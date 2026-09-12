@@ -25,8 +25,11 @@ ordered. The file may carry a title and basic metadata.
 **R3 — Text content.** A slide can contain headings, paragraphs, lists, links, emphasis and
 inline code. Nothing else is required for this version.
 
-**R4 — Embedding.** A deck can be added to an existing HTML page with a small snippet. The host
-page must not need a build step, a framework, or changes to its own tooling.
+**R4 — Embedding.** A deck is embedded in an existing page as a component, in the page's own
+authoring format, alongside the page's own content. The host page supplies the deck file and
+places the component where the deck should appear, and the page may drive the deck from its own
+code. Host pages are therefore ones that can render components; a page that is only static HTML
+is not a host.
 
 **R5 — Embedded mode.** In embedded mode the deck is part of the page and shows one slide at a
 time: it occupies a box supplied by the host, and the host can size that box. The deck's text is
@@ -55,21 +58,19 @@ notified when the mode changes.
 
 ## Non-functional requirements
 
-**N1 — No host build step.** Embedding must work from static files.
-
-**N2 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
+**N1 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
 presenting and restored on exit; while embedded, the deck takes the keyboard only when the reader
 has focused it, and Tab moves into and out of it normally. Reduced-motion preferences are
 respected.
 
-**N3 — Compatibility.** Current Chrome, Edge, Firefox and Safari.
+**N2 — Compatibility.** Current Chrome, Edge, Firefox and Safari.
 
 ## Acceptance criteria
 
 This version is done when:
 
-1. A text file with three slides can be embedded in a plain HTML page with a small snippet, and
-   the deck appears in the page showing one slide at a time when it is opened in a browser.
+1. A text file with three slides can be embedded in a page as a component, and the deck appears
+   in the page showing one slide at a time when it is opened in a browser.
 2. The same page, in present mode, shows one slide at a time filling the screen, and can be
    navigated forwards and backwards with the keyboard.
 3. Leaving present mode returns the reader to the slide and scroll position they were at.
@@ -79,6 +80,7 @@ This version is done when:
 
 - Package name: `@saburto/saburto-decks`, one package.
 - Builder: Vite. Runner: Bun.
-- Authoring format: MDX with React.
+- Authoring format: MDX with React. A deck is a React component, and host pages embed it as a
+  component — not as a script, and not as a custom element.
 - Embedded use comes first; all other delivery forms wait.
 - Present mode is full screen.
