@@ -1,0 +1,194 @@
+/**
+ * The deck's entire stylesheet. It is injected into the element's shadow root,
+ * so nothing here can leak out and nothing outside can leak in.
+ *
+ * There is one way to render the deck: a single slide on a stage, scaled to
+ * the space it has. Embedded, that space is the host's box (16:9 by default);
+ * presenting, it is the screen. The only difference between the two is how
+ * much room the deck is given.
+ *
+ * `all: initial` on `:host` severs inheritance from the host page (R8). The
+ * outer tree wins over `:host` rules for the host element itself, so the
+ * properties that actually reach the deck's text are set again on `.deck`,
+ * inside the shadow root, where no host rule can reach them.
+ */
+export const styles = /* css */ `
+  :host {
+    all: initial;
+    /* The host may set these, which is how theming is meant to work. */
+    --sd-bg: #ffffff;
+    --sd-fg: #16181d;
+    --sd-muted: #5b6472;
+    --sd-border: #d8dce3;
+    --sd-accent: #2f6fed;
+    --sd-surface: #f2f4f7;
+
+    display: block;
+    position: relative;
+    overflow: hidden;
+    background: var(--sd-bg);
+
+    /* A definite size in both axes, so the deck can size its own type to its
+       own box rather than to the page or the viewport. The host page can
+       override either one, e.g.
+         saburto-deck { aspect-ratio: 4 / 3 }
+         saburto-deck { aspect-ratio: auto; height: 34rem } */
+    aspect-ratio: 16 / 9;
+  }
+
+  :host(:focus-visible) {
+    outline: 2px solid var(--sd-accent);
+    outline-offset: 2px;
+  }
+
+  /* The host chooses the theme explicitly so the deck never guesses. */
+  :host([theme="dark"]) {
+    --sd-bg: #111318;
+    --sd-fg: #e8eaed;
+    --sd-muted: #9aa4b2;
+    --sd-border: #2c313a;
+    --sd-accent: #7aa2f7;
+    --sd-surface: #1b1f27;
+  }
+  @media (prefers-color-scheme: dark) {
+    :host([theme="system"]) {
+      --sd-bg: #111318;
+      --sd-fg: #e8eaed;
+      --sd-muted: #9aa4b2;
+      --sd-border: #2c313a;
+      --sd-accent: #7aa2f7;
+      --sd-surface: #1b1f27;
+    }
+  }
+
+  .mount { display: contents; }
+
+  .deck {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    /* The deck is its own size container, so 1cqi means 1% of the deck's own
+       width whether the deck is in a page or on the whole screen. */
+    container-type: size;
+    color: var(--sd-fg);
+    background: var(--sd-bg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: start;
+  }
+
+  /* ---- the stage: one slide, fitted to whatever room there is ---- */
+  .stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    place-content: center;
+    overflow: hidden;
+    padding: 4cqi 6cqi;
+    /* The size to start from: 1cqi is 1% of the deck's own width, so type is
+       sized to the deck and not to the page or the screen. The element then
+       shrinks this further when a slide would not otherwise fit. */
+    font-size: clamp(0.9rem, 2.4cqi, 2.2rem);
+  }
+
+  /* Deliberately not measured in ch: the column must not get narrower as the
+     type shrinks, or fitting a slide would fight itself. */
+  .slide { display: none; width: 100%; max-width: 72cqi; overflow-wrap: break-word; }
+  .slide[data-active] { display: block; }
+  .slide > :first-child { margin-block-start: 0; }
+  .slide > :last-child { margin-block-end: 0; }
+
+  h1, h2, h3, h4 { line-height: 1.15; text-wrap: balance; }
+  h1 { font-size: 1.9em; }
+  h2 { font-size: 1.45em; }
+  h3 { font-size: 1.15em; }
+  p, ul, ol, blockquote { margin-block: 0.85em; }
+  ul, ol { padding-inline-start: 1.4em; }
+  li + li { margin-block-start: 0.3em; }
+  a { color: var(--sd-accent); text-decoration-thickness: from-font; }
+  strong { font-weight: 700; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9em;
+    background: var(--sd-surface);
+    padding: 0.1em 0.35em;
+    border-radius: 0.3em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .slide[data-active] { animation: sd-enter 160ms ease-out both; }
+  }
+  @keyframes sd-enter {
+    from { opacity: 0; transform: translateY(0.35em); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ---- the bar ---- */
+  .bar {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.75rem;
+    font-size: clamp(0.75rem, 1.7cqi, 1.05rem);
+    opacity: 0.6;
+    transition: opacity 150ms ease-out;
+  }
+  .bar:hover, .bar:focus-within { opacity: 1; }
+  .bar button {
+    font: inherit;
+    min-height: 2.4em;
+    padding: 0.3em 0.9em;
+    color: inherit;
+    background: var(--sd-surface);
+    border: 1px solid var(--sd-border);
+    border-radius: 0.5em;
+    cursor: pointer;
+  }
+  .bar button:disabled { opacity: 0.35; cursor: default; }
+  .bar button:focus-visible { outline: 2px solid var(--sd-accent); outline-offset: 2px; }
+  .counter {
+    min-width: 4ch;
+    text-align: center;
+    color: var(--sd-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- present mode: the same deck, on the whole screen ----
+     The host element deliberately stays in the page's flow, still occupying
+     the box it did before, so the host page's height and scroll position are
+     never disturbed (R7). What goes full screen is the deck itself, fixed to
+     the viewport, rather than the element the host page placed.
+
+     A fixed overlay rather than a reliance on the Fullscreen API also means a
+     browser without it still gets a full-screen deck (R9).
+     Native fullscreen, when available, is requested on top and only removes
+     the browser chrome. */
+  :host([data-mode="present"]) {
+    background: transparent;
+    overflow: visible;
+    outline: none;
+  }
+  :host([data-mode="present"]) .deck {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+  }
+  :host([data-mode="present"])::backdrop { background: var(--sd-bg); }
+  :host([data-mode="present"]) .stage { padding: 5cqi 8cqi; }
+  :host([data-mode="present"]) .bar { opacity: 0.35; }
+
+  .live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+`
