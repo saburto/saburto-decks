@@ -1,25 +1,7 @@
 import { describe, expect, test } from 'bun:test'
-import { VFile } from 'vfile'
 import { remarkSlides, splitSlides, type MdastNode } from '../src/build/remark-slides'
 
-const run = (tree: MdastNode) => remarkSlides()(tree, new VFile({ path: 'deck.mdx' }))
-
-/** Digs the value of an `export const <name> = <value>` node back out of the
- * generated ESTree, since that is where MDX reads it from. */
-function declaredConstant(tree: MdastNode, name: string): unknown {
-  const program = tree.children?.[0]?.['data'] as { estree?: EstreeNode } | undefined
-  const declaration = program?.estree?.body?.[0]?.declaration?.declarations?.[0]
-  if (declaration?.id?.name !== name) throw new Error(`no export named ${name}`)
-  return declaration.init?.value
-}
-
-interface EstreeNode {
-  body?: Array<{
-    declaration?: {
-      declarations?: Array<{ id?: { name?: string }; init?: { value?: unknown } }>
-    }
-  }>
-}
+const run = (tree: MdastNode) => remarkSlides()(tree)
 
 const p = (text: string): MdastNode => ({ type: 'paragraph', children: [{ type: 'text', value: text }] })
 const heading = (text: string): MdastNode => ({ type: 'heading', depth: 1, children: [{ type: 'text', value: text }] })
@@ -67,21 +49,12 @@ describe('splitSlides', () => {
 })
 
 describe('remarkSlides', () => {
-  test('replaces the tree children with slides, plus the count export', () => {
+  test('replaces the tree children with slides', () => {
     const tree: MdastNode = { type: 'root', children: [p('one'), break_(), p('two')] }
 
     run(tree)
 
-    expect(tree.children?.map((c) => c.type)).toEqual(['mdxjsEsm', 'mdxJsxFlowElement', 'mdxJsxFlowElement'])
-  })
-
-  test('exports a slideCount matching the number of slides emitted', () => {
-    const tree: MdastNode = { type: 'root', children: [p('one'), break_(), p('two'), break_(), p('three')] }
-
-    run(tree)
-
-    /* The export is written as an ESTree program; `value` stays empty. */
-    expect(declaredConstant(tree, 'slideCount')).toBe(3)
+    expect(tree.children?.map((c) => c.type)).toEqual(['mdxJsxFlowElement', 'mdxJsxFlowElement'])
   })
 
   test('frontmatter is hoisted to the root, never inside a slide', () => {
@@ -90,13 +63,8 @@ describe('remarkSlides', () => {
 
     run(tree)
 
-    expect(tree.children?.map((c) => c.type)).toEqual([
-      'mdxjsEsm',
-      'yaml',
-      'mdxJsxFlowElement',
-      'mdxJsxFlowElement'
-    ])
-    expect(tree.children?.[2]).toEqual({
+    expect(tree.children?.map((c) => c.type)).toEqual(['yaml', 'mdxJsxFlowElement', 'mdxJsxFlowElement'])
+    expect(tree.children?.[1]).toEqual({
       type: 'mdxJsxFlowElement',
       name: 'Slide',
       attributes: [{ type: 'mdxJsxAttribute', name: 'index', value: '0' }],

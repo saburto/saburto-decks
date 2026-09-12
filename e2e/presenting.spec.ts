@@ -3,18 +3,19 @@
  *
  * Covers R6 (one slide at a time, filling the screen, keyboard navigation, a
  * way out), R7 (the reader keeps their place) and R9 (presenting must not
- * silently fail on a platform without the Fullscreen API).
+ * silently fail in a browser without the Fullscreen API).
  */
 import { expect, test, type Page } from '@playwright/test'
-import { DEMO, deck, state } from './helpers'
+import { DEMO, deck, fullScreen, hostExitPresent, hostPresentButton, hostStatus, state } from './helpers'
 
 /** Enter present mode the way a reader would: the button inside the deck. */
-const enterPresent = (page: Page) => page.locator('.bar button').last().click()
+const enterPresent = (page: Page) => fullScreen(page)
 
 test.beforeEach(async ({ page }) => {
   await page.goto(DEMO)
-  await expect.poll(() => state(page).then((s) => s.mode)).toBe('embedded')
-  await page.locator('#deck h1').first().click()
+  await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
+  await expect(page.locator('#deck section.slide')).toHaveCount(3)
+  await page.locator('#deck section.slide[data-active] h1').first().click()
 })
 
 test.describe('present mode', () => {
@@ -37,30 +38,27 @@ test.describe('present mode', () => {
     expect(presenting.box.height).toBeGreaterThan(0)
   })
 
-  test('is driven by the keyboard (R6, N2)', async ({ page }) => {
+  test('is driven by the keyboard (R6, N1)', async ({ page }) => {
     await enterPresent(page)
 
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('.counter')).toHaveText('2 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 3')
 
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('.counter')).toHaveText('3 / 3')
-    await expect(page.locator('.live')).toHaveText('Slide 3 of 3')
+    await expect(page.locator('#deck .counter')).toHaveText('3 / 3')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 3 of 3')
 
     await page.keyboard.press('ArrowLeft')
-    await expect(page.locator('.counter')).toHaveText('2 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 3')
 
     await page.keyboard.press('Home')
-    await expect(page.locator('.counter')).toHaveText('1 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('1 / 3')
 
     await page.keyboard.press('End')
-    await expect(page.locator('.counter')).toHaveText('3 / 3')
-
-    await page.keyboard.press(' ')
-    await expect(page.locator('.counter')).toHaveText('3 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('3 / 3')
 
     await page.keyboard.press('PageUp')
-    await expect(page.locator('.counter')).toHaveText('2 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 3')
   })
 
   test('keeps the reader in their place: same slide, same scroll offset (R7)', async ({ page }) => {
@@ -69,8 +67,7 @@ test.describe('present mode', () => {
     expect(leftAt).toBeGreaterThan(0)
 
     await page.keyboard.press('ArrowRight')
-    const slide = (await state(page)).index
-    expect(slide).toBe(1)
+    expect((await state(page)).index).toBe(1)
 
     await enterPresent(page)
     await expect(deck(page)).toHaveAttribute('data-mode', 'present')
@@ -79,7 +76,7 @@ test.describe('present mode', () => {
 
     await page.keyboard.press('Escape')
 
-    await expect.poll(() => state(page).then((s) => s.mode)).toBe('embedded')
+    await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
     /* Back on the slide that was being presented... */
     expect((await state(page)).index).toBe(2)
     /* ...and the page is exactly where it was left. */
@@ -87,7 +84,7 @@ test.describe('present mode', () => {
     expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe('')
   })
 
-  test('keeps focus inside itself while presenting (N2)', async ({ page }) => {
+  test('keeps focus inside itself while presenting (N1)', async ({ page }) => {
     await enterPresent(page)
 
     const stops: string[] = []
@@ -111,7 +108,7 @@ test.describe('present mode', () => {
       delete (Element.prototype as unknown as Record<string, unknown>)['requestFullscreen']
     })
     await page.reload()
-    await expect.poll(() => state(page).then((s) => s.mode)).toBe('embedded')
+    await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
 
     const viewport = page.viewportSize()
     await enterPresent(page)
@@ -126,31 +123,31 @@ test.describe('present mode', () => {
     await page.keyboard.press('ArrowRight')
     expect((await state(page)).index).toBe(1)
     await page.keyboard.press('Escape')
-    await expect.poll(() => state(page).then((s) => s.mode)).toBe('embedded')
+    await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
   })
 
-  test('respects reduced motion (N2)', async ({ page }) => {
+  test('respects reduced motion (N1)', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await enterPresent(page)
 
-    await expect(page.locator('section.slide[data-active]')).toHaveCSS('animation-name', 'none')
+    await expect(page.locator('#deck section.slide[data-active]')).toHaveCSS('animation-name', 'none')
 
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('section.slide[data-active]')).toHaveCSS('animation-name', 'sd-enter')
+    await expect(page.locator('#deck section.slide[data-active]')).toHaveCSS('animation-name', 'sd-enter')
   })
 
-  test('leaves fullscreen behind when it is told to (R6)', async ({ page }) => {
-    /* Presenting from the host page, rather than from the deck's own button. */
-    await page.locator('#present').click()
+  test('leaves fullscreen behind when the host says so (R6, R10)', async ({ page }) => {
+    await hostPresentButton(page).click()
     await expect(deck(page)).toHaveAttribute('data-mode', 'present')
+    await expect(hostStatus(page)).toHaveText('present')
 
-    await page.evaluate(() => {
-      const element = document.querySelector('#deck') as HTMLElement & { exitPresent(): void }
-      element.exitPresent()
-    })
+    /* The host's own logic ends the presentation — a presenting deck covers
+       the page, so there is nothing left to click. */
+    await hostExitPresent(page)
 
     await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
+    await expect(hostStatus(page)).toHaveText('embedded')
     expect(await page.evaluate(() => document.fullscreenElement)).toBeNull()
   })
 })

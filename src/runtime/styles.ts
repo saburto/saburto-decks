@@ -12,7 +12,7 @@
  * properties that actually reach the deck's text are set again on `.deck`,
  * inside the shadow root, where no host rule can reach them.
  */
-export const styles = /* css */ `
+export const deckStyles = /* css */ `
   :host {
     all: initial;
     /* The host may set these, which is how theming is meant to work. */
@@ -29,11 +29,11 @@ export const styles = /* css */ `
     background: var(--sd-bg);
 
     /* A definite size in both axes, so the deck can size its own type to its
-       own box rather than to the page or the viewport. The host page can
-       override either one, e.g.
-         saburto-deck { aspect-ratio: 4 / 3 }
-         saburto-deck { aspect-ratio: auto; height: 34rem } */
-    aspect-ratio: 16 / 9;
+       own box rather than to the page or the viewport. The default box is set
+       inline by the component (so the server-rendered HTML reserves the right
+       space); a host overrides it with the --sd-aspect property or its own
+       inline style. */
+    aspect-ratio: var(--sd-aspect, 16 / 9);
   }
 
   :host(:focus-visible) {
@@ -42,7 +42,7 @@ export const styles = /* css */ `
   }
 
   /* The host chooses the theme explicitly so the deck never guesses. */
-  :host([theme="dark"]) {
+  :host([data-theme="dark"]) {
     --sd-bg: #111318;
     --sd-fg: #e8eaed;
     --sd-muted: #9aa4b2;
@@ -51,7 +51,7 @@ export const styles = /* css */ `
     --sd-surface: #1b1f27;
   }
   @media (prefers-color-scheme: dark) {
-    :host([theme="system"]) {
+    :host([data-theme="system"]) {
       --sd-bg: #111318;
       --sd-fg: #e8eaed;
       --sd-muted: #9aa4b2;

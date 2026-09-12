@@ -1,0 +1,110 @@
+/* A plain page theme, with the same deliberately hostile rules as the Astro
+   demo so the isolation claim is tested in both hosts. */
+
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #16181d;
+  --muted: #5b6472;
+  --border: #d8dce3;
+  --danger: crimson;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0c0e12;
+  --surface: #14171d;
+  --text: #e8eaed;
+  --muted: #9aa4b2;
+  --border: #2c313a;
+  --danger: #ff5c78;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme='system'] {
+    --bg: #0c0e12;
+    --surface: #14171d;
+    --text: #e8eaed;
+    --muted: #9aa4b2;
+    --border: #2c313a;
+    --danger: #ff5c78;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  line-height: 2.4;
+}
+
+.wrap {
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: 2rem 1.25rem 6rem;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-block: 2rem 1rem;
+}
+
+#status {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.theme {
+  display: flex;
+  gap: 0.25rem;
+  margin-inline-start: auto;
+}
+
+.theme button[aria-pressed='true'] {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* Hostile, on purpose: none of this may reach the deck. */
+
+h1,
+h2,
+h3 {
+  color: var(--danger);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: underline wavy var(--danger);
+}
+
+p {
+  border-inline-start: 6px solid var(--danger);
+  padding-inline-start: 12px;
+}
+
+section {
+  margin-block: 1.5rem;
+  padding: 1.5rem;
+  background: color-mix(in srgb, var(--danger) 6%, transparent);
+  border: 4px dashed var(--danger);
+}
+
+button {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.9rem;
+  color: #fff;
+  background: var(--danger);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}

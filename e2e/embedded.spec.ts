@@ -1,17 +1,19 @@
 /**
  * Embedded mode: the deck living inside a host page.
  *
- * Covers R4 (a host page needs nothing but a script tag), R5 (one slide at a
- * time, in a box the host can size, scaled to that box), R8 (nothing crosses
- * the boundaries in either direction) and R10 (the host can drive the deck and
- * is told when it changes).
+ * Covers R4 (a page embeds a deck the way it embeds any component), R5 (one
+ * slide at a time, in a box the host can size, scaled to that box), R8 (nothing
+ * crosses the boundaries in either direction) and R10 (the host can drive the
+ * deck and is told when it changes).
  */
 import { expect, test } from '@playwright/test'
-import { DEMO, deck, nextSlide, state } from './helpers'
+import { DEMO, deck, firstSlide, hostCss, hostExitPresent, hostPresentButton, hostStatus, nextSlide, state } from './helpers'
 
 test.beforeEach(async ({ page }) => {
   await page.goto(DEMO)
-  await expect.poll(() => state(page).then((s) => s.mode)).toBe('embedded')
+  /* The deck is an island: wait for it to arrive before asserting anything. */
+  await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
+  await expect(page.locator('#deck section.slide')).toHaveCount(3)
 })
 
 test.describe('an embedded deck', () => {
@@ -20,52 +22,39 @@ test.describe('an embedded deck', () => {
 
     expect(first.count).toBe(3)
     expect(first.visible).toEqual([0])
-    await expect(page.locator('.counter')).toHaveText('1 / 3')
+    expect(first.index).toBe(0)
+    await expect(page.locator('#deck .counter')).toHaveText('1 / 3')
 
     await nextSlide(page)
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 3')
     expect((await state(page)).visible).toEqual([1])
-    await expect(page.locator('.counter')).toHaveText('2 / 3')
 
     await nextSlide(page)
+    await expect(page.locator('#deck .counter')).toHaveText('3 / 3')
     expect((await state(page)).visible).toEqual([2])
-    await expect(page.locator('.counter')).toHaveText('3 / 3')
 
     /* The last slide cannot go further. */
-    await expect(page.locator('.bar button[aria-label="Next slide"]')).toBeDisabled()
+    await expect(page.locator('#deck .bar button[aria-label="Next slide"]')).toBeDisabled()
   })
 
   test('never scrolls: a slide is scaled to fit the box instead', async ({ page }) => {
-    const resize = (css: string) =>
-      page.evaluate((content) => {
-        document.getElementById('probe')?.remove()
-        const style = document.createElement('style')
-        style.id = 'probe'
-        style.textContent = content
-        document.head.append(style)
-      }, css)
-
-    const goToFirst = () =>
-      page.evaluate(() => {
-        const host = document.querySelector('#deck') as HTMLElement & { goTo(index: number): void }
-        host.goTo(0)
-      })
-
-    for (const size of ['16rem', '24rem', '34rem', '44rem']) {
-      await resize(`saburto-deck { width: ${size}; aspect-ratio: 4 / 3 }`)
-      await goToFirst()
+    for (const width of ['16rem', '24rem', '34rem', '44rem']) {
+      await hostCss(page, `#deck { width: ${width}; --sd-aspect: 4 / 3 }`)
+      await firstSlide(page)
 
       for (let index = 0; index < 3; index++) {
         const measured = await state(page)
-        expect(measured.index).toBe(index)
-        expect(measured.clipped, `slide ${index} is clipped in a ${size} box`).toBeLessThanOrEqual(0)
-        expect(measured.clippedHorizontally, `slide ${index} overflows sideways at ${size}`).toBeLessThanOrEqual(0)
+        expect(measured.index, `at slide ${index}`).toBe(index)
+        expect(measured.clipped, `slide ${index} is clipped in a ${width} box`).toBeLessThanOrEqual(0)
+        expect(measured.clippedHorizontally, `slide ${index} overflows sideways at ${width}`).toBeLessThanOrEqual(0)
         if (index < 2) await nextSlide(page)
       }
     }
 
-    await resize('')
+    await hostCss(page, '')
     /* Fitting must not mean unreadable in a box of a sane size. */
-    expect((await state(page)).typePx).toBeGreaterThanOrEqual(16)
+    const back = await state(page)
+    expect(back.typePx).toBeGreaterThanOrEqual(16)
   })
 
   test('sizes its type to the deck, not to the page or the viewport', async ({ page }) => {
@@ -80,7 +69,7 @@ test.describe('an embedded deck', () => {
     expect(resizedViewport.typePx).toBeCloseTo(wide.typePx, 1)
 
     /* A narrower deck gets smaller type. */
-    await page.addStyleTag({ content: 'saburto-deck { width: 22rem; aspect-ratio: 4 / 3 }' })
+    await hostCss(page, '#deck { width: 22rem; --sd-aspect: 4 / 3 }')
     const narrow = await state(page)
     expect(narrow.typePx).toBeLessThan(wide.typePx)
   })
@@ -89,12 +78,14 @@ test.describe('an embedded deck', () => {
     const byDefault = (await state(page)).box
     expect(byDefault.width / byDefault.height).toBeCloseTo(16 / 9, 1)
 
-    await page.addStyleTag({ content: 'saburto-deck { aspect-ratio: 4 / 3 }' })
+    await hostCss(page, '#deck { --sd-aspect: 1 / 1 }')
     const square = (await state(page)).box
-    expect(square.width / square.height).toBeCloseTo(4 / 3, 1)
+    expect(square.width / square.height).toBeCloseTo(1, 1)
 
-    await page.addStyleTag({ content: 'saburto-deck { aspect-ratio: auto; height: 22rem }' })
-    expect((await state(page)).box.height).toBeCloseTo(352, 0)
+    await hostCss(page, '#deck { width: 30rem; --sd-aspect: auto; height: 12rem }')
+    const fixed = (await state(page)).box
+    expect(fixed.width).toBeCloseTo(480, 0)
+    expect(fixed.height).toBeCloseTo(192, 0)
   })
 
   test('does not change how the host page looks (R8)', async ({ page }) => {
@@ -102,11 +93,10 @@ test.describe('an embedded deck', () => {
        purpose. Snapshot one of those, take the deck away, and compare. */
     const snapshot = () =>
       page.evaluate(() => {
-        const el = document.querySelector('.wrap > section > p') as HTMLElement
-        const style = getComputedStyle(el)
+        const paragraph = getComputedStyle(document.querySelector('.wrap > section > p') as HTMLElement)
         const heading = getComputedStyle(document.querySelector('.wrap > h1') as HTMLElement)
         return {
-          paragraph: [style.color, style.fontFamily, style.lineHeight, style.borderLeftWidth, style.paddingLeft],
+          paragraph: [paragraph.color, paragraph.fontFamily, paragraph.lineHeight, paragraph.borderLeftWidth, paragraph.paddingLeft],
           heading: [heading.color, heading.textTransform, heading.textDecorationLine]
         }
       })
@@ -126,11 +116,11 @@ test.describe('an embedded deck', () => {
     await expect(page.locator('.wrap > h1')).toHaveCSS('text-transform', 'uppercase')
     await expect(page.locator('.wrap > h1')).toHaveCSS('color', 'rgb(220, 20, 60)')
 
-    const heading = page.locator('#deck h1').first()
+    const heading = page.locator('#deck section.slide[data-active] h1').first()
     await expect(heading).toHaveCSS('text-transform', 'none')
     await expect(heading).toHaveCSS('color', 'rgb(22, 24, 29)')
-    await expect(page.locator('#deck section p').first()).toHaveCSS('border-left-width', '0px')
-    await expect(page.locator('#deck section p').first()).toHaveCSS('font-family', /ui-sans-serif/)
+    await expect(page.locator('#deck section.slide[data-active] p').first()).toHaveCSS('border-left-width', '0px')
+    await expect(page.locator('#deck section.slide[data-active] p').first()).toHaveCSS('font-family', /ui-sans-serif/)
   })
 
   test('the deck styles do not reach into the host page (R8)', async ({ page }) => {
@@ -146,7 +136,7 @@ test.describe('an embedded deck', () => {
           continue
         }
         for (const rule of Array.from(rules)) {
-          if (/\.stage|\.slide|:host|saburto-deck/.test(rule.cssText)) found.push(rule.cssText)
+          if (/\.stage|\.slide|:host/.test(rule.cssText)) found.push(rule.cssText.slice(0, 80))
         }
       }
       return found
@@ -155,7 +145,7 @@ test.describe('an embedded deck', () => {
     expect(deckRulesInDocument).toEqual([])
   })
 
-  test('leaves the keyboard to the page until it is focused (N2)', async ({ page }) => {
+  test('leaves the keyboard to the page until it is focused (N1)', async ({ page }) => {
     await page.locator('.wrap > h1').click()
     const before = await page.evaluate(() => window.scrollY)
 
@@ -164,15 +154,15 @@ test.describe('an embedded deck', () => {
     expect((await state(page)).index).toBe(0)
 
     /* Focused, the same key drives the deck instead. */
-    await page.locator('#deck h1').first().click()
+    await page.locator('#deck section.slide[data-active] h1').first().click()
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('.counter')).toHaveText('2 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 3')
     await page.keyboard.press('ArrowLeft')
-    await expect(page.locator('.counter')).toHaveText('1 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('1 / 3')
   })
 
-  test('lets Tab walk in and out of it while embedded (N2)', async ({ page }) => {
-    await page.locator('#deck h1').first().click()
+  test('lets Tab walk in and out of it while embedded (N1)', async ({ page }) => {
+    await page.locator('#deck section.slide[data-active] h1').first().click()
 
     const stops: string[] = []
     for (let i = 0; i < 8; i++) {
@@ -181,7 +171,7 @@ test.describe('an embedded deck', () => {
         const host = document.querySelector('#deck') as HTMLElement
         const inside = host.shadowRoot?.activeElement
         if (inside) return `deck:${inside.textContent?.trim()}`
-        return document.activeElement === host ? 'deck:itself' : `page:${(document.activeElement as HTMLElement | null)?.id || 'body'}`
+        return document.activeElement === host ? 'deck:itself' : `page:${(document.activeElement as HTMLElement | null)?.tagName.toLowerCase() ?? 'body'}`
       }))
     }
 
@@ -190,27 +180,21 @@ test.describe('an embedded deck', () => {
   })
 
   test('the host can drive it and is told what happened (R10)', async ({ page }) => {
-    await page.evaluate(() => {
-      const host = window as unknown as { modes: string[] }
-      host.modes = []
-      document.addEventListener('saburto-deck-mode-change', (event) => {
-        host.modes.push((event as CustomEvent<{ mode: string }>).detail.mode)
-      })
-    })
+    await expect(hostStatus(page)).toHaveText('embedded')
 
-    await page.locator('#present').click()
+    await hostPresentButton(page).click()
 
     await expect(deck(page)).toHaveAttribute('data-mode', 'present')
-    await expect(page.locator('#status')).toHaveText('present · slide 1/3')
-    await expect.poll(() => page.evaluate(() => (window as unknown as { modes: string[] }).modes)).toEqual(['present'])
+    await expect(hostStatus(page)).toHaveText('present')
+    await page.keyboard.press('ArrowRight')
+    await expect(hostStatus(page)).toHaveText('present · slide 2/3')
 
-    await page.locator('.bar button').last().click()
+    /* A presenting deck covers the page, so the host's own logic is what ends
+       it — the button above is no longer reachable, which is the point. */
+    await hostExitPresent(page)
 
     await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
-    await expect.poll(() => page.evaluate(() => (window as unknown as { modes: string[] }).modes)).toEqual([
-      'present',
-      'embedded'
-    ])
+    await expect(hostStatus(page)).toHaveText('embedded · slide 2/3')
   })
 
   test('the host decides the theme (R8)', async ({ page }) => {
@@ -218,7 +202,7 @@ test.describe('an embedded deck', () => {
 
     await page.locator('.theme button[data-theme="dark"]').click()
 
-    await expect(deck(page)).toHaveAttribute('theme', 'dark')
+    await expect(deck(page)).toHaveAttribute('data-theme', 'dark')
     await expect(page.locator('#deck .deck')).toHaveCSS('background-color', 'rgb(17, 19, 24)')
     await expect(page.locator('#deck .deck')).toHaveCSS('color', 'rgb(232, 234, 237)')
   })

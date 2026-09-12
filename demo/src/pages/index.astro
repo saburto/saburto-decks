@@ -1,0 +1,43 @@
+---
+import DeckDemo from '../components/DeckDemo.tsx'
+import '../styles/host.css'
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Saburto Decks — an Astro page</title>
+  </head>
+
+  <body>
+    <main class="wrap">
+      <h1>An ordinary Astro page</h1>
+
+      <p>
+        This page is plain Astro, and it embeds a deck the same way it would embed any other
+        component. The deck below is a React island, because a deck is interactive.
+      </p>
+
+      <section>
+        <h2>Host content under hostile styles</h2>
+        <p>
+          This section, heading, paragraph and the buttons above are styled by the host page on
+          purpose, and aggressively: Comic Sans, crimson wavy underlines, dashed borders, a
+          <code>line-height</code> of 2.4. The deck below sits inside the same page and must be
+          completely unaffected.
+        </p>
+      </section>
+
+      <!-- The whole integration: a component, in the page's own markup. -->
+      <DeckDemo client:load />
+      <!-- That's it. -->
+
+      <p>
+        Host content continues after the deck, unchanged. Toggle the theme above and both follow
+        it — the page because it was told to, and the deck because it was given the same choice.
+      </p>
+    </main>
+  </body>
+</html>

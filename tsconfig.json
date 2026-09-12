@@ -14,5 +14,13 @@
     "types": ["bun", "node"],
     "verbatimModuleSyntax": true
   },
-  "include": ["src", "decks", "test", "e2e", "scripts", "vite.config.ts", "playwright.config.ts", "src/mdx.d.ts"]
+  "include": [
+    "src",
+    "demo/src",
+    "demo/astro.config.ts",
+    "test",
+    "e2e",
+    "vite.lib.config.ts",
+    "playwright.config.ts"
+  ]
 }

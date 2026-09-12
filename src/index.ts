@@ -1,19 +1,9 @@
 /**
- * The package's surface: everything, in one place.
+ * The component a host page renders.
  *
- * Note what that costs. This module re-exports both halves of the source, so
- * anything importing it reaches build-time code as well as the deck itself.
- * A shipped entry point must therefore import from `runtime/` directly — as
- * `decks/example.deck.ts` does — so that what a host page downloads cannot
- * reach `build/` at all. That separation is the reason for the two folders,
- * and importing this barrel from a bundle entry would quietly undo it.
+ * Deliberately free of build-time code: this is what ends up in the page's
+ * JavaScript, so nothing here may reach for `@mdx-js/rollup` or remark. The
+ * build half lives in `./mdx`.
  */
-export {
-  SaburtoDeckElement,
-  defineDeck,
-  MODE_CHANGE_EVENT,
-  TAG_NAME,
-  type DeckModule
-} from './runtime/element'
-export { DeckView, Slide, type DeckMode, type DeckComponent } from './runtime/deck'
-export { remarkSlides, splitSlides, type MdastNode } from './build/remark-slides'
+export { Deck, type DeckHandle, type DeckProps } from './runtime/Deck'
+export { Slide, type DeckComponent, type DeckMode, type DeckTheme } from './runtime/Slide'

@@ -4,8 +4,6 @@ declare module '*.mdx' {
   const MDXContent: ComponentType<Record<string, unknown>>
   export default MDXContent
 
-  /** Injected by `remarkSlides`. */
-  export const slideCount: number
-  /** Injected by `remark-mdx-frontmatter`. */
+  /** Injected by `remark-mdx-frontmatter` — the deck's own metadata. */
   export const frontmatter: Record<string, unknown> | undefined
 }

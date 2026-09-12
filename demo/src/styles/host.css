@@ -2,9 +2,13 @@
    Host page stylesheet.
 
    The top half is a normal page theme. The bottom half is deliberately
-   HOSTILE: it targets h1/h2/p/section/button/a with loud rules that would
+   HOSTILE: it targets h1/h2/p/section/button/a/code with loud rules that would
    visibly wreck the deck if the deck's styles were not sealed inside its own
    shadow root (R8).
+
+   Note that nothing here targets the deck's host element. A host page that
+   wanted to size the deck would do it with `--sd-aspect`, or by styling a
+   wrapper around it.
    ========================================================================= */
 
 :root {
@@ -57,24 +61,23 @@ body {
   padding: 2rem 1.25rem 6rem;
 }
 
-.topbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-  justify-content: space-between;
-  padding-block-end: 1rem;
-  border-block-end: 1px solid var(--border);
+.deck-demo {
+  margin-block: 2rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
 }
 
-.controls {
+.deck-demo .controls {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+  margin-block-end: 1rem;
 }
 
-.status {
+#status {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.8rem;
   color: var(--muted);
@@ -83,19 +86,12 @@ body {
 .theme {
   display: flex;
   gap: 0.25rem;
+  margin-inline-start: auto;
 }
 
 .theme button[aria-pressed='true'] {
   outline: 2px solid var(--text);
   outline-offset: 2px;
-}
-
-.deck-slot {
-  margin-block: 2rem;
-  padding: 1rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
 }
 
 /* ---------------------------------------------------------------------------

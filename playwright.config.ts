@@ -1,9 +1,8 @@
 import { defineConfig } from '@playwright/test'
 
 /**
- * End-to-end tests: they drive the real demo host page in a real browser, and
- * assert the behaviour the requirements actually promise — a deck embedded in
- * a page, presenting full screen, and the place it was left in.
+ * End-to-end tests: they drive a real Astro page that embeds a deck, in a real
+ * browser, and assert the behaviour the requirements actually promise.
  *
  * `channel: 'chromium'` selects the full Chromium build (rather than the
  * separate headless shell) and WebKit and Firefox projects are deliberately
@@ -22,10 +21,21 @@ export default defineConfig({
     viewport: { width: 1280, height: 800 },
     trace: 'retain-on-failure'
   },
-  webServer: {
-    command: 'bun run scripts/serve.ts',
-    url: 'http://127.0.0.1:4173/demo/',
-    reuseExistingServer: !process.env['CI'],
-    stdout: 'ignore'
-  }
+  webServer: [
+    /* Both demos, because there are two host shapes to prove: an Astro page
+       and a plain React app. The tests drive the built sites, so `build` must
+       have run. */
+    {
+      command: 'bun run preview',
+      url: 'http://127.0.0.1:4173/',
+      reuseExistingServer: !process.env['CI'],
+      stdout: 'ignore'
+    },
+    {
+      command: 'bun run preview:react',
+      url: 'http://127.0.0.1:4174/',
+      reuseExistingServer: !process.env['CI'],
+      stdout: 'ignore'
+    }
+  ]
 })

@@ -1,81 +1,98 @@
 # AGENTS.md
 
-Embeddable slide decks authored in MDX: a deck shows one slide at a time inside a host page, and
-the same deck presents full screen. [PLAN.md](PLAN.md) says what it must do; [README.md](README.md)
-says how to use it. This file says how the repository is put together, and the traps in it.
+A deck is an MDX file compiled to a **React component**, embedded in a host page as a component:
+one slide at a time in the host's layout, or full screen. [PLAN.md](PLAN.md) says what it must do;
+[README.md](README.md) says how to use it. This file says how the repository is put together, and
+the traps in it.
 
 ## Rules
 
 - **PLAN.md is requirements-level only.** No stack details, file layouts, code samples, API
   signatures, or implementation steps. State what the product must do, not how.
+- **PLAN.md owns the requirements; README.md documents usage.** Do not restate a requirement in
+  README.md, and do not cite requirement numbers there — a second copy of the requirements is a
+  second thing to keep in sync. Requirement numbers belong in PLAN.md, in code comments, and in
+  test names.
 - **Scope is deliberately minimal:** slides of simple text. Do not add features, dependencies,
   files, or documents that were not asked for.
-- **Fixed stack:** Bun (scripts and unit tests), Vite 8 (builder), React 19 + MDX (authoring),
-  Playwright (end-to-end tests). One package, `@saburto/saburto-decks`.
-- Code comments cite requirement numbers (`R5`, `N2`) from PLAN.md. **If you renumber a
+- **Fixed stack:** Bun (scripts and unit tests), Vite and Astro (builds), React 19 + MDX (a deck is
+  a React component). One package, `@saburto/saburto-decks`.
+- Code comments cite requirement numbers (`R5`, `N1`) from PLAN.md. **If you renumber a
   requirement, grep for it** — the numbers are referenced in `src/`, `test/` and `e2e/`.
 
 ## Layout
 
 ```
-src/runtime/     ships in the deck bundle: the element, the React view, the stylesheet
-src/build/       runs at build time and must never ship: the MDX → slides transform
-src/index.ts     barrel re-exporting both halves, so nothing shipped may import it
-decks/           a deck (.mdx) and its bundle entry (.deck.ts)
-demo/            the host page: plain static HTML, no build step, on purpose
+src/runtime/     ships to the browser: Deck.tsx (the component), Slide.tsx, the stylesheet
+src/build/       build-time only, never shipped: the MDX → <Slide> transform
+src/mdx.ts       the Vite plugin and remark pipeline a host's config uses
+src/index.ts     the component entry — it must never import the build half
+decks/           example.mdx: the deck both demo hosts embed
+demo/            an Astro site that embeds it as an island
+react-demo/      a plain React app that embeds the same deck
 e2e/             Playwright specs; test/ holds the Bun unit tests
-scripts/serve.ts static server for the demo, and the e2e web server
 ```
+
+Two demo hosts are kept on purpose. The Astro one is the target that matters; the React one proves
+a deck is a React component and nothing more, and gives the suite a second, non-Astro host.
 
 ## Commands
 
 ```bash
-bun run verify      # typecheck → unit tests → build → e2e tests. Run this before saying done.
-bun run test        # unit tests (Bun)
-bun run test:e2e    # end-to-end tests (Playwright)
-bun run typecheck   # tsc --noEmit
-bun run build       # → dist/example.deck.js
-bun run demo        # build, then serve the demo at http://127.0.0.1:4173/demo/
-bun run dev         # Vite's dev server instead; needs dist/ to have been built
+bun run verify       # typecheck → unit tests → build → e2e tests. Run this before saying done.
+bun run test         # unit tests (Bun)
+bun run test:e2e     # end-to-end tests (Playwright), against both built demos
+bun run typecheck    # tsc --noEmit
+bun run build        # the library, then both demo sites
+bun run dev          # the Astro demo with hot reload
+bun run dev:react    # the React demo with hot reload
+bun run demo         # build, then serve the Astro demo at http://127.0.0.1:4173/
 ```
-
-`HOST=0.0.0.0 bun run demo` binds to the network instead of localhost, if you want to reach the
-demo from another machine.
 
 ## Traps
 
 Each of these has already cost time here.
 
-- **Vite library mode leaves `process.env.NODE_ENV` unresolved.** Both the development and the
-  production build of React then ship. The `define` block in `vite.config.ts` is load-bearing;
-  after any Vite upgrade, check `rg -c process.env.NODE_ENV dist/example.deck.js` → `0`.
-- **A shipped entry must import from `runtime/`, not from `src/index.ts`.** The barrel re-exports
-  the build-time half too, so importing it drags `unist-util-mdx-define` and friends into the
-  module graph. They are currently shaken out, but nothing then stops them from shipping.
-- **MDX v3 does not parse frontmatter.** `remark-frontmatter` must be in the pipeline, or `---`
-  becomes a setext heading. Injected exports need `unist-util-mdx-define`: a hand-built `mdxjsEsm`
-  node is silently dropped, and `value` stays empty even when it works — MDX reads `data.estree`.
+- **A deck is a React component, and Astro's MDX integration does not produce React.** Do not add
+  `@astrojs/mdx` to a host and expect `<Deck slides={slides} />` to work: it compiles MDX to Astro
+  components. `saburtoDecks()` from `./mdx` brings `@mdx-js/rollup` and the remark pipeline instead.
+- **The deck renders in a shadow root, so it is client-only.** Nothing inside it is in the
+  server-rendered HTML. That is the accepted cost of R8; do not "fix" it by dropping the shadow
+  root without the owner's say-so.
+- **The deck's host is a `div`, and outer rules beat `:host` for the host element itself.** That is
+  why the properties that reach the deck's text (font, colour, line-height) are set again on
+  `.deck` *inside* the shadow root. Keep them there.
 - **The stylesheet is a template string.** A backtick in a CSS comment terminates it.
-- **The deck must never scroll.** A slide is scaled to fit its box instead; the fit loop lives in
-  `#fitStage`. Do not reintroduce a scroll container or the keys that fed one.
+- **MDX v3 does not parse frontmatter.** `remark-frontmatter` must be in the pipeline, or `---`
+  becomes a setext heading.
+- **`Deck.tsx` wraps the slides in `SlideContext.Provider`.** Drop it and every slide thinks it is
+  slide 1: the counter moves while the slides do not.
+- **The deck must never scroll.** A slide is scaled to fit its box instead (see `fitStage` in
+  `Deck.tsx`). Do not reintroduce a scroll container.
 - **`bun test` and Playwright both claim `*.spec.ts`.** The unit script passes
   `--path-ignore-patterns='e2e/**'`, and `verify` must call `bun run test`, not `bun test`.
 - **Run Playwright through `bun run test:e2e`.** `bunx playwright` executes it under Bun and fails
   with a `bun:` protocol error. Its config uses `channel: 'chromium'` so no browser is downloaded.
-- **The e2e tests drive the built bundle**, so `dist/` must be current — `verify` builds first.
+- **The e2e tests drive the built demo sites**, and there are two web servers (4173 for Astro, 4174
+  for React) — `verify` builds before testing.
+- **An `.d.ts` beside a `.ts` of the same name is that module's declaration file, not ambient
+  globals.** The `*.mdx` declaration lives in `src/ambient.d.ts` for exactly this reason.
 
 ## Decisions already taken
 
 Do not relitigate these without the owner.
 
-- **No CSS framework.** Tailwind v4 does work inside a shadow root, but it cannot express the
-  layout (container-relative `cqi` type that is shrunk to fit) and a host page's Tailwind cannot
-  reach into the shadow root, so every deck would embed its own generated copy. The stylesheet is
-  ~200 lines of purpose-written CSS.
-- **React, not Preact.** React 19 is the runtime; do not alias `react` to `preact/compat` and do
-  not treat payload size as a design constraint — it is not one.
-- **One deck per page.** `defineDeck` registers the single `<saburto-deck>` tag, so a second deck
-  bundle on the same page replaces the first. Per-deck tags are the fix when that matters.
-- **Present mode is a fixed overlay inside the shadow tree,** plus native fullscreen when the
-  browser has it. Present mode therefore does not depend on the Fullscreen API existing or being
-  permitted; fullscreen only removes the browser chrome.
+- **A component, not a custom element, and never a script tag.** The host imports `<Deck>` and
+  renders it; there is no bundle to load, no tag to register, no snippet. R4 was rewritten for this.
+- **Hosts must be able to render React components** (an Astro site with `@astrojs/react`, or any
+  React app). A static HTML page is not a host.
+- **The shadow root stays (R8).** The accepted cost: the slides are not in the server HTML.
+- **React, not Preact.** Do not alias `react` to `preact/compat`, and do not treat payload size as
+  a design constraint — it is not one.
+- **No CSS framework.** The stylesheet is purpose-written: container-relative type that is shrunk
+  to fit, `all: initial` isolation, and a shadow root.
+- **One deck per page is no longer a limit.** Each `<Deck>` gets its own shadow root, so several
+  decks can coexist.
+- **A presenting deck covers the page it is in,** so the host's own controls are unreachable while
+  presenting. Host-driven exit is `exitPresent()` from the host's code; the reader's own exits are
+  `Esc` and the deck's bar.

@@ -1,7 +1,7 @@
 /**
- * Compiles the real example deck through the real plugin pipeline. This is the
- * test that catches plugin-order regressions — frontmatter being parsed as a
- * setext heading, or the slide count export silently disappearing.
+ * Compiles the demo's real deck file through the real plugin pipeline. This is
+ * the test that catches plugin-order regressions — frontmatter being parsed as
+ * a setext heading, or the slides never being wrapped at all.
  */
 import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
@@ -13,9 +13,8 @@ const source = readFileSync(new URL('../decks/example.mdx', import.meta.url), 'u
 const compiled = await compile(source, { remarkPlugins: remarkDeckPlugins })
 const output = String(compiled.value)
 
-describe('the example deck', () => {
+describe('the demo deck', () => {
   test('has exactly three slides', () => {
-    expect(output).toContain('export const slideCount = 3')
     expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(3)
     expect(output).toContain('_missingMdxReference("Slide"')
   })
