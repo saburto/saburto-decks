@@ -80,11 +80,12 @@ sequenceDiagram
 
 ---
 
-## Other diagrams
+## Flowcharts
 
-A diagram that is not a sequence diagram — a flowchart, say — is shown whole.
+A flowchart is revealed the same way: each node, then each edge.
 
 ```mermaid
 flowchart LR
     A[Source] --> B[Deck]
+    B -->|Readers| C[Reader]
 ```

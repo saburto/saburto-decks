@@ -1,9 +1,9 @@
 /**
  * Diagrams: a Mermaid fence is drawn rather than printed (R13), and a sequence
- * diagram is revealed a participant and a message at a time (R14).
+ * diagram or a flowchart is revealed one element at a time (R14).
  *
- * The demo deck keeps its two diagrams on separate slides: a sequence diagram,
- * which steps, and a flowchart, which does not.
+ * The demo deck keeps its two diagrams on separate slides: a sequence diagram
+ * and a flowchart, each with steps of its own.
  */
 import { expect, test, type Page } from '@playwright/test'
 import { DEMO, deck, goTo, hostCss, state } from './helpers'
@@ -54,6 +54,32 @@ async function messages(page: Page): Promise<number> {
   })
 }
 
+/** The flowchart's nodes, and its edges, that are on screen. */
+async function flowNodes(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const host = document.querySelector('#deck') as HTMLElement
+    const flow = host.shadowRoot?.querySelector('section.slide[data-active] .sd-mermaid')
+    return flow?.querySelectorAll('g.nodes g.node.sd-shown').length ?? 0
+  })
+}
+
+async function flowEdges(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const host = document.querySelector('#deck') as HTMLElement
+    const flow = host.shadowRoot?.querySelector('section.slide[data-active] .sd-mermaid')
+    return flow?.querySelectorAll('g.edgePaths path.sd-shown').length ?? 0
+  })
+}
+
+/** The flowchart's edge labels that are on screen: revealed with their edge. */
+async function flowLabels(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const host = document.querySelector('#deck') as HTMLElement
+    const flow = host.shadowRoot?.querySelector('section.slide[data-active] .sd-mermaid')
+    return flow?.querySelectorAll('g.edgeLabels g.edgeLabel.sd-shown').length ?? 0
+  })
+}
+
 /** The fill of a participant's box, as the browser computes it. */
 async function actorFill(page: Page): Promise<[number, number, number]> {
   return page.evaluate(() => {
@@ -93,16 +119,45 @@ test.describe('diagrams', () => {
     expect(await page.locator('#deck section.slide[data-active] .sd-mermaid-source:visible').count()).toBe(0)
   })
 
-  test('shows a diagram that is not a sequence whole, as one step (R13)', async ({ page }) => {
+  test('reveals a flowchart a node and an edge at a time (R14)', async ({ page }) => {
     await goTo(page, FLOWCHART)
     await expect(page.locator('#deck section.slide[data-active] .sd-mermaid svg')).toHaveCount(1)
+    await expect.poll(async () => (await drawn(page))[0]?.steps).toBe(5)
+    await page.locator('#deck').focus()
 
-    const [flowchart] = await drawn(page)
-    expect(flowchart?.steps).toBe(1)
-    expect(flowchart?.total).toBe(0)
-    expect(flowchart?.revealed).toBe(0)
+    /* Three nodes and two edges: the nodes first, in declaration order... */
+    expect(await flowNodes(page)).toBe(1)
+    expect(await flowEdges(page)).toBe(0)
+    expect(await flowLabels(page)).toBe(0)
+    await page.keyboard.press('ArrowRight')
+    expect(await flowNodes(page)).toBe(2)
+    await page.keyboard.press('ArrowRight')
+    expect(await flowNodes(page)).toBe(3)
+    expect(await flowEdges(page)).toBe(0)
 
-    await expect(page.locator('#deck .counter')).toHaveText('7 / 7')
+    /* ...then the edges, in declaration order, each with its label. */
+    await page.keyboard.press('ArrowRight')
+    expect(await flowNodes(page)).toBe(3)
+    expect(await flowEdges(page)).toBe(1)
+    expect(await flowLabels(page)).toBe(0)
+    await page.keyboard.press('ArrowRight')
+    expect(await flowEdges(page)).toBe(2)
+    expect(await flowLabels(page)).toBe(1)
+
+    /* Five steps, and the flowchart is the deck's last slide. */
+    await expect(page.locator('#deck .live')).toHaveText('Slide 7 of 7, step 5 of 5')
+    await expect(page.locator('#deck .bar button[aria-label="Next slide"]')).toBeDisabled()
+
+    /* Previous walks back through the edges, then the nodes. */
+    await page.keyboard.press('ArrowLeft')
+    expect(await flowEdges(page)).toBe(1)
+    await page.keyboard.press('ArrowLeft')
+    expect(await flowEdges(page)).toBe(0)
+    expect(await flowNodes(page)).toBe(3)
+    await page.keyboard.press('ArrowLeft')
+    expect(await flowNodes(page)).toBe(2)
+    await page.keyboard.press('ArrowLeft')
+    expect(await flowNodes(page)).toBe(1)
   })
 
   test('reveals the sequence a participant and a message at a time (R14)', async ({ page }) => {
@@ -124,11 +179,10 @@ test.describe('diagrams', () => {
     await expect(page.locator('#deck .step-dot')).toHaveCount(5)
     await expect(page.locator('#deck .live')).toHaveText('Slide 6 of 7, step 5 of 5')
 
-    /* The sequence slide is not the deck's last, so Next moves on — and the
-       flowchart after it is the end. */
+    /* The sequence slide is not the deck's last, so Next moves on to the
+       flowchart — which has steps of its own (R14). */
     await page.keyboard.press('ArrowRight')
     await expect(page.locator('#deck .counter')).toHaveText('7 / 7')
-    await expect(page.locator('#deck .bar button[aria-label="Next slide"]')).toBeDisabled()
 
     await page.keyboard.press('ArrowLeft')
     await expect(page.locator('#deck .counter')).toHaveText('6 / 7')

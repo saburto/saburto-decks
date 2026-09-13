@@ -6,14 +6,14 @@
  * deck without a diagram never pays for it.
  *
  * The component's job is to hand the source to Mermaid, put the drawing it
- * produces into the slide, and mark the parts that a sequence diagram reveals
- * one at a time (R14). The reveal itself is applied by the deck, which owns the
- * reader's position; the diagram only says which element belongs to which step
- * and asks the deck to look again.
+ * produces into the slide, and mark the parts a diagram reveals one at a time
+ * (R14). The reveal itself is applied by the deck, which owns the reader's
+ * position; the diagram only says which element belongs to which step and asks
+ * the deck to look again.
  */
 import { useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { SlideContext, type DeckTheme } from './Slide'
-import { assignSequenceSteps } from './mermaid-steps'
+import { assignDiagramSteps } from './mermaid-steps'
 
 type MermaidApi = (typeof import('mermaid'))['default']
 
@@ -93,7 +93,7 @@ export function Mermaid({ children, 'data-full': full }: MermaidProps) {
           drawn.setAttribute('width', '100%')
         }
         const whole = full === 'true'
-        setSteps(!drawn || whole ? 1 : assignSequenceSteps(drawn))
+        setSteps(!drawn || whole ? 1 : assignDiagramSteps(drawn))
         setFailed(false)
       } catch {
         if (cancelled) return

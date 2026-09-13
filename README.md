@@ -106,10 +106,11 @@ sequenceDiagram
 ````
 
 A **sequence diagram** is revealed one element at a time, in the order the diagram declares
-itself: each participant, then each message or note (R14). That reveal is part of the deck's
-navigation, exactly like a code block's steps — `→` moves to the next participant or message, the
-bar shows a dot per step, and the reader only leaves the slide after the last one. Other kinds of
-diagram, such as a flowchart or a pie chart, are shown whole.
+itself: each participant, then each message or note (R14). A **flowchart** is revealed the same
+way: each node, then each edge. That reveal is part of the deck's navigation, exactly like a code
+block's steps — `→` moves to the next element, the bar shows a dot per step, and the reader only
+leaves the slide after the last one. Other kinds of diagram, such as a pie chart or a state chart,
+are shown whole.
 
 A diagram follows the deck's theme, and is redrawn when the host changes it. Like all slide
 content it is measured against the deck's box and scaled to fit, never scrolled.
