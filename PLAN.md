@@ -2,12 +2,15 @@
 
 ## Purpose
 
-Author a slide deck once, then use it two ways: **embedded** inside an existing web page, and
-**presented full screen** from the same source. This is the *infodeck* idea — a deck that lives
-inside a page without stopping being a deck.
+To make **infodecks** easy to create. An infodeck is a deck meant to be read rather than
+projected: a document that uses slides and spatial layout to explain something, and that is worth
+treating as a form of writing in its own right
+([Martin Fowler, *Infodeck*](https://martinfowler.com/bliki/Infodeck.html)).
 
-Today the choice is between presentation tools that take over the whole page, and hand-written
-article HTML with no presentation mode.
+The form is poorly served by the tools that exist. Presentation software takes over the whole page
+and is built for an audience in a room; hand-written article HTML has no deck behaviour at all. So
+a deck is authored once and used two ways: **embedded** inside an existing web page, and
+**presented full screen** from the same source.
 
 ## Users
 
@@ -55,6 +58,19 @@ full-screen presentation.
 
 **R10 — Host control.** The host page can put the deck into and out of present mode, and is
 notified when the mode changes.
+
+**R11 — Code.** A slide can contain fenced code blocks. Code is syntax-highlighted, and the
+highlighting is produced when the deck is built, not when it is shown: no highlighter, grammar or
+theme reaches the browser. A code block may name the file it came from and mark the lines that
+matter. Like all slide content, a code block is sized to the deck's box and is never scrolled.
+
+**R12 — Steps.** A code block can declare an ordered sequence of highlighted line sets. The deck
+moves through that sequence one step at a time — with the same next/previous navigation, and by
+clicking the slide — and only leaves the slide once the last step has been shown. A step can show
+no highlights at all, or take the code block off the slide entirely. Going back reverses the
+sequence, and from a slide's first step returns to the previous slide's last step. The reader can
+see how many steps the slide has and where in them they are. The host can drive and observe
+steps, as it can slides.
 
 ## Non-functional requirements
 

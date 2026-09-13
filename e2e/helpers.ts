@@ -5,7 +5,7 @@
  * pierce on their own — `page.locator('section.slide')` finds the slides. Only
  * the measurements need to reach into the shadow root by hand.
  */
-import { expect, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 export const DEMO = '/'
 
@@ -21,6 +21,12 @@ export const nextSlide = (page: Page) => page.locator('#deck .bar button[aria-la
 /** The deck's own way in and out of present mode. */
 export const fullScreen = (page: Page) => page.locator('#deck .bar button').last().click()
 
+/** Jumps straight to a slide, the way a host page's own logic would (R10).
+ * Stepping through a deck by keyboard is a different thing, and is tested as
+ * such — this is for getting to a particular slide regardless of its steps. */
+export const goTo = (page: Page, index: number) =>
+  page.evaluate((at) => (window as unknown as { deck?: { goTo(index: number): void } }).deck?.goTo(at), index)
+
 /** The host page's way in and out of present mode (R10). */
 export const hostPresentButton = (page: Page) => page.locator('#present')
 
@@ -32,19 +38,19 @@ export const hostStatus = (page: Page) => page.locator('#status')
 export const hostExitPresent = (page: Page) =>
   page.evaluate(() => (window as unknown as { deck?: { exitPresent(): void } }).deck?.exitPresent())
 
-/** Back to the first slide, using the keyboard a reader would use. */
-export async function firstSlide(page: Page): Promise<void> {
-  await page.locator('#deck').focus()
-  await page.keyboard.press('Home')
-  await expect(page.locator('#deck .counter')).toHaveText('1 / 3')
-}
-
 export interface DeckState {
   mode: 'embedded' | 'present'
   theme: string | null
   /** The slide actually on screen. */
   index: number
   count: number
+  /** Which step of the current slide, and how many that slide has (R12). */
+  step: number
+  stepCount: number
+  /** How many lines the current step highlights. */
+  activeLines: number
+  /** How many code blocks the current step takes off the slide (R12). */
+  hiddenCode: number
   /** The type size the deck settled on, in px. */
   typePx: number
   /** How many px of the slide do not fit the stage. Must never be positive. */
@@ -82,6 +88,10 @@ export async function state(page: Page): Promise<DeckState> {
       theme: host.dataset['theme'] ?? null,
       index: active ? Number(active.dataset['index']) : -1,
       count: slides.length,
+      step: Number(host.dataset['step'] ?? 0),
+      stepCount: Number(host.dataset['steps'] ?? 1),
+      activeLines: shadow.querySelectorAll('section.slide[data-active] .line.highlighted').length,
+      hiddenCode: shadow.querySelectorAll('section.slide[data-active] pre.shiki[hidden]').length,
       typePx: Number.parseFloat(getComputedStyle(stage).fontSize),
       clipped: stage.scrollHeight - stage.clientHeight,
       clippedHorizontally: stage.scrollWidth - stage.clientWidth,

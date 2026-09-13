@@ -14,6 +14,14 @@ import { deckStyles } from './styles'
 
 const noop = () => {}
 
+/** A `{hide}` step takes a code block, and the title bar above it, off the
+ * slide — nothing about it is left behind. */
+function setCodeHidden(block: HTMLElement, hidden: boolean): void {
+  block.hidden = hidden
+  const title = block.previousElementSibling
+  if (title instanceof HTMLElement && title.classList.contains('sd-code-title')) title.hidden = hidden
+}
+
 /** The deck is server-rendered by Astro and hydrated on the client. Layout
  * effects only exist in a browser, so fall back to `useEffect` where there is
  * no DOM to lay out. */
@@ -25,7 +33,10 @@ export interface DeckHandle {
   exitPresent(): void
   next(): void
   prev(): void
-  goTo(index: number): void
+  /** Jump to a slide, and optionally to a step within it. Both are clamped. */
+  goTo(index: number, step?: number): void
+  /** Move within the current slide's steps. */
+  goToStep(step: number): void
 }
 
 export interface DeckProps extends HTMLAttributes<HTMLDivElement> {
@@ -36,6 +47,8 @@ export interface DeckProps extends HTMLAttributes<HTMLDivElement> {
   theme?: DeckTheme
   /** Told when the slide changes, so a host can show where the reader is. */
   onSlideChange?: (index: number, count: number) => void
+  /** Told when the step within a slide changes, and how many it has (R12). */
+  onStepChange?: (step: number, stepCount: number) => void
   /** Told when the deck enters or leaves present mode. */
   onModeChange?: (mode: DeckMode) => void
 }
@@ -49,7 +62,7 @@ export interface DeckProps extends HTMLAttributes<HTMLDivElement> {
  * CSS cannot leak out.
  */
 export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
-  { slides: Slides, defaultSlide = 0, theme = 'light', onSlideChange, onModeChange, className, style, ...rest },
+  { slides: Slides, defaultSlide = 0, theme = 'light', onSlideChange, onStepChange, onModeChange, className, style, ...rest },
   ref
 ) {
   const hostRef = useRef<HTMLDivElement | null>(null)
@@ -57,15 +70,24 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
   const [mode, setMode] = useState<DeckMode>('embedded')
   const [index, setIndex] = useState(defaultSlide)
   const [count, setCount] = useState(0)
+  /* A slide's steps are its code blocks' ordered highlight states (R12). Every
+     slide has at least one (the state it arrives in), so the dots only appear
+     when there is more than one. */
+  const [step, setStep] = useState(0)
+  const [stepCount, setStepCount] = useState(0)
 
   /* Mirrors of the state, for the listeners and callbacks that outlive a
      render and must not read a stale closure. */
   const modeRef = useRef(mode)
   const indexRef = useRef(index)
   const countRef = useRef(count)
+  const stepRef = useRef(step)
+  const stepCountRef = useRef(stepCount)
   const changeSlide = useRef(onSlideChange)
+  const changeStep = useRef(onStepChange)
   const changeMode = useRef(onModeChange)
   changeSlide.current = onSlideChange
+  changeStep.current = onStepChange
   changeMode.current = onModeChange
 
   /* Where the reader was, captured before present mode disturbs anything. */
@@ -80,18 +102,69 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
     setShadow(host.shadowRoot ?? host.attachShadow({ mode: 'open' }))
   }, [])
 
-  const goTo = useCallback((next: number) => {
-    const total = countRef.current
-    if (total === 0) return
-    const clamped = Math.max(0, Math.min(next, total - 1))
-    if (clamped === indexRef.current) return
-    indexRef.current = clamped
-    setIndex(clamped)
-    changeSlide.current?.(clamped, total)
+  /** How many steps a slide has: the longest run of highlight states among
+     its code blocks. A slide without stepping code still has the one state it
+     arrives in. */
+  const stepsIn = useCallback((slide: Element | null | undefined): number => {
+    if (!slide) return 1
+    let steps = 1
+    for (const block of slide.querySelectorAll('pre.shiki[data-steps]')) {
+      steps = Math.max(steps, Number(block.getAttribute('data-steps')) || 1)
+    }
+    return steps
   }, [])
 
-  const next = useCallback(() => goTo(indexRef.current + 1), [goTo])
-  const prev = useCallback(() => goTo(indexRef.current - 1), [goTo])
+  const slideAt = useCallback(
+    (position: number): Element | null => shadow?.querySelectorAll('section.slide')[position] ?? null,
+    [shadow]
+  )
+
+  /** Moves to a slide and a step in one committed change, telling the host
+     which of the two actually moved. */
+  const applyPosition = useCallback(
+    (nextIndex: number, nextStep: number) => {
+      const total = countRef.current
+      if (total === 0) return
+
+      const clampedIndex = Math.max(0, Math.min(nextIndex, total - 1))
+      const stepTotal = stepsIn(slideAt(clampedIndex))
+      const clampedStep = Math.max(0, Math.min(nextStep, stepTotal - 1))
+
+      const indexMoved = clampedIndex !== indexRef.current
+      const stepMoved = clampedStep !== stepRef.current || stepTotal !== stepCountRef.current
+
+      indexRef.current = clampedIndex
+      stepRef.current = clampedStep
+      stepCountRef.current = stepTotal
+
+      if (indexMoved) {
+        setIndex(clampedIndex)
+        changeSlide.current?.(clampedIndex, total)
+      }
+      if (stepMoved) {
+        setStep(clampedStep)
+        setStepCount(stepTotal)
+        changeStep.current?.(clampedStep, stepTotal)
+      }
+    },
+    [slideAt, stepsIn]
+  )
+
+  const goTo = useCallback((nextIndex: number, nextStep = 0) => applyPosition(nextIndex, nextStep), [applyPosition])
+  const goToStep = useCallback((nextStep: number) => applyPosition(indexRef.current, nextStep), [applyPosition])
+
+  /* Next walks the current slide's steps before it leaves the slide; previous
+     walks them back, and steps back onto the last step of the slide before
+     this one — the reader always moves one position, never two (R12). */
+  const next = useCallback(() => {
+    if (stepRef.current < stepCountRef.current - 1) applyPosition(indexRef.current, stepRef.current + 1)
+    else if (indexRef.current < countRef.current - 1) applyPosition(indexRef.current + 1, 0)
+  }, [applyPosition])
+
+  const prev = useCallback(() => {
+    if (stepRef.current > 0) applyPosition(indexRef.current, stepRef.current - 1)
+    else if (indexRef.current > 0) applyPosition(indexRef.current - 1, stepsIn(slideAt(indexRef.current - 1)) - 1)
+  }, [applyPosition, slideAt, stepsIn])
 
   /**
    * Puts the page back at the offset it was at.
@@ -154,12 +227,13 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
     place.current.focus?.focus({ preventScroll: true })
   }, [restoreScroll])
 
-  useImperativeHandle(ref, () => ({ present, exitPresent, next, prev, goTo }), [
+  useImperativeHandle(ref, () => ({ present, exitPresent, next, prev, goTo, goToStep }), [
     present,
     exitPresent,
     next,
     prev,
-    goTo
+    goTo,
+    goToStep
   ])
 
   /* The browser leaves fullscreen on its own for Escape and on tablets for the
@@ -182,9 +256,10 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
    *
    * A run of text occupies an area that grows with the square of the type
    * size, and the column width is independent of it, so height grows with the
-   * square too: one correction by the square root lands very close, and a
-   * couple more passes settle it. Each pass re-measures, so text that re-wraps
-   * as it shrinks is accounted for.
+   * square too: one correction by the square root lands very close. A block of
+   * wrapping code is measured in whole lines, so it needs a few small
+   * corrections after that. Each pass re-measures, so content that re-wraps as
+   * it shrinks is accounted for.
    */
   const fitStage = useCallback(() => {
     const stage = shadow?.querySelector<HTMLElement>('.stage')
@@ -201,7 +276,7 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
     if (!(room > 0) || !(start > 0)) return
 
     let size = start
-    for (let pass = 0; pass < 5; pass++) {
+    for (let pass = 0; pass < 10; pass++) {
       const needed = slide.scrollHeight
       if (needed <= room) return
       size *= Math.sqrt(room / needed)
@@ -209,18 +284,51 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
     }
   }, [shadow])
 
-  /* Learn how many slides the deck file has, keep the current one in range,
-     and fit the type — after every render, before the browser paints. */
+  /** Shows the current step, Shiki's way: the lines whose `data-hl` names it
+     carry `highlighted`, the block dims the rest, and a `{hide}` step takes
+     the block off the slide altogether. Only the active slide is touched —
+     the others are hidden, and are brought up to date when they become
+     active. Opacity does not change layout, so this needs no measure of its
+     own; hiding does, and `fitStage` follows this. */
+  const applyStepHighlights = useCallback(() => {
+    const active = shadow?.querySelector<HTMLElement>('section.slide[data-active]')
+    if (!active) return
+    for (const block of active.querySelectorAll<HTMLElement>('pre.shiki[data-steps]')) {
+      const total = Number(block.getAttribute('data-steps')) || 1
+      const at = Math.min(stepRef.current, total - 1)
+      const hidden = (block.getAttribute('data-hide') ?? '').split(' ').includes(String(at))
+      setCodeHidden(block, hidden)
+      for (const line of block.querySelectorAll<HTMLElement>('.line')) {
+        const steps = (line.getAttribute('data-hl') ?? '').split(' ')
+        line.classList.toggle('highlighted', !hidden && steps.includes(String(at)))
+      }
+      block.classList.toggle('has-highlighted', !hidden)
+    }
+  }, [shadow])
+
+  /* Learn how many slides the deck file has, keep the current slide and step
+     in range, show the step, and fit the type — after every render, before
+     the browser paints. */
   useIsomorphicLayoutEffect(() => {
     if (!shadow) return
-    const total = shadow.querySelectorAll('section.slide').length
+    const slides = shadow.querySelectorAll('section.slide')
+    const total = slides.length
     countRef.current = total
     setCount((current) => (current === total ? current : total))
-    setIndex((current) => {
-      const clamped = Math.max(0, Math.min(current, total - 1))
-      indexRef.current = clamped
-      return clamped === current ? current : clamped
-    })
+
+    const position = Math.max(0, Math.min(indexRef.current, total - 1))
+    indexRef.current = position
+    setIndex((current) => (current === position ? current : position))
+
+    const stepTotal = stepsIn(slides[position])
+    stepCountRef.current = stepTotal
+    setStepCount((current) => (current === stepTotal ? current : stepTotal))
+
+    const at = Math.max(0, Math.min(stepRef.current, stepTotal - 1))
+    stepRef.current = at
+    setStep((current) => (current === at ? current : at))
+
+    applyStepHighlights()
     fitStage()
   })
 
@@ -310,6 +418,35 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
     return () => host.removeEventListener('keydown', onKeyDown)
   }, [shadow, exitPresent, goTo, next, prev])
 
+  /* Clicking the slide advances, as in Slidev (R12) — but the click that first
+     focuses an unfocused deck only focuses it, or reaching for the deck's own
+     controls would move the deck on. Links, form controls and selected text
+     belong to the reader, not to the deck. */
+  useEffect(() => {
+    if (!shadow) return
+    let wasFocused = false
+    const onMouseDown = () => {
+      wasFocused = shadow.activeElement !== null || document.activeElement === hostRef.current
+    }
+    const onClick = (event: Event) => {
+      const target = event.target
+      if (
+        target instanceof Element &&
+        target.closest('a, button, input, select, textarea, summary, [role="button"], [contenteditable="true"]')
+      )
+        return
+      if (window.getSelection()?.toString()) return
+      if (!wasFocused) return
+      next()
+    }
+    shadow.addEventListener('mousedown', onMouseDown)
+    shadow.addEventListener('click', onClick)
+    return () => {
+      shadow.removeEventListener('mousedown', onMouseDown)
+      shadow.removeEventListener('click', onClick)
+    }
+  }, [shadow, next])
+
   return (
     <div
       {...rest}
@@ -323,6 +460,8 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
       tabIndex={rest.tabIndex ?? 0}
       data-mode={mode}
       data-theme={theme}
+      data-step={step}
+      data-steps={stepCount}
     >
       {shadow &&
         createPortal(
@@ -338,16 +477,28 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
               </div>
 
               <div className="bar" role="toolbar" aria-label="Deck controls">
-                <button type="button" onClick={prev} disabled={index <= 0} aria-label="Previous slide">
+                <button
+                  type="button"
+                  onClick={prev}
+                  disabled={index <= 0 && step <= 0}
+                  aria-label="Previous slide"
+                >
                   ‹
                 </button>
                 <span className="counter" aria-hidden="true">
                   {count > 0 ? `${index + 1} / ${count}` : ''}
                 </span>
+                {stepCount > 1 && (
+                  <span className="steps" aria-hidden="true">
+                    {Array.from({ length: stepCount }, (_, position) => (
+                      <span key={position} className="step-dot" data-on={position === step ? '' : undefined} />
+                    ))}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={next}
-                  disabled={count === 0 || index >= count - 1}
+                  disabled={count === 0 || (index >= count - 1 && step >= stepCount - 1)}
                   aria-label="Next slide"
                 >
                   ›
@@ -362,6 +513,7 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
                 where they are in the deck (N1). */}
             <p className="live" aria-live="polite">
               Slide {index + 1} of {count}
+              {stepCount > 1 ? `, step ${step + 1} of ${stepCount}` : ''}
             </p>
           </>,
           shadow

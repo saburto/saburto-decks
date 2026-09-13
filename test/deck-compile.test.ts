@@ -1,21 +1,26 @@
 /**
  * Compiles the demo's real deck file through the real plugin pipeline. This is
  * the test that catches plugin-order regressions — frontmatter being parsed as
- * a setext heading, or the slides never being wrapped at all.
+ * a setext heading, the slides never being wrapped at all, or a code block
+ * reaching the page unhighlighted.
  */
 import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
 import { compile } from '@mdx-js/mdx'
 import { remarkDeckPlugins } from '../src/build/remark-plugins'
+import { rehypeDeckPlugins } from '../src/build/rehype-plugins'
 
 const source = readFileSync(new URL('../decks/example.mdx', import.meta.url), 'utf8')
 
-const compiled = await compile(source, { remarkPlugins: remarkDeckPlugins })
+const compiled = await compile(source, {
+  remarkPlugins: remarkDeckPlugins,
+  rehypePlugins: rehypeDeckPlugins
+})
 const output = String(compiled.value)
 
 describe('the demo deck', () => {
-  test('has exactly three slides', () => {
-    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(3)
+  test('has exactly five slides', () => {
+    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(5)
     expect(output).toContain('_missingMdxReference("Slide"')
   })
 
@@ -28,10 +33,46 @@ describe('the demo deck', () => {
 
   test('every slide is addressed by index in document order', () => {
     const indices = Array.from(output.matchAll(/index: "(\d+)"/g), (match) => match[1])
-    expect(indices).toEqual(['0', '1', '2'])
+    expect(indices).toEqual(['0', '1', '2', '3', '4'])
   })
 
   test('the markdown rules between slides are gone', () => {
     expect(output).not.toContain('_components.hr')
+  })
+})
+
+describe('code blocks', () => {
+  test('are highlighted at build time, with a colour per theme (R11)', () => {
+    /* Nothing here needs a highlighter at run time: every token has already
+       become a span with its two colours written on it. */
+    expect(output).toContain('"--shiki-light"')
+    expect(output).toContain('"--shiki-dark"')
+    expect(output).toContain('shiki-themes vitesse-light vitesse-dark')
+  })
+
+  test('a fence meta names the lines each step highlights (R11, R12)', () => {
+    /* `{1|5|hide|none}` is four steps: line 1, line 5, the block hidden, then
+       the block shown with nothing highlighted. `{all|4|6|6-7|9|all}` is six. */
+    expect(output).toContain('"data-steps": "4"')
+    expect(output).toContain('"data-steps": "6"')
+    expect(output).toContain('"data-hl": "0"')
+    expect(output).toContain('"data-hl": "1"')
+    expect(output).toContain('"data-hide": "2"')
+  })
+
+  test("uses Shiki's own highlight classes (R11, R12)", () => {
+    /* The block and the lines of the first step are marked the way Shiki marks
+       them, so stepping only has to move those marks. */
+    expect(output).toContain('className: "shiki shiki-themes vitesse-light vitesse-dark has-highlighted"')
+    expect(output).toContain('className: "line highlighted"')
+  })
+
+  test('a `[filename]` fence meta names the file above the block (R11)', () => {
+    expect(output).toContain('className: "sd-code-title"')
+    expect(output).toContain('children: "Post.tsx"')
+  })
+
+  test('never becomes a scroll container: no horizontal scrolling tab stop (R5)', () => {
+    expect(output).not.toContain('tabIndex: "0"')
   })
 })

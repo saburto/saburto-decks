@@ -15,6 +15,7 @@ export default function DeckDemo() {
   const [theme, setTheme] = useState<DeckTheme>('light')
   const [mode, setMode] = useState<DeckMode>('embedded')
   const [at, setAt] = useState('')
+  const [step, setStep] = useState('')
 
   /* The page follows the same choice the deck is given, so the two agree. */
   useEffect(() => {
@@ -30,6 +31,10 @@ export default function DeckDemo() {
 
   const onSlideChange = useCallback((index: number, count: number) => {
     setAt(`${index + 1}/${count}`)
+  }, [])
+
+  const onStepChange = useCallback((index: number, count: number) => {
+    setStep(count > 1 ? `${index + 1}/${count}` : '')
   }, [])
 
   const onModeChange = useCallback((next: DeckMode) => {
@@ -50,6 +55,7 @@ export default function DeckDemo() {
         <output id="status">
           {mode}
           {at ? ` · slide ${at}` : ''}
+          {step ? ` · step ${step}` : ''}
         </output>
 
         <div className="theme" role="group" aria-label="Theme">
@@ -73,6 +79,7 @@ export default function DeckDemo() {
         slides={slides}
         theme={theme}
         onSlideChange={onSlideChange}
+        onStepChange={onStepChange}
         onModeChange={onModeChange}
       />
     </div>

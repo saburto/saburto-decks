@@ -1,8 +1,9 @@
 # saburto-decks
 
-Author a slide deck once in MDX, then use it two ways: **embedded** in a page, showing one slide
-at a time in a box the page provides, and **presented full screen** from the same file. No second
-copy, no audience-facing slides-plus-article.
+Write [**infodecks**](https://martinfowler.com/bliki/Infodeck.html) — decks meant to be read — in
+MDX. Author one file, then use it two ways: **embedded** in a page, showing one slide at a time in
+a box the page provides, and **presented full screen** from the same file. No second copy, no
+audience-facing slides-plus-article.
 
 A deck is a React component. Embedding one is importing a component and rendering it, whether the
 host page is an Astro site or a plain React app.
@@ -51,9 +52,45 @@ Slide three.
 
 `---` is ordinary Markdown, so the file stays readable in any editor. Frontmatter's own `---` are
 parsed first, so they never split a slide. A slide may contain headings, paragraphs, lists, links,
-emphasis and inline code (R3); anything MDX can render will work, but nothing else is promised.
+emphasis, inline code and highlighted code blocks (R3, R11); anything MDX can render will work,
+but nothing else is promised.
 
 The deck's frontmatter `title` is available to the host as `frontmatter` from the same import.
+
+### Code
+
+Fenced code is syntax-highlighted **at build time**. The highlighter runs while the deck is
+compiled, so the page receives only the finished, coloured markup — no highlighter, grammars or
+theme are ever shipped to the browser (R11). A snippet wraps rather than scrolls, and shrinks to
+fit its slide like everything else.
+
+````mdx
+```tsx [Post.tsx] {1|3|all}
+import { Deck } from '@saburto/saburto-decks'
+
+<Deck slides={slides} />
+```
+````
+
+Two pieces of fence metadata are understood, and both are optional:
+
+- `[Post.tsx]` (or `title="Post.tsx"`) names the file, shown in a bar above the block.
+- `{…}` marks lines to draw the eye. `{1,3-5}` highlights a fixed set; with `|` it becomes a
+  **sequence of steps** the reader advances through, as in Slidev: `{1|3-5|all}`. `all` — or `*`,
+  or an empty step — means every line; `none` shows the block with nothing highlighted, so every
+  line recedes; `hide` takes the block (and its file name) off the slide for that step.
+
+Steps are part of the deck's navigation, not a thing of their own: `→`, `Space` and the bar's
+next control move to the next step, and only leave the slide after the last one. `←` walks back,
+and from a slide's first step returns to the previous slide's last step. Clicking the slide
+advances too. The bar shows a dot per step, and the position is announced to screen readers (R12).
+
+Highlighting follows Shiki and Slidev: the current step's lines keep the colour they always had,
+and the lines it does not name are dimmed. No line is boxed or restyled, so the code reads the
+same throughout — only the emphasis moves.
+
+Code follows the deck's theme: every token carries a light and a dark colour, and the deck picks
+one from the `theme` it was given, exactly as the rest of the slide does.
 
 ## Embedding a deck
 
@@ -129,6 +166,7 @@ React is a peer dependency: the host's React is used, and a deck never carries a
 | `defaultSlide` | `number` | which slide to start on |
 | `theme` | `'light' \| 'dark' \| 'system'` | the host decides; the deck never guesses |
 | `onSlideChange` | `(index, count) => void` | told when the slide changes |
+| `onStepChange` | `(step, stepCount) => void` | told when the step within a slide changes (R12) |
 | `onModeChange` | `(mode) => void` | told when the deck enters or leaves present mode |
 
 Anything else — `id`, `className`, `style`, `aria-label`, `data-*` — goes to the deck's element in
@@ -145,8 +183,10 @@ const deck = useRef<DeckHandle>(null)
 <button onClick={() => deck.current?.present()}>Present</button>
 <Deck ref={deck} slides={slides} />
 
-deck.current?.goTo(2)      // 0-based, clamped
-deck.current?.next()       // also prev(), exitPresent()
+deck.current?.goTo(2)         // 0-based, clamped
+deck.current?.goTo(2, 1)      // …and to step 1 within it
+deck.current?.goToStep(2)     // step within the current slide
+deck.current?.next()          // also prev(), exitPresent()
 ```
 
 Note that while a deck is presenting it covers the page, so the host's own buttons are underneath
@@ -176,13 +216,14 @@ The host page has the last word on both:
 | `--sd-border` | hairlines |
 | `--sd-accent` | links |
 | `--sd-surface` | inline code and buttons |
+| `--sd-code-dim` | how far the lines outside the current step recede (default `0.3`) |
 
 ## Keyboard
 
 | Key | Embedded (once the deck has focus) | Presenting |
 | --- | --- | --- |
-| `→` `↓` `PageDown` `Space` | next slide | next slide |
-| `←` `↑` `PageUp` | previous slide | previous slide |
+| `→` `↓` `PageDown` `Space` | next step or slide | next step or slide |
+| `←` `↑` `PageUp` | previous step or slide | previous step or slide |
 | `Home` / `End` | first / last slide | first / last slide |
 | `Esc` | — | leave present mode |
 | `Tab` | moves on through the page | cycles within the deck |

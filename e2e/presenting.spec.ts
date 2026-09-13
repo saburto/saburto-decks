@@ -14,7 +14,7 @@ const enterPresent = (page: Page) => fullScreen(page)
 test.beforeEach(async ({ page }) => {
   await page.goto(DEMO)
   await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
-  await expect(page.locator('#deck section.slide')).toHaveCount(3)
+  await expect(page.locator('#deck section.slide')).toHaveCount(5)
   await page.locator('#deck section.slide[data-active] h1').first().click()
 })
 
@@ -27,7 +27,7 @@ test.describe('present mode', () => {
     const presenting = await state(page)
 
     expect(presenting.visible).toEqual([0])
-    expect(presenting.counter).toBe('1 / 3')
+    expect(presenting.counter).toBe('1 / 5')
     expect(presenting.surface.position).toBe('fixed')
     expect(presenting.surface.width).toBeCloseTo(viewport?.width ?? 0, 0)
     expect(presenting.surface.height).toBeCloseTo(viewport?.height ?? 0, 0)
@@ -42,23 +42,25 @@ test.describe('present mode', () => {
     await enterPresent(page)
 
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck .counter')).toHaveText('2 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 5')
 
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck .counter')).toHaveText('3 / 3')
-    await expect(page.locator('#deck .live')).toHaveText('Slide 3 of 3')
+    await expect(page.locator('#deck .counter')).toHaveText('3 / 5')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 3 of 5')
 
     await page.keyboard.press('ArrowLeft')
-    await expect(page.locator('#deck .counter')).toHaveText('2 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 5')
 
     await page.keyboard.press('Home')
-    await expect(page.locator('#deck .counter')).toHaveText('1 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('1 / 5')
 
     await page.keyboard.press('End')
-    await expect(page.locator('#deck .counter')).toHaveText('3 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('5 / 5')
 
+    /* Previous steps back onto the previous slide's last step, not its first. */
     await page.keyboard.press('PageUp')
-    await expect(page.locator('#deck .counter')).toHaveText('2 / 3')
+    await expect(page.locator('#deck .counter')).toHaveText('4 / 5')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 4 of 5, step 4 of 4')
   })
 
   test('keeps the reader in their place: same slide, same scroll offset (R7)', async ({ page }) => {

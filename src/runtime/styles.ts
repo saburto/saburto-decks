@@ -22,6 +22,8 @@ export const deckStyles = /* css */ `
     --sd-border: #d8dce3;
     --sd-accent: #2f6fed;
     --sd-surface: #f2f4f7;
+    /* How far the lines outside the current step recede (R12). */
+    --sd-code-dim: 0.3;
 
     display: block;
     position: relative;
@@ -117,6 +119,73 @@ export const deckStyles = /* css */ `
     border-radius: 0.3em;
   }
 
+  /* ---- code blocks ----
+     Shiki highlights at build time and gives each token a colour per theme,
+     as CSS variables; the deck's own palette picks one, exactly as it does
+     for the rest of the slide. Like every other slide content, a code block
+     never scrolls: long lines wrap, and the type shrinks to fit the stage
+     (R11, R5). */
+  pre.shiki {
+    margin-block: 0.7em;
+    padding: 0.8em 1em;
+    border-radius: 0.5em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.8em;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    tab-size: 2;
+  }
+  pre.shiki code {
+    font-family: inherit;
+    font-size: inherit;
+    background: none;
+    padding: 0;
+    border-radius: 0;
+  }
+  pre.shiki,
+  pre.shiki span { color: var(--shiki-light); }
+  pre.shiki { background-color: var(--shiki-light-bg); }
+  /* Shiki's convention, and Slidev's: the current step's lines keep the colour
+     they always had, and the lines it does not name recede. Nothing about the
+     highlighted line changes — no background, no box — so a line of code looks
+     the same whether or not it is the one being shown (R12). */
+  pre.shiki.has-highlighted .line:not(.highlighted) {
+    opacity: var(--sd-code-dim, 0.3);
+  }
+
+  /* A {hide} step: the block and the title bar above it leave the slide. */
+  pre.shiki[hidden],
+  .sd-code-title[hidden] { display: none; }
+  :host([data-theme="dark"]) pre.shiki,
+  :host([data-theme="dark"]) pre.shiki span { color: var(--shiki-dark); }
+  :host([data-theme="dark"]) pre.shiki { background-color: var(--shiki-dark-bg); }
+  @media (prefers-color-scheme: dark) {
+    :host([data-theme="system"]) pre.shiki,
+    :host([data-theme="system"]) pre.shiki span { color: var(--shiki-dark); }
+    :host([data-theme="system"]) pre.shiki { background-color: var(--shiki-dark-bg); }
+  }
+
+  /* The file a snippet came from, as a bar the code panel sits under. */
+  .sd-code-title {
+    margin-block: 0.7em 0;
+    padding: 0.35em 0.9em;
+    border: 1px solid var(--sd-border);
+    border-block-end: 0;
+    border-start-start-radius: 0.5em;
+    border-start-end-radius: 0.5em;
+    background: var(--sd-surface);
+    color: var(--sd-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72em;
+    line-height: 1.4;
+  }
+  .sd-code-title + pre.shiki {
+    margin-block-start: 0;
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     .slide[data-active] { animation: sd-enter 160ms ease-out both; }
   }
@@ -156,6 +225,15 @@ export const deckStyles = /* css */ `
     color: var(--sd-muted);
     font-variant-numeric: tabular-nums;
   }
+  /* How far through a stepped slide the reader is. */
+  .steps { display: inline-flex; gap: 0.25rem; align-items: center; }
+  .step-dot {
+    width: 0.4em;
+    height: 0.4em;
+    border-radius: 50%;
+    background: var(--sd-border);
+  }
+  .step-dot[data-on] { background: var(--sd-accent); }
 
   /* ---- present mode: the same deck, on the whole screen ----
      The host element deliberately stays in the page's flow, still occupying
