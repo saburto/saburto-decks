@@ -298,10 +298,16 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
     if (!(room > 0) || !(start > 0)) return
 
     let size = start
-    for (let pass = 0; pass < 10; pass++) {
+    /* A run of text occupies an area that grows with the square of the type
+       size, so one square-root correction lands close. A diagram grows with
+       the type size itself — its width is a multiple of it — and correcting by
+       the square root of a diagram's overflow would crawl towards fitting
+       without reaching it, so a diagram takes the linear correction. */
+    const hasDiagram = Boolean(slide.querySelector('.sd-mermaid'))
+    for (let pass = 0; pass < 12; pass++) {
       const needed = slide.scrollHeight
       if (needed <= room) return
-      size *= Math.sqrt(room / needed)
+      size *= hasDiagram ? room / needed : Math.sqrt(room / needed)
       stage.style.fontSize = `${size}px`
     }
   }, [shadow])

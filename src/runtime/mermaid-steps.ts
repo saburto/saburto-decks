@@ -8,8 +8,9 @@
  * - A sequence diagram names a top participant box `root-N`, that
  *   participant's lifeline `actorN`, and each message or note `iN`, numbered
  *   across the whole diagram.
- * - A flowchart lists its nodes in `g.nodes` in declaration order, and its
- *   edges in `g.edgePaths`, also in declaration order.
+ * - A diagram drawn as a graph — a flowchart, a state diagram, a class diagram
+ *   — lists its nodes in `g.nodes` in declaration order, and its edges in
+ *   `g.edgePaths`, also in declaration order.
  *
  * A diagram of any other kind gets no marks at all and is therefore shown
  * whole, as one step (R13).
@@ -29,11 +30,11 @@ const LIFELINE = '[data-et="life-line"][data-id]'
  */
 const EVENT = '[data-et="message"][data-id], [data-et="note"][data-id]'
 
-/** A flowchart's node, in declaration order. */
-const FLOWCHART_NODE = 'g.nodes g.node'
+/** A node in a graph Mermaid drew: a flowchart, state or class diagram node. */
+const GRAPH_NODE = 'g.nodes g.node'
 
-/** A flowchart's edge, in declaration order. */
-const FLOWCHART_EDGE = 'g.edgePaths path'
+/** An edge between two such nodes. */
+const GRAPH_EDGE = 'g.edgePaths path'
 
 /** An edge's label, which Mermaid draws apart from the edge itself. */
 const EDGE_LABEL = 'g.edgeLabels .label[data-id]'
@@ -132,13 +133,14 @@ function edgeLabelFor(svg: Element, edge: Element): Element | null {
 }
 
 /**
- * Marks every node of a flowchart, then every edge, with the step that reveals
- * it — the same shape as a sequence diagram's participants and then its
- * messages — and returns how many steps there are.
+ * Marks every node of a graph, then every edge, with the step that reveals it
+ * — the same shape as a sequence diagram's participants and then its messages
+ * — and returns how many steps there are. Flowcharts, state diagrams and class
+ * diagrams are all drawn this way.
  */
-export function assignFlowchartSteps(svg: Element): number {
-  const nodes = Array.from(svg.querySelectorAll(FLOWCHART_NODE))
-  const edges = Array.from(svg.querySelectorAll(FLOWCHART_EDGE))
+export function assignGraphSteps(svg: Element): number {
+  const nodes = Array.from(svg.querySelectorAll(GRAPH_NODE))
+  const edges = Array.from(svg.querySelectorAll(GRAPH_EDGE))
   if (nodes.length === 0 && edges.length === 0) return 1
 
   let step = 0
@@ -165,7 +167,7 @@ export function assignFlowchartSteps(svg: Element): number {
  * is a single step.
  */
 export function assignDiagramSteps(svg: Element): number {
-  if (svg.classList.contains('flowchart')) return assignFlowchartSteps(svg)
   if (svg.querySelector(PARTICIPANT) || svg.querySelector(EVENT)) return assignSequenceSteps(svg)
+  if (svg.querySelector(GRAPH_NODE) || svg.querySelector(GRAPH_EDGE)) return assignGraphSteps(svg)
   return 1
 }

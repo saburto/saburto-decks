@@ -89,3 +89,35 @@ flowchart LR
     A[Source] --> B[Deck]
     B -->|Readers| C[Reader]
 ```
+
+---
+
+## State diagrams
+
+A state diagram is revealed the same way again: each state, then each transition.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Idle
+    Idle --> Running: start
+    Running --> Idle: stop
+```
+
+---
+
+## Class diagrams
+
+And a class diagram: each class, then each relation.
+
+```mermaid
+classDiagram
+    direction LR
+    class Animal {
+      +name
+    }
+    class Dog
+    class Puppy
+    Animal <|-- Dog
+    Dog <|-- Puppy
+```
