@@ -16,6 +16,7 @@
   },
   "include": [
     "src",
+    "scripts",
     "demo/src",
     "demo/astro.config.ts",
     "test",

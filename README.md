@@ -332,6 +332,26 @@ mode, isolation in both directions, host control, keyboard behaviour, focus cont
 motion, the no-Fullscreen-API path, and place restoration. `bun run test:e2e --headed` watches it
 work.
 
+### Looking at a deck
+
+The tests assert on the deck; two tools show it to you. Both are development-only and ship
+nowhere.
+
+```bash
+bun run inspect --slide 5 --step 2                # a slide's state, printed
+bun run inspect --slide 8 --shot /tmp/deck.png    # ...and a picture of it
+bun run inspect --present --dark                  # full screen, dark theme
+bun run inspect --width 16rem --aspect '4 / 3'    # in a cramped box
+
+bun run compile                                   # decks/example.mdx, compiled
+bun run compile decks/example.mdx --grep Mark     # just the lines that mention Mark
+```
+
+`inspect` needs the host built (`bun run build`); if nothing is serving, it starts the preview
+itself and stops it again. `--url http://127.0.0.1:4174/` points it at the React host. `compile`
+runs the real build pipeline over a single file, which is what to reach for when a slide, a code
+fence or an annotation comes out wrong.
+
 ## Requirements
 
 [PLAN.md](PLAN.md) is the requirements document — what the deck must do, and when this version is

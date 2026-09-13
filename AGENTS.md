@@ -28,6 +28,7 @@ src/build/       build-time only, never shipped: the MDX → <Slide> transform
 src/mdx.ts       the Vite plugin and remark pipeline a host's config uses
 src/index.ts     the component entry — it must never import the build half
 decks/           example.mdx: the deck both demo hosts embed
+scripts/         development tools, never shipped: inspect.ts, compile.ts
 demo/            an Astro site that embeds it as an island
 react-demo/      a plain React app that embeds the same deck
 e2e/             Playwright specs; test/ holds the Bun unit tests
@@ -47,6 +48,8 @@ bun run build        # the library, then both demo sites
 bun run dev          # the Astro demo with hot reload
 bun run dev:react    # the React demo with hot reload
 bun run demo         # build, then serve the Astro demo at http://127.0.0.1:4173/
+bun run inspect      # a slide on screen: its state, and a PNG if asked. Dev tool only.
+bun run compile      # print what a deck file compiles to. Dev tool only.
 ```
 
 ## Traps

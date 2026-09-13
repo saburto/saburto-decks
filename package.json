@@ -22,6 +22,8 @@
     "demo": "bun run build && bun run preview",
     "test": "bun test --path-ignore-patterns='e2e/**'",
     "test:e2e": "playwright test",
+    "inspect": "bun run scripts/inspect.ts",
+    "compile": "bun run scripts/compile.ts",
     "verify": "bun run typecheck && bun run test && bun run build && bun run test:e2e",
     "typecheck": "tsc --noEmit"
   },
