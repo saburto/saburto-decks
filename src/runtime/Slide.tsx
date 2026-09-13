@@ -18,6 +18,8 @@ export type DeckComponent = ComponentType<Record<string, unknown>>
 interface SlideState {
   index: number
   count: number
+  /** Which step of the current slide the reader is on (R12). */
+  step: number
   theme: DeckTheme
   refresh: () => void
   /** Where a diagram may be built and measured, off the host page's flow. */
@@ -27,10 +29,18 @@ interface SlideState {
 export const SlideContext = createContext<SlideState>({
   index: 0,
   count: 0,
+  step: 0,
   theme: 'light',
   refresh: () => {},
   measure: null
 })
+
+/**
+ * Which slide a piece of content is on. `Slide` provides its own position, so
+ * content that has to know it — an annotation deciding whether the reader has
+ * reached its step (R15) — can read it without walking the DOM.
+ */
+export const SlideNumberContext = createContext(0)
 
 /**
  * One slide.
@@ -55,7 +65,7 @@ export function Slide({ index, children }: { index?: string; children?: ReactNod
       aria-label={`${position + 1} of ${count}`}
       inert={!active}
     >
-      {children}
+      <SlideNumberContext.Provider value={position}>{children}</SlideNumberContext.Provider>
     </section>
   )
 }

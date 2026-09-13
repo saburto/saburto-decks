@@ -24,6 +24,9 @@ export const deckStyles = /* css */ `
     --sd-surface: #f2f4f7;
     /* How far the lines outside the current step recede (R12). */
     --sd-code-dim: 0.3;
+    /* The colour a highlight is drawn in. A highlight is a thick stroke behind
+       the words, so it is translucent: the words stay readable under it (R15). */
+    --sd-highlight: rgba(255, 208, 0, 0.45);
 
     display: block;
     position: relative;
@@ -51,6 +54,7 @@ export const deckStyles = /* css */ `
     --sd-border: #2c313a;
     --sd-accent: #7aa2f7;
     --sd-surface: #1b1f27;
+    --sd-highlight: rgba(255, 208, 0, 0.32);
   }
   @media (prefers-color-scheme: dark) {
     :host([data-theme="system"]) {
@@ -60,6 +64,7 @@ export const deckStyles = /* css */ `
       --sd-border: #2c313a;
       --sd-accent: #7aa2f7;
       --sd-surface: #1b1f27;
+      --sd-highlight: rgba(255, 208, 0, 0.32);
     }
   }
 
@@ -233,6 +238,19 @@ export const deckStyles = /* css */ `
   @keyframes sd-enter {
     from { opacity: 0; transform: translateY(0.35em); }
     to { opacity: 1; transform: none; }
+  }
+
+  /* ---- annotations (R15) ----
+     A hand-drawn mark over a passage. rough-notation draws it as an SVG beside
+     the words, out of the flow, so it never enters the slide's measurement and
+     never changes the type size the deck settles on. The deck redraws a mark
+     when its passage is remeasured, so it stays on the words it marks.
+
+     Its draw keyframes are declared here, in the tree the annotations live in,
+     rather than in document.head where the library would otherwise put them:
+     nothing of the deck's styling belongs in the host page (R8). */
+  @keyframes rough-notation-dash {
+    to { stroke-dashoffset: 0; }
   }
 
   /* ---- the bar ---- */

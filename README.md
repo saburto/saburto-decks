@@ -52,8 +52,8 @@ Slide three.
 
 `---` is ordinary Markdown, so the file stays readable in any editor. Frontmatter's own `---` are
 parsed first, so they never split a slide. A slide may contain headings, paragraphs, lists, links,
-emphasis, inline code, highlighted code blocks (R3, R11) and Mermaid diagrams (R13); anything MDX
-can render will work, but nothing else is promised.
+emphasis, inline code, highlighted code blocks (R3, R11), hand-drawn annotations and Mermaid
+diagrams (R13); anything MDX can render will work, but nothing else is promised.
 
 The deck's frontmatter `title` is available to the host as `frontmatter` from the same import.
 
@@ -126,6 +126,32 @@ sequenceDiagram
     Alice->>John: Hello
 ```
 ````
+
+### Annotations
+
+Bring a passage forward by wrapping it in a `<Mark>`. A hand-drawn mark is drawn over the words:
+
+```mdx
+Press <Mark type="box">Full screen</Mark> to present, or
+<Mark type="circle" at={2} color="accent">Escape</Mark> to come back.
+```
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `type` | `highlight`, `underline`, `box`, `circle`, `strike-through`, `crossed-off`, `bracket` | what to draw; `highlight` by default |
+| `color` | a CSS colour, or a palette name (`accent`, `muted`, `fg`, `bg`, `highlight`) | a highlight uses `--sd-highlight`; the outline kinds use the text's own colour |
+| `at` | `number` | the step the mark is revealed on, counted with the slide's other steps; with the slide when omitted |
+| `multiline` | `boolean` | draw the mark per line, for a passage that wraps |
+| `brackets` | `left`, `right`, `top`, `bottom` | which side a `bracket` sits on |
+
+The mark is decoration — the words are on the slide whether or not the mark is — so it changes
+neither the text nor how the slide fits. A mark with an `at` takes part in the slide's steps: the
+dots, the keyboard and Next/Previous treat it like a code block or a diagram step, and the reader
+only leaves the slide after it. The drawing follows the deck's theme and palette, and is drawn in
+as it appears unless the reader prefers reduced motion.
+
+Annotations are an extra dependency only when a slide has one: a deck without a `<Mark>` never
+loads the library that draws it.
 
 ## Embedding a deck
 
@@ -251,6 +277,7 @@ The host page has the last word on both:
 | `--sd-border` | hairlines |
 | `--sd-accent` | links |
 | `--sd-surface` | inline code and buttons |
+| `--sd-highlight` | the colour a `<Mark type="highlight">` is drawn in (translucent, so the words stay readable under it) |
 | `--sd-code-dim` | how far the lines outside the current step recede (default `0.3`) |
 
 ## Keyboard

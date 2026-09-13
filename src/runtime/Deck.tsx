@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { Slide, SlideContext, type DeckComponent, type DeckMode, type DeckTheme } from './Slide'
+import { Mark } from './Mark'
 import { Mermaid } from './Mermaid'
 import { deckStyles } from './styles'
 
@@ -519,8 +520,8 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
                   [data-active]; changing the key here would remount every
                   slide — and every diagram — on each move. */}
               <div className="stage">
-                <SlideContext.Provider value={{ index, count, theme, refresh, measure }}>
-                  <Slides components={{ Slide, Mermaid }} />
+                <SlideContext.Provider value={{ index, count, step, theme, refresh, measure }}>
+                  <Slides components={{ Slide, Mermaid, Mark }} />
                 </SlideContext.Provider>
               </div>
 

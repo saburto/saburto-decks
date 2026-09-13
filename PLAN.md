@@ -84,6 +84,13 @@ Those elements are steps of the slide, reached and reversed with the same naviga
 step, and counted and announced with them. An author can turn a diagram's reveal off, so the whole
 diagram is shown at once.
 
+**R15 — Annotations.** A slide can mark a passage with a hand-drawn annotation — a highlight, an
+underline, a box, a circle, a strike-through or a bracket — to bring the eye to it. An annotation is
+decoration: it never changes the passage's text or its meaning, and it never changes the slide's
+layout or the size its type settles on. An annotation can be revealed as one of the slide's steps,
+counted and navigated with the others (R12); by default it appears with the slide. It follows the
+deck's theme and palette, and it respects the reader's reduced-motion preference.
+
 ## Non-functional requirements
 
 **N1 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
@@ -106,6 +113,8 @@ This version is done when:
 5. A sequence diagram is revealed a participant and a message at a time, and a graph diagram — a
    flowchart, state diagram or class diagram — a node and an edge at a time, as the reader advances;
    a diagram with no such order is shown whole.
+6. A passage on a slide can be marked with a hand-drawn annotation, and that annotation can be one
+   of the slide's steps, without changing the passage's text or whether the slide fits.
 
 ## Fixed decisions from the owner
 

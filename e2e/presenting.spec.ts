@@ -46,7 +46,10 @@ test.describe('present mode', () => {
 
     await page.keyboard.press('ArrowRight')
     await expect(page.locator('#deck .counter')).toHaveText('3 / 9')
-    await expect(page.locator('#deck .live')).toHaveText('Slide 3 of 9')
+    /* The live region names the slide. This slide also carries an annotation on
+       a step, so the step within it is stated after; the step itself is the
+       annotation tests' concern. */
+    await expect(page.locator('#deck .live')).toHaveText(/^Slide 3 of 9/)
 
     await page.keyboard.press('ArrowLeft')
     await expect(page.locator('#deck .counter')).toHaveText('2 / 9')

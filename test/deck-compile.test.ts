@@ -77,6 +77,28 @@ describe('code blocks', () => {
   })
 })
 
+describe('annotations (R15)', () => {
+  test('a <Mark> is a component the deck provides, not raw markup', () => {
+    expect(output).toContain('_missingMdxReference("Mark"')
+    /* Four in the demo deck: a highlight on the title, an underline, a box and
+       a circle. */
+    expect(output.match(/_jsx\(Mark,/g)).toHaveLength(4)
+  })
+
+  test('its type, colour and step survive compilation', () => {
+    expect(output).toContain('type: "highlight"')
+    expect(output).toContain('type: "underline"')
+    expect(output).toContain('type: "box"')
+    expect(output).toContain('type: "circle"')
+    expect(output).toContain('color: "accent"')
+    expect(output).toContain('at: 2')
+  })
+
+  test('the marked passage keeps its own markdown', () => {
+    expect(output).toContain('_jsx(_components.strong, {')
+  })
+})
+
 describe('diagrams', () => {
   test('a mermaid fence becomes a Mermaid element, not code (R13)', () => {
     /* Four fences in the demo deck: a sequence diagram, a flowchart, a state
