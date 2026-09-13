@@ -14,7 +14,7 @@ const enterPresent = (page: Page) => fullScreen(page)
 test.beforeEach(async ({ page }) => {
   await page.goto(DEMO)
   await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
-  await expect(page.locator('#deck section.slide')).toHaveCount(9)
+  await expect(page.locator('#deck section.slide')).toHaveCount(10)
   await page.locator('#deck section.slide[data-active] h1').first().click()
 })
 
@@ -27,7 +27,7 @@ test.describe('present mode', () => {
     const presenting = await state(page)
 
     expect(presenting.visible).toEqual([0])
-    expect(presenting.counter).toBe('1 / 9')
+    expect(presenting.counter).toBe('1 / 10')
     expect(presenting.surface.position).toBe('fixed')
     expect(presenting.surface.width).toBeCloseTo(viewport?.width ?? 0, 0)
     expect(presenting.surface.height).toBeCloseTo(viewport?.height ?? 0, 0)
@@ -42,28 +42,30 @@ test.describe('present mode', () => {
     await enterPresent(page)
 
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck .counter')).toHaveText('2 / 9')
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 10')
 
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck .counter')).toHaveText('3 / 9')
+    await expect(page.locator('#deck .counter')).toHaveText('3 / 10')
     /* The live region names the slide. This slide also carries an annotation on
        a step, so the step within it is stated after; the step itself is the
        annotation tests' concern. */
-    await expect(page.locator('#deck .live')).toHaveText(/^Slide 3 of 9/)
+    await expect(page.locator('#deck .live')).toHaveText(/^Slide 3 of 10/)
 
     await page.keyboard.press('ArrowLeft')
-    await expect(page.locator('#deck .counter')).toHaveText('2 / 9')
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 10')
 
     await page.keyboard.press('Home')
-    await expect(page.locator('#deck .counter')).toHaveText('1 / 9')
+    await expect(page.locator('#deck .counter')).toHaveText('1 / 10')
 
     await page.keyboard.press('End')
-    await expect(page.locator('#deck .counter')).toHaveText('9 / 9')
+    await expect(page.locator('#deck .counter')).toHaveText('10 / 10')
 
-    /* Previous steps back onto the previous slide's last step, not its first. */
+    /* Previous steps back onto the previous slide's last step, not its first.
+       The motion slide is the deck's last one; the class diagram comes before
+       it, and the class diagram has five steps. */
     await page.keyboard.press('PageUp')
-    await expect(page.locator('#deck .counter')).toHaveText('8 / 9')
-    await expect(page.locator('#deck .live')).toHaveText('Slide 8 of 9, step 6 of 6')
+    await expect(page.locator('#deck .counter')).toHaveText('9 / 10')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 9 of 10, step 5 of 5')
   })
 
   test('keeps the reader in their place: same slide, same scroll offset (R7)', async ({ page }) => {

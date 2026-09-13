@@ -22,6 +22,7 @@
  */
 import { useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { SlideContext, SlideNumberContext } from './Slide'
+import { stepAt } from './steps'
 
 /** The annotation kinds rough-notation knows how to draw. */
 export type MarkType =
@@ -53,16 +54,6 @@ let loading: Promise<Annotate> | null = null
 function loadAnnotate(): Promise<Annotate> {
   loading ??= import('rough-notation').then((module) => module.annotate)
   return loading
-}
-
-/**
- * The step an annotation appears on, 1-based, and therefore how many steps it
- * gives its slide. `at` is what the author wrote; anything unreadable, or
- * nothing at all, means "with the slide", which is step 1 (R12, R15).
- */
-export function annotationStep(at: number | string | undefined): number {
-  const value = Math.round(Number(at ?? 1))
-  return Number.isFinite(value) && value >= 1 ? value : 1
 }
 
 /**
@@ -123,7 +114,7 @@ export function Mark({ type = 'highlight', color, at, multiline = false, bracket
   const annotation = useRef<Annotation | null>(null)
   const [ready, setReady] = useState(0)
 
-  const position = annotationStep(at)
+  const position = stepAt(at)
   /* The mark is part of the slide it is written on, and shows once the reader
      has reached its step — and not while that slide is off screen, where there
      is nothing to measure against. */

@@ -91,6 +91,13 @@ layout or the size its type settles on. An annotation can be revealed as one of 
 counted and navigated with the others (R12); by default it appears with the slide. It follows the
 deck's theme and palette, and it respects the reader's reduced-motion preference.
 
+**R16 — Motion.** A slide can animate an object: it can arrive on one of the slide's steps, or
+move on one — to a place the author names, or to wherever the slide's own layout puts it. An object
+that has not arrived still occupies its place, so nothing else on the slide shifts as the reader
+steps, and the type size the slide settled on does not change under them. Stepping back undoes the
+motion. The reader's reduced-motion preference is respected: without animation, objects are simply
+in the right place.
+
 ## Non-functional requirements
 
 **N1 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
@@ -115,6 +122,8 @@ This version is done when:
    a diagram with no such order is shown whole.
 6. A passage on a slide can be marked with a hand-drawn annotation, and that annotation can be one
    of the slide's steps, without changing the passage's text or whether the slide fits.
+7. An object on a slide can be made to arrive on one step and to move on a later one, keeping its
+   place while it waits, and the motion reverses when the reader steps back.
 
 ## Fixed decisions from the owner
 

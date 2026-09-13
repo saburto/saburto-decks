@@ -232,6 +232,18 @@ export const deckStyles = /* css */ `
   }
   .sd-mermaid-source[hidden] { display: none; }
 
+  /* ---- motion (R16) ----
+     An object that arrives or moves is shown and placed by Motion, which
+     writes its own opacity and transform inline. The deck says only how the
+     object sits in the flow: a span by default, so it is legal inside a
+     paragraph, and a block when that is asked for. It keeps its place while it
+     waits — the point of the whole arrangement is that a step must never
+     change the slide's layout. A transform does not apply to a plain inline
+     box, so the default box is an inline-block, bounded so a long passage
+     wraps rather than overflowing the slide. */
+  .sd-motion { display: inline-block; max-width: 100%; }
+  .sd-motion[data-as="div"] { display: block; }
+
   @media (prefers-reduced-motion: no-preference) {
     .slide[data-active] { animation: sd-enter 160ms ease-out both; }
   }

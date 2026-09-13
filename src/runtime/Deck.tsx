@@ -12,6 +12,7 @@ import { createPortal } from 'react-dom'
 import { Slide, SlideContext, type DeckComponent, type DeckMode, type DeckTheme } from './Slide'
 import { Mark } from './Mark'
 import { Mermaid } from './Mermaid'
+import { Appear, Move } from './Motion'
 import { deckStyles } from './styles'
 
 const noop = () => {}
@@ -68,6 +69,12 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
   ref
 ) {
   const hostRef = useRef<HTMLDivElement | null>(null)
+  /* The same shadow root, held where a callback can always see it. The state
+     drives rendering; this ref is for the host's handle, which must not go
+     stale: a host may hold the handle it was first given, and `goTo(index,
+     step)` would silently lose its step if that handle still saw no root
+     (R10). */
+  const rootRef = useRef<ShadowRoot | null>(null)
   const [shadow, setShadow] = useState<ShadowRoot | null>(null)
   const [mode, setMode] = useState<DeckMode>('embedded')
   const [index, setIndex] = useState(defaultSlide)
@@ -122,7 +129,9 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
   useIsomorphicLayoutEffect(() => {
     const host = hostRef.current
     if (!host) return
-    setShadow(host.shadowRoot ?? host.attachShadow({ mode: 'open' }))
+    const root = host.shadowRoot ?? host.attachShadow({ mode: 'open' })
+    rootRef.current = root
+    setShadow(root)
   }, [])
 
   /** How many steps a slide has: the longest run of steps among its code
@@ -138,8 +147,8 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
   }, [])
 
   const slideAt = useCallback(
-    (position: number): Element | null => shadow?.querySelectorAll('section.slide')[position] ?? null,
-    [shadow]
+    (position: number): Element | null => rootRef.current?.querySelectorAll('section.slide')[position] ?? null,
+    []
   )
 
   /** Moves to a slide and a step in one committed change, telling the host
@@ -521,7 +530,7 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
                   slide — and every diagram — on each move. */}
               <div className="stage">
                 <SlideContext.Provider value={{ index, count, step, theme, refresh, measure }}>
-                  <Slides components={{ Slide, Mermaid, Mark }} />
+                  <Slides components={{ Slide, Mermaid, Mark, Appear, Move }} />
                 </SlideContext.Provider>
               </div>
 

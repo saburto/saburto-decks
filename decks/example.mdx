@@ -122,3 +122,16 @@ classDiagram
     Animal <|-- Dog
     Dog <|-- Puppy
 ```
+
+---
+
+## Motion
+
+An object can arrive on a step, and it can move on one. It keeps its place
+while it waits, so nothing else on the slide moves when it shows up.
+
+<Appear at={2}>This line arrives on the first step.</Appear>
+
+<Move at={3} x={120}><strong>And this one slides right on the next.</strong></Move>
+
+Reading it backwards moves the line back, and takes the first one away again.

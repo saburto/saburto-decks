@@ -128,15 +128,15 @@ test.describe('diagrams', () => {
 
     /* Five steps in all: the dots and the live region agree. */
     await expect(page.locator('#deck .step-dot')).toHaveCount(5)
-    await expect(page.locator('#deck .live')).toHaveText('Slide 6 of 9, step 5 of 5')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 6 of 10, step 5 of 5')
 
     /* The sequence slide is not the deck's last, so Next moves on to the
        flowchart — which has steps of its own (R14). */
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck .counter')).toHaveText('7 / 9')
+    await expect(page.locator('#deck .counter')).toHaveText('7 / 10')
 
     await page.keyboard.press('ArrowLeft')
-    await expect(page.locator('#deck .counter')).toHaveText('6 / 9')
+    await expect(page.locator('#deck .counter')).toHaveText('6 / 10')
     expect(await messages(page)).toBe(3)
 
     /* Previous walks back through the messages, then the participants. */
@@ -162,11 +162,11 @@ test.describe('diagrams', () => {
     expect(await graph(page)).toEqual({ nodes: 3, edges: 1, labels: 0 })
     await page.keyboard.press('ArrowRight')
     expect(await graph(page)).toEqual({ nodes: 3, edges: 2, labels: 1 })
-    await expect(page.locator('#deck .live')).toHaveText('Slide 7 of 9, step 5 of 5')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 7 of 10, step 5 of 5')
 
     /* Next moves on to the state diagram; Previous comes back to the end. */
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck .counter')).toHaveText('8 / 9')
+    await expect(page.locator('#deck .counter')).toHaveText('8 / 10')
     await page.keyboard.press('ArrowLeft')
     expect(await graph(page)).toEqual({ nodes: 3, edges: 2, labels: 1 })
 
@@ -195,9 +195,10 @@ test.describe('diagrams', () => {
       expect((await graph(page)).edges).toBe(expected)
     }
 
-    await expect(page.locator('#deck .live')).toHaveText('Slide 8 of 9, step 6 of 6')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 8 of 10, step 6 of 6')
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck .counter')).toHaveText('9 / 9')
+    /* The class diagram follows, and the motion slide is after that. */
+    await expect(page.locator('#deck .counter')).toHaveText('9 / 10')
   })
 
   test('reveals a class diagram a class and a relation at a time (R14)', async ({ page }) => {
@@ -214,9 +215,10 @@ test.describe('diagrams', () => {
     await page.keyboard.press('ArrowRight')
     expect((await graph(page)).edges).toBe(2)
 
-    /* Five steps, and the class diagram is the deck's last slide. */
-    await expect(page.locator('#deck .live')).toHaveText('Slide 9 of 9, step 5 of 5')
-    await expect(page.locator('#deck .bar button[aria-label="Next slide"]')).toBeDisabled()
+    /* Five steps, and the class diagram is no longer the deck's last slide:
+       the motion slide follows it, so Next has somewhere to go. */
+    await expect(page.locator('#deck .live')).toHaveText('Slide 9 of 10, step 5 of 5')
+    await expect(page.locator('#deck .bar button[aria-label="Next slide"]')).toBeEnabled()
 
     /* Previous reverses it. */
     await page.keyboard.press('ArrowLeft')

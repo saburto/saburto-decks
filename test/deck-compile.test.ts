@@ -19,8 +19,8 @@ const compiled = await compile(source, {
 const output = String(compiled.value)
 
 describe('the demo deck', () => {
-  test('has exactly nine slides', () => {
-    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(9)
+  test('has exactly ten slides', () => {
+    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(10)
     expect(output).toContain('_missingMdxReference("Slide"')
   })
 
@@ -33,7 +33,7 @@ describe('the demo deck', () => {
 
   test('every slide is addressed by index in document order', () => {
     const indices = Array.from(output.matchAll(/index: "(\d+)"/g), (match) => match[1])
-    expect(indices).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8'])
+    expect(indices).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
   })
 
   test('the markdown rules between slides are gone', () => {
@@ -96,6 +96,22 @@ describe('annotations (R15)', () => {
 
   test('the marked passage keeps its own markdown', () => {
     expect(output).toContain('_jsx(_components.strong, {')
+  })
+})
+
+describe('motion (R16)', () => {
+  test('<Appear> and <Move> are components the deck provides, not raw markup', () => {
+    expect(output).toContain('_missingMdxReference("Appear"')
+    expect(output).toContain('_missingMdxReference("Move"')
+    /* One of each in the demo deck. */
+    expect(output.match(/_jsxs?\(Appear,/g)).toHaveLength(1)
+    expect(output.match(/_jsxs?\(Move,/g)).toHaveLength(1)
+  })
+
+  test('their step and their move survive compilation', () => {
+    expect(output).toContain('at: 2')
+    expect(output).toContain('at: 3')
+    expect(output).toContain('x: 120')
   })
 })
 

@@ -53,7 +53,8 @@ Slide three.
 `---` is ordinary Markdown, so the file stays readable in any editor. Frontmatter's own `---` are
 parsed first, so they never split a slide. A slide may contain headings, paragraphs, lists, links,
 emphasis, inline code, highlighted code blocks (R3, R11), hand-drawn annotations and Mermaid
-diagrams (R13); anything MDX can render will work, but nothing else is promised.
+diagrams (R13), and animated objects (R16); anything MDX can render will work, but nothing else is
+promised.
 
 The deck's frontmatter `title` is available to the host as `frontmatter` from the same import.
 
@@ -152,6 +153,37 @@ as it appears unless the reader prefers reduced motion.
 
 Annotations are an extra dependency only when a slide has one: a deck without a `<Mark>` never
 loads the library that draws it.
+
+### Motion
+
+An object can arrive on a step, or move on one — animated by [Motion](https://motion.dev), loaded
+only by a deck that actually uses it:
+
+```mdx
+<Appear at={2}>This line arrives on the first step.</Appear>
+
+<Move at={3} x={120}><strong>And this one slides right on the next.</strong></Move>
+```
+
+Both are steps of the slide in exactly the sense a code block's highlights are (R16): clicking,
+`→` and the bar's next control advance to them, `←` reverses them, the dots count them, and a host
+drives them with `goToStep`. An object that has not been reached keeps its place — it is hidden
+with opacity and moved with a transform, never taken out of the flow — so nothing else on the slide
+shifts as the steps move, and the type size the deck settled on does not change under the reader.
+
+| Component | Prop | Notes |
+| --- | --- | --- |
+| both | `at` | the step it happens on, counted with the slide's other steps; with the slide when omitted |
+| both | `from` | where it starts: any of `opacity`, `x`, `y`, `rotate`, `scale` |
+| both | `to` | where it settles; `Appear` defaults to the resting value of everything `from` names |
+| `Move` | `x`, `y`, `rotate`, `scale` | shorthands for a single `to`: px, px, degrees, factor |
+| both | `transition` | a [Motion transition](https://motion.dev/docs/react-transitions), overriding the deck's short ease-out |
+| both | `layout` | animate to wherever the slide's layout puts it as well as to `to`; on for `Move` |
+| both | `as` | `span` (the default, for a passage inside a paragraph) or `div` |
+
+`<Appear>` fades and rises in by default (`{ opacity: 0, y: 8 }`); `<Move>` starts wherever the
+object already is. An object that is not shown yet is kept out of the accessibility tree, and a
+reader who prefers reduced motion gets it in its place with no animation at all (N1).
 
 ## Embedding a deck
 

@@ -109,14 +109,14 @@ test.describe('annotations', () => {
 
     /* The bar counts it and announces it, like any other step. */
     await expect(page.locator('#deck .step-dot')).toHaveCount(2)
-    await expect(page.locator('#deck .live')).toHaveText('Slide 3 of 9, step 1 of 2')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 3 of 10, step 1 of 2')
 
     await page.keyboard.press('ArrowRight')
     now = await state(page)
     expect(now.index, 'still on the slide').toBe(PRESENTING)
     expect(now.step).toBe(1)
     await expect(strokes(page, 'circle')).not.toHaveCount(0)
-    await expect(page.locator('#deck .live')).toHaveText('Slide 3 of 9, step 2 of 2')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 3 of 10, step 2 of 2')
 
     /* Only after the last step does the reader leave. */
     await page.keyboard.press('ArrowRight')
