@@ -83,8 +83,8 @@ Two pieces of fence metadata are understood, and both are optional:
 
 Steps are part of the deck's navigation, not a thing of their own: `→`, `Space` and the bar's
 next control move to the next step, and only leave the slide after the last one. `←` walks back,
-and from a slide's first step returns to the previous slide's last step. Clicking the slide
-advances too. The bar shows a dot per step, and the position is announced to screen readers (R12).
+and from a slide's first step returns to the previous slide's last step. A click on the slide
+never moves it. The bar shows a dot per step, and the position is announced to screen readers (R12).
 
 Highlighting follows Shiki and Slidev: the current step's lines keep the colour they always had,
 and the lines it does not name are dimmed. No line is boxed or restyled, so the code reads the
@@ -128,6 +128,23 @@ sequenceDiagram
 ```
 ````
 
+Write `{build}` to show the diagram whole and highlight a part of it on each step instead. Give
+the nodes a `stepN` class in the diagram, and the deck brings the `stepN` part forward on step
+`N`, dimming the rest:
+
+````mdx
+```mermaid {build}
+flowchart LR
+    resources["Resources"] --> services["Service Layer"] --> domain["Domain"]
+    class resources step1
+    class services,domain step2
+```
+````
+
+`{build}` is the shape the original infodeck's diagrams use: the picture is always there, and a
+step moves the eye across it. It composes with `<Appear>`, so a slide can bring a passage in on
+the same step the diagram highlights the part it describes (R14, R16).
+
 ### Annotations
 
 Bring a passage forward by wrapping it in a `<Mark>`. A hand-drawn mark is drawn over the words:
@@ -165,8 +182,8 @@ only by a deck that actually uses it:
 <Move at={3} x={120}><strong>And this one slides right on the next.</strong></Move>
 ```
 
-Both are steps of the slide in exactly the sense a code block's highlights are (R16): clicking,
-`→` and the bar's next control advance to them, `←` reverses them, the dots count them, and a host
+Both are steps of the slide in exactly the sense a code block's highlights are (R16): `→` and
+the bar's next control advance to them, `←` reverses them, the dots count them, and a host
 drives them with `goToStep`. An object that has not been reached keeps its place — it is hidden
 with opacity and moved with a transform, never taken out of the flow — so nothing else on the slide
 shifts as the steps move, and the type size the deck settled on does not change under the reader.
@@ -184,6 +201,95 @@ shifts as the steps move, and the type size the deck settled on does not change 
 `<Appear>` fades and rises in by default (`{ opacity: 0, y: 8 }`); `<Move>` starts wherever the
 object already is. An object that is not shown yet is kept out of the accessibility tree, and a
 reader who prefers reduced motion gets it in its place with no animation at all (N1).
+
+### Contents
+
+Every deck carries a table of contents, built from its slides' own first headings — one entry per
+slide, with the reader's own slide marked. It is available from any slide, in embedded mode and
+while presenting alike.
+
+Open it with the **Contents** control in the bar, or by pressing `O` while the deck has focus.
+Choosing an entry goes to that slide; `Esc`, the close control or a click outside the panel
+dismisses it and returns the reader to the deck. The position in the list is announced, so a
+screen reader user can tell where they are before moving.
+
+A slide with no heading is still listed, by its number. The list scrolls when a deck has more
+slides than fit — the contents are a control, not a slide, and no slide is ever scrolled. Opening
+the contents does not change the slide's layout or the type size it settled on.
+
+The same list can be a slide of its own. Put `<Contents />` where the contents should appear and
+the deck's slides are listed there too — the same entries, each jumping to its slide:
+
+```mdx
+## Contents
+
+<Contents />
+```
+
+On a slide the contents are ordinary slide content: they are measured with the rest of the slide
+and scaled to fit it, and they never scroll.
+
+### Cover layout
+
+A front page that uses the whole slide rather than a column of text can use `<Cover>`: a title at
+the top, the body centred in the room that is left, and two small columns at the foot.
+
+```mdx
+<Cover
+  title="Testing Strategies in a Microservice Architecture"
+  meta="18 November 2014"
+  left={<p>…</p>}
+  right={<p>…</p>}
+>
+  <p>There has been a shift …</p>
+  <p>Here, we plan to discuss …</p>
+</Cover>
+```
+
+`title` and `meta` are optional, as are `left` and `right`. The component measures the stage so the
+bands spread over its full height, and everything is sized in the deck's own units, so it scales
+with the deck's box and with the type size the deck settles on.
+
+### Agenda and columns
+
+`<Agenda>` is the same three-band shape with room for a few short lists: the title, then the first
+two blocks side by side and any further blocks centred below.
+
+```mdx
+<Agenda title="Our agenda">
+  <div>…</div>
+  <div>…</div>
+  <div>…</div>
+</Agenda>
+```
+
+`<Columns>` is a title and two columns, top-aligned under it:
+
+```mdx
+<Columns title="What is a microservice?">
+  <div>…</div>
+  <div>…</div>
+</Columns>
+```
+
+### Spatial layout
+
+A slide is normally one column of text that reflows and shrinks to fit. A slide that has to be laid
+out on a fixed board instead — positioned blocks, no reflow — wraps its content in a `<Canvas>`:
+
+```mdx
+<Canvas width={960} height={590}>
+  <div className="absolute left-[220px] top-[140px] w-[500px]">…</div>
+</Canvas>
+```
+
+`width` and `height` are the board's own coordinates (960×590 by default, the original infodeck's).
+Its children are positioned in those coordinates with Tailwind utilities, and the whole board is
+scaled uniformly to the room the deck's stage has, so nothing reflows.
+
+The utilities a deck can use are the ones the library's own stylesheet compiled: the deck ships a
+fixed stylesheet, not a Tailwind build of the host's. `@source` in `src/runtime/tailwind.css` decides
+what is compiled into it.
 
 ## Embedding a deck
 
@@ -319,13 +425,15 @@ The host page has the last word on both:
 | `→` `↓` `PageDown` `Space` | next step or slide | next step or slide |
 | `←` `↑` `PageUp` | previous step or slide | previous step or slide |
 | `Home` / `End` | first / last slide | first / last slide |
-| `Esc` | — | leave present mode |
+| `O` | open or close the contents | open or close the contents |
+| `Esc` | closes the contents, if open | closes the contents, else leaves present mode |
 | `Tab` | moves on through the page | cycles within the deck |
 
-The deck takes the keyboard **only while it has focus**; click it, or Tab to it. Everywhere else
-the page scrolls normally. While presenting, focus is contained and returned on exit, and
-`prefers-reduced-motion` removes the slide transition. Slide changes are announced to screen
-readers through a live region.
+The deck takes the keyboard **only while it has focus**; click it, or Tab to it. A click never
+advances the slide — the arrows, `Space`, `Page Up`/`Page Down` and the bar's controls do that.
+Everywhere else the page scrolls normally. While presenting, focus is contained and returned on
+exit, and `prefers-reduced-motion` removes the slide transition. Slide changes are announced to
+screen readers through a live region.
 
 ## Presenting, and coming back
 

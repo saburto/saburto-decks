@@ -23,9 +23,21 @@ export const fullScreen = (page: Page) => page.locator('#deck .bar button').last
 
 /** Jumps straight to a slide, the way a host page's own logic would (R10).
  * Stepping through a deck by keyboard is a different thing, and is tested as
- * such — this is for getting to a particular slide regardless of its steps. */
-export const goTo = (page: Page, index: number) =>
-  page.evaluate((at) => (window as unknown as { deck?: { goTo(index: number): void } }).deck?.goTo(at), index)
+ * such — this is for getting to a particular slide regardless of its steps.
+ *
+ * The host element carries `id="deck"`, so until the deck has hydrated
+ * `window.deck` is that element (browser named access), not the handle. Wait
+ * for the handle, or a caller that runs before hydration calls `goTo` on the
+ * element. */
+export const goTo = async (page: Page, index: number): Promise<void> => {
+  await page.waitForFunction(
+    () => typeof (window as unknown as { deck?: { goTo?: unknown } }).deck?.goTo === 'function'
+  )
+  await page.evaluate(
+    (at) => (window as unknown as { deck?: { goTo(index: number): void } }).deck?.goTo(at),
+    index
+  )
+}
 
 /** The host page's way in and out of present mode (R10). */
 export const hostPresentButton = (page: Page) => page.locator('#present')

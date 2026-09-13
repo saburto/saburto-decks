@@ -4,8 +4,8 @@
  *
  * A deck author wraps an object in `<Appear>` to have it arrive on a step, or
  * in `<Move>` to have it move on one. Both are steps of the slide in exactly
- * the sense a code block's highlights are (R12): clicking the slide, `→` and
- * the bar's next control advance to them, `←` reverses them, the bar counts
+ * the sense a code block's highlights are (R12): `→` and the
+ * bar's next control advance to them, `←` reverses them, the bar counts
  * them, and a host drives and observes them with `goToStep`.
  *
  * Three things follow from the deck being a shadow tree that sizes its type to
@@ -198,7 +198,8 @@ function Animated({ kind, at, start, end, transition, layout, as, className, chi
      moved, it is simply there. */
   const mounted = useRef(target)
 
-  const classes = className ? `sd-motion ${className}` : 'sd-motion'
+  const base = 'sd-motion inline-block max-w-full data-[as=div]:block'
+  const classes = className ? `${base} ${className}` : base
   /* Shown and moved by opacity and transform only, so the object keeps its
      place in the slide's layout whether or not it has been reached (R16). An
      object not yet reached is inert so it is not read out or focused. */

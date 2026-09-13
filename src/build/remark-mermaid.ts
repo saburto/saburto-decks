@@ -16,6 +16,10 @@ const MERMAID = 'mermaid'
 /** `mermaid {full}` — the diagram is not revealed element by element. */
 const FULL = /\bfull\b/
 
+/** `mermaid {build}` — shown whole, but the elements a `stepN` class marks are
+ * highlighted one step at a time (R14). */
+const BUILD = /\bbuild\b/
+
 /** True for a fenced code block whose language is `mermaid`. */
 export function isMermaid(node: MdastNode): boolean {
   return node.type === 'code' && node.lang === MERMAID
@@ -26,18 +30,26 @@ export function wantsWholeDiagram(node: MdastNode): boolean {
   return FULL.test(String(node.meta ?? ''))
 }
 
+/** True when the fence's meta asks for the whole diagram, its parts
+ * highlighted a step at a time (R14). */
+export function wantsBuiltDiagram(node: MdastNode): boolean {
+  return BUILD.test(String(node.meta ?? ''))
+}
+
 /**
  * The `<Mermaid>` element a diagram fence compiles to, with its source as the
  * element's only child. The source is a text child rather than an attribute so
  * that newlines and punctuation reach the component exactly as written.
  */
 export function mermaidElement(node: MdastNode): MdastNode {
+  const attributes: MdastNode[] = []
+  if (wantsBuiltDiagram(node)) attributes.push({ type: 'mdxJsxAttribute', name: 'data-build', value: 'true' })
+  else if (wantsWholeDiagram(node)) attributes.push({ type: 'mdxJsxAttribute', name: 'data-full', value: 'true' })
+
   return {
     type: 'mdxJsxFlowElement',
     name: 'Mermaid',
-    attributes: wantsWholeDiagram(node)
-      ? [{ type: 'mdxJsxAttribute', name: 'data-full', value: 'true' }]
-      : [],
+    attributes,
     children: [{ type: 'text', value: String(node.value ?? '') }]
   }
 }

@@ -65,8 +65,8 @@ theme reaches the browser. A code block may name the file it came from and mark 
 matter. Like all slide content, a code block is sized to the deck's box and is never scrolled.
 
 **R12 — Steps.** A code block can declare an ordered sequence of highlighted line sets. The deck
-moves through that sequence one step at a time — with the same next/previous navigation, and by
-clicking the slide — and only leaves the slide once the last step has been shown. A step can show
+moves through that sequence one step at a time — with the same next/previous navigation — and
+only leaves the slide once the last step has been shown. A step can show
 no highlights at all, or take the code block off the slide entirely. Going back reverses the
 sequence, and from a slide's first step returns to the previous slide's last step. The reader can
 see how many steps the slide has and where in them they are. The host can drive and observe
@@ -98,6 +98,14 @@ steps, and the type size the slide settled on does not change under them. Steppi
 motion. The reader's reduced-motion preference is respected: without animation, objects are simply
 in the right place.
 
+**R17 — Contents.** A deck has a table of contents built from its slides: an entry per slide,
+named by the slide's own first heading, with the slide the reader is on marked. A slide without a
+heading still has an entry. The reader can open the contents from any slide, in either mode, and
+choosing an entry goes to that slide. Opening and choosing are keyboard-operable and dismissing
+the contents returns the reader to the deck. Opening the contents changes neither a slide's
+layout nor the type size the deck settled on. An author can also place the contents on a slide,
+where they are that slide's own content and are sized with it.
+
 ## Non-functional requirements
 
 **N1 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
@@ -124,6 +132,10 @@ This version is done when:
    of the slide's steps, without changing the passage's text or whether the slide fits.
 7. An object on a slide can be made to arrive on one step and to move on a later one, keeping its
    place while it waits, and the motion reverses when the reader steps back.
+8. From any slide, in either mode, the reader can open a table of contents, see which slide they
+   are on, and choose an entry to go to that slide; a slide with no heading is still listed,
+   opening the contents does not change how the slide fits, and the contents can be the content
+   of a slide the author writes.
 
 ## Fixed decisions from the owner
 

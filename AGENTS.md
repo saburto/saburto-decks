@@ -23,7 +23,7 @@ the traps in it.
 ## Layout
 
 ```
-src/runtime/     ships to the browser: Deck.tsx (the component), Slide.tsx, the stylesheet
+src/runtime/     ships to the browser: Deck.tsx (the component), Slide.tsx, Cover.tsx, Agenda.tsx, Columns.tsx, Canvas.tsx, tailwind.css
 src/build/       build-time only, never shipped: the MDX → <Slide> transform
 src/mdx.ts       the Vite plugin and remark pipeline a host's config uses
 src/index.ts     the component entry — it must never import the build half
@@ -65,7 +65,11 @@ Each of these has already cost time here.
 - **The deck's host is a `div`, and outer rules beat `:host` for the host element itself.** That is
   why the properties that reach the deck's text (font, colour, line-height) are set again on
   `.deck` *inside* the shadow root. Keep them there.
-- **The stylesheet is a template string.** A backtick in a CSS comment terminates it.
+- **The stylesheet is Tailwind v4, compiled into the shadow root.** `src/runtime/tailwind.css`
+  imports Tailwind's theme and utilities (not preflight — the deck has its own reset) and holds the
+  CSS Tailwind cannot express; `styles.ts` hands the compiled string to the shadow root. A utility
+  only exists if the scanner saw it, so `@source` decides what is compiled, and a host authoring
+  its own utilities in a deck needs its own Tailwind build.
 - **MDX v3 does not parse frontmatter.** `remark-frontmatter` must be in the pipeline, or `---`
   becomes a setext heading.
 - **`Deck.tsx` wraps the slides in `SlideContext.Provider`.** Drop it and every slide thinks it is
@@ -92,8 +96,11 @@ Do not relitigate these without the owner.
 - **The shadow root stays (R8).** The accepted cost: the slides are not in the server HTML.
 - **React, not Preact.** Do not alias `react` to `preact/compat`, and do not treat payload size as
   a design constraint — it is not one.
-- **No CSS framework.** The stylesheet is purpose-written: container-relative type that is shrunk
-  to fit, `all: initial` isolation, and a shadow root.
+- **Tailwind v4, compiled into the shadow root.** The deck's own components are styled with
+  utilities; `src/runtime/tailwind.css` imports the theme and utilities and is injected into the
+  shadow root, so the host page is still untouched. Preflight is deliberately left out: the deck
+  has its own reset (`all: initial`) and its own content typography, and preflight inside a shadow
+  tree would strip the list markers and heading weights the slides rely on.
 - **One deck per page is no longer a limit.** Each `<Deck>` gets its own shadow root, so several
   decks can coexist.
 - **A presenting deck covers the page it is in,** so the host's own controls are unreachable while

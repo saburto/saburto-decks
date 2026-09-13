@@ -11,8 +11,8 @@ import { expect, test, type Page } from '@playwright/test'
 import { DEMO, deck, goTo, state } from './helpers'
 
 const TITLE = 0
-const WRITING = 1
-const PRESENTING = 2
+const WRITING = 2
+const PRESENTING = 3
 
 /** One kind of mark on the slide the reader is on. */
 const ofType = (page: Page, type: string) =>
@@ -44,9 +44,20 @@ test.describe('annotations', () => {
       const root = document.querySelector('#deck')?.shadowRoot
       const path = root?.querySelector('section.slide[data-active] .sd-mark[data-mark="highlight"] svg path')
       const deck = root?.querySelector('.deck')
+      /* A colour written as `#rrggbbaa` and the same colour written as
+         `rgba(...)` are the same colour; the stylesheet is minified, so the
+         two sides can disagree on the notation. Compare them resolved. */
+      const normalise = (value: string) => {
+        const probe = document.createElement('span')
+        probe.style.color = value
+        ;(root ?? document.body).append(probe)
+        const resolved = getComputedStyle(probe).color
+        probe.remove()
+        return resolved
+      }
       return {
-        drawn: path ? getComputedStyle(path).stroke : '',
-        declared: deck ? getComputedStyle(deck).getPropertyValue('--sd-highlight').trim() : '',
+        drawn: normalise(path ? getComputedStyle(path).stroke : ''),
+        declared: normalise(deck ? getComputedStyle(deck).getPropertyValue('--sd-highlight').trim() : ''),
         text: deck ? getComputedStyle(deck).color : ''
       }
     })
@@ -109,18 +120,18 @@ test.describe('annotations', () => {
 
     /* The bar counts it and announces it, like any other step. */
     await expect(page.locator('#deck .step-dot')).toHaveCount(2)
-    await expect(page.locator('#deck .live')).toHaveText('Slide 3 of 10, step 1 of 2')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 4 of 11, step 1 of 2')
 
     await page.keyboard.press('ArrowRight')
     now = await state(page)
     expect(now.index, 'still on the slide').toBe(PRESENTING)
     expect(now.step).toBe(1)
     await expect(strokes(page, 'circle')).not.toHaveCount(0)
-    await expect(page.locator('#deck .live')).toHaveText('Slide 3 of 10, step 2 of 2')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 4 of 11, step 2 of 2')
 
     /* Only after the last step does the reader leave. */
     await page.keyboard.press('ArrowRight')
-    expect((await state(page)).index).toBe(3)
+    expect((await state(page)).index).toBe(PRESENTING + 1)
 
     /* Previous comes back to the slide's last step, with its mark drawn. */
     await page.keyboard.press('ArrowLeft')

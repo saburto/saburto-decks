@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config'
 import react from '@astrojs/react'
+import tailwindcss from '@tailwindcss/vite'
 import { saburtoDecks } from '../src/mdx.ts'
 
 /**
@@ -11,5 +12,5 @@ import { saburtoDecks } from '../src/mdx.ts'
  */
 export default defineConfig({
   integrations: [react()],
-  vite: { plugins: [saburtoDecks()] }
+  vite: { plugins: [tailwindcss(), saburtoDecks()] }
 })

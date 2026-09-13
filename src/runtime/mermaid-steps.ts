@@ -162,6 +162,27 @@ export function assignGraphSteps(svg: Element): number {
 }
 
 /**
+ * Marks a diagram's parts from a `stepN` class the author wrote, so a diagram
+ * can be shown whole and a part of it highlighted one step at a time (R14).
+ * Mermaid puts the author's classes on the nodes it draws, so
+ * `class resources,gateways step1` marks both for the first step. The step is
+ * 0-based, as the deck's steps are; the count the diagram reports is the
+ * highest `N` written.
+ */
+export function assignClassSteps(svg: Element): number {
+  let steps = 0
+  for (const element of svg.querySelectorAll<Element>('[class]')) {
+    const names = (element.getAttribute('class') ?? '').split(/\s+/)
+    const found = names.map((name) => /^step(\d+)$/.exec(name)?.[1]).find((value) => value !== undefined)
+    if (!found) continue
+    const step = Number(found) - 1
+    element.setAttribute(REVEAL_ATTRIBUTE, String(step))
+    steps = Math.max(steps, step + 1)
+  }
+  return Math.max(1, steps)
+}
+
+/**
  * Marks a diagram's parts with the step that reveals each, and returns how
  * many steps there are. A diagram whose kind does not step — or an empty one —
  * is a single step.

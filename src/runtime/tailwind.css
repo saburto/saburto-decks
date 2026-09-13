@@ -1,0 +1,236 @@
+/*
+ * The deck's stylesheet.
+ *
+ * Tailwind v4's theme and utilities are compiled here, and the whole file is
+ * injected into the deck's shadow root, so nothing in it can reach the host
+ * page and nothing on the page can reach in (R8).
+ *
+ * Preflight is deliberately left out. The deck already performs its own reset
+ * (`all: initial` on the host) and styles its own content, and preflight inside
+ * the shadow tree would strip the list markers and heading weights the slides
+ * rely on. Importing the theme and utilities only is documented Tailwind v4.
+ *
+ * What is left below the imports is the CSS Tailwind cannot express: the
+ * `:host` element, the theme variables, the markdown elements (which carry no
+ * classes), and the markup Shiki, Mermaid and rough-notation generate. The
+ * deck's own chrome is Tailwind utilities on the components.
+ */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@source "../**/*.{ts,tsx,mdx}";
+@source "../../decks/**/*.mdx";
+
+/* The deck's palette and fonts, as Tailwind tokens, so a component can say
+   `bg-sd-surface` or `text-sd-muted` and a host can still override the
+   variables. `inline` keeps the utility pointing at the live variable. */
+@theme inline {
+  --color-sd-bg: var(--sd-bg);
+  --color-sd-fg: var(--sd-fg);
+  --color-sd-muted: var(--sd-muted);
+  --color-sd-border: var(--sd-border);
+  --color-sd-accent: var(--sd-accent);
+  --color-sd-surface: var(--sd-surface);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* `all: initial` on the host severs inheritance from the host page. The outer
+   tree wins over `:host` rules for the host element itself, so the properties
+   that reach the deck's text are set again on `.deck`, inside the shadow root,
+   where no host rule can reach them. */
+:host {
+  all: initial;
+  --sd-bg: #ffffff;
+  --sd-fg: #16181d;
+  --sd-muted: #5b6472;
+  --sd-border: #d8dce3;
+  --sd-accent: #2f6fed;
+  --sd-surface: #f2f4f7;
+  /* How far the lines outside the current step recede (R12). */
+  --sd-code-dim: 0.3;
+  /* A highlight is a thick stroke behind the words, so it is translucent: the
+     words stay readable under it (R15). */
+  --sd-highlight: rgba(255, 208, 0, 0.45);
+
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: var(--sd-bg);
+  /* The box the host's HTML already reserves. `--sd-aspect: auto` lets the
+     host's own height decide instead. */
+  aspect-ratio: var(--sd-aspect, 16 / 9);
+}
+
+:host(:focus-visible) {
+  outline: 2px solid var(--sd-accent);
+  outline-offset: 2px;
+}
+
+/* The host chooses the theme explicitly so the deck never guesses. */
+:host([data-theme="dark"]) {
+  --sd-bg: #111318;
+  --sd-fg: #e8eaed;
+  --sd-muted: #9aa4b2;
+  --sd-border: #2c313a;
+  --sd-accent: #7aa2f7;
+  --sd-surface: #1b1f27;
+  --sd-highlight: rgba(255, 208, 0, 0.32);
+}
+@media (prefers-color-scheme: dark) {
+  :host([data-theme="system"]) {
+    --sd-bg: #111318;
+    --sd-fg: #e8eaed;
+    --sd-muted: #9aa4b2;
+    --sd-border: #2c313a;
+    --sd-accent: #7aa2f7;
+    --sd-surface: #1b1f27;
+    --sd-highlight: rgba(255, 208, 0, 0.32);
+  }
+}
+
+/* ---- slide typography ----
+   Markdown carries no classes, so the elements are styled here. It is a base
+   layer, so a Tailwind utility on the element still wins. */
+@layer base {
+  /* Tailwind's utilities assume `border-box` (its preflight sets this); the
+     deck keeps its own reset instead of preflight, so it sets it here. */
+  *, ::before, ::after { box-sizing: border-box; }
+  h1, h2, h3, h4 { line-height: 1.15; text-wrap: balance; font-weight: 700; }
+  h1 { font-size: 1.9em; }
+  h2 { font-size: 1.45em; }
+  h3 { font-size: 1.15em; }
+  p, ul, ol, blockquote { margin-block: 0.85em; }
+  ul, ol { padding-inline-start: 1.4em; }
+  ul { list-style: disc outside; }
+  ol { list-style: decimal outside; }
+  li + li { margin-block-start: 0.3em; }
+  a { color: var(--sd-accent); text-decoration-thickness: from-font; }
+  strong { font-weight: 700; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9em;
+    background: var(--sd-surface);
+    padding: 0.1em 0.35em;
+    border-radius: 0.3em;
+  }
+
+  /* ---- code blocks ----
+     Shiki highlights at build time and gives each token a colour per theme as
+     CSS variables; the deck's own palette picks one, exactly as it does for
+     the rest of the slide. Like every other slide content, a code block never
+     scrolls: long lines wrap, and the type shrinks to fit the stage (R11, R5). */
+  pre.shiki {
+    margin-block: 0.7em;
+    padding: 0.8em 1em;
+    border-radius: 0.5em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.8em;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    tab-size: 2;
+  }
+  pre.shiki code { font-family: inherit; font-size: inherit; background: none; padding: 0; border-radius: 0; }
+  pre.shiki, pre.shiki span { color: var(--shiki-light); }
+  pre.shiki { background-color: var(--shiki-light-bg); }
+  /* Shiki's convention, and Slidev's: the current step's lines keep the colour
+     they always had, and the lines it does not name recede. Nothing about the
+     highlighted line changes, so a line of code looks the same whether or not
+     it is the one being shown (R12). */
+  pre.shiki.has-highlighted .line:not(.highlighted) { opacity: var(--sd-code-dim, 0.3); }
+  pre.shiki[hidden], .sd-code-title[hidden] { display: none; }
+  :host([data-theme="dark"]) pre.shiki, :host([data-theme="dark"]) pre.shiki span { color: var(--shiki-dark); }
+  :host([data-theme="dark"]) pre.shiki { background-color: var(--shiki-dark-bg); }
+  @media (prefers-color-scheme: dark) {
+    :host([data-theme="system"]) pre.shiki,
+    :host([data-theme="system"]) pre.shiki span { color: var(--shiki-dark); }
+    :host([data-theme="system"]) pre.shiki { background-color: var(--shiki-dark-bg); }
+  }
+
+  /* The file a snippet came from, as a bar the code panel sits under. */
+  .sd-code-title {
+    margin-block: 0.7em 0;
+    padding: 0.35em 0.9em;
+    border: 1px solid var(--sd-border);
+    border-block-end: 0;
+    border-start-start-radius: 0.5em;
+    border-start-end-radius: 0.5em;
+    background: var(--sd-surface);
+    color: var(--sd-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72em;
+    line-height: 1.4;
+  }
+  .sd-code-title + pre.shiki {
+    margin-block-start: 0;
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+  }
+
+  /* ---- diagrams ----
+     A Mermaid diagram is drawn in the browser (R13) and is sized like every
+     other piece of slide content: it narrows with the deck's type and is
+     scaled to fit the box, never scrolled. A sequence diagram is revealed one
+     element at a time (R14); the elements not yet reached keep their place but
+     are not shown, so nothing moves as the drawing fills in. */
+  .sd-mermaid svg { display: block; width: 100%; height: auto; max-width: 100%; }
+  .sd-mermaid:not([data-build]) [data-sd-step] { visibility: hidden; opacity: 0; }
+  .sd-mermaid:not([data-build]) [data-sd-step].sd-shown { visibility: visible; opacity: 1; }
+  /* A {build} diagram is shown whole; only the current step's part comes
+     forward and the rest recede. */
+  .sd-mermaid[data-build] [data-sd-step] { opacity: 0.2; }
+  .sd-mermaid[data-build] [data-sd-step].sd-current { opacity: 1; }
+  @media (prefers-reduced-motion: no-preference) {
+    .sd-mermaid [data-sd-step] { transition: opacity 160ms ease-out; }
+  }
+  /* The source, shown only when Mermaid could not draw it. An author display
+     rule would otherwise beat the UA rule for [hidden], so it is restated. */
+  .sd-mermaid-source {
+    display: block;
+    white-space: pre-wrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72em;
+    color: var(--sd-muted);
+  }
+  .sd-mermaid-source[hidden] { display: none; }
+}
+
+/* ---- motion (R16) ----
+   The library writes the object's opacity and transform inline; the component
+   carries the layout utilities. The slide's own entrance animation. */
+@media (prefers-reduced-motion: no-preference) {
+  .slide[data-active] { animation: sd-enter 160ms ease-out both; }
+  /* A board is portalled out of its slide, so it enters on its own. */
+  .sd-canvas { animation: sd-enter 160ms ease-out both; }
+}
+@keyframes sd-enter {
+  from { opacity: 0; transform: translateY(0.35em); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---- annotations (R15) ----
+   rough-notation's draw keyframes are declared here, in the tree the
+   annotations live in, rather than in document.head where the library would
+   otherwise put them: nothing of the deck's styling belongs in the host page. */
+@keyframes rough-notation-dash {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ---- present mode: the same deck, on the whole screen ----
+   The host element deliberately stays in the page's flow, so the host page's
+   height and scroll position are never disturbed (R7). What goes full screen
+   is the deck itself, fixed to the viewport. A fixed overlay rather than a
+   reliance on the Fullscreen API also means a browser without it still gets a
+   full-screen deck (R9); native fullscreen, when available, is requested on
+   top and only removes the browser chrome. */
+:host([data-mode="present"]) {
+  background: transparent;
+  overflow: visible;
+  outline: none;
+}
+:host([data-mode="present"]) .deck { position: fixed; inset: 0; z-index: 2147483647; }
+:host([data-mode="present"])::backdrop { background: var(--sd-bg); }
+:host([data-mode="present"]) .stage { padding: 5cqi 8cqi; }
+:host([data-mode="present"]) .bar { opacity: 0.35; }

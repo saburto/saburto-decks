@@ -19,8 +19,8 @@ const compiled = await compile(source, {
 const output = String(compiled.value)
 
 describe('the demo deck', () => {
-  test('has exactly ten slides', () => {
-    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(10)
+  test('has exactly eleven slides', () => {
+    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(11)
     expect(output).toContain('_missingMdxReference("Slide"')
   })
 
@@ -33,7 +33,7 @@ describe('the demo deck', () => {
 
   test('every slide is addressed by index in document order', () => {
     const indices = Array.from(output.matchAll(/index: "(\d+)"/g), (match) => match[1])
-    expect(indices).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+    expect(indices).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'])
   })
 
   test('the markdown rules between slides are gone', () => {
@@ -112,6 +112,14 @@ describe('motion (R16)', () => {
     expect(output).toContain('at: 2')
     expect(output).toContain('at: 3')
     expect(output).toContain('x: 120')
+  })
+})
+
+describe('contents (R17)', () => {
+  test('<Contents> is a component the deck provides, not raw markup', () => {
+    expect(output).toContain('_missingMdxReference("Contents", true)')
+    /* One in the demo deck: the contents slide. */
+    expect(output.match(/_jsx\(Contents,/g)).toHaveLength(1)
   })
 })
 

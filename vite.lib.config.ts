@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 
 /**
  * The package build.
@@ -12,6 +13,7 @@ import { defineConfig } from 'vite'
  * component a page renders, `mdx` is the plugin a build config uses.
  */
 export default defineConfig({
+  plugins: [tailwindcss()],
   build: {
     target: 'es2022',
     outDir: 'dist',

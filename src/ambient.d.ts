@@ -7,3 +7,9 @@ declare module '*.mdx' {
   /** Injected by `remark-mdx-frontmatter` — the deck's own metadata. */
   export const frontmatter: Record<string, unknown> | undefined
 }
+
+/** Vite hands a stylesheet imported with `?inline` back as a string. */
+declare module '*.css?inline' {
+  const css: string
+  export default css
+}

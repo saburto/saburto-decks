@@ -13,7 +13,7 @@
  */
 import { useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { SlideContext, type DeckTheme } from './Slide'
-import { assignDiagramSteps } from './mermaid-steps'
+import { assignClassSteps, assignDiagramSteps } from './mermaid-steps'
 
 type MermaidApi = (typeof import('mermaid'))['default']
 
@@ -51,9 +51,12 @@ export interface MermaidProps {
   children?: ReactNode
   /** `"true"` when the author asked for the whole diagram at once (R14). */
   'data-full'?: string
+  /** `"true"` when the author asked for the whole diagram, its parts
+   * highlighted one step at a time (R14). */
+  'data-build'?: string
 }
 
-export function Mermaid({ children, 'data-full': full }: MermaidProps) {
+export function Mermaid({ children, 'data-full': full, 'data-build': build }: MermaidProps) {
   const chart = typeof children === 'string' ? children : String(children ?? '')
   const { theme, refresh, measure } = useContext(SlideContext)
   const resolved = useResolvedTheme(theme)
@@ -93,7 +96,8 @@ export function Mermaid({ children, 'data-full': full }: MermaidProps) {
           drawn.setAttribute('width', '100%')
         }
         const whole = full === 'true'
-        setSteps(!drawn || whole ? 1 : assignDiagramSteps(drawn))
+        const built = build === 'true'
+        setSteps(!drawn ? 1 : built ? assignClassSteps(drawn) : whole ? 1 : assignDiagramSteps(drawn))
         setFailed(false)
       } catch {
         if (cancelled) return
@@ -110,16 +114,20 @@ export function Mermaid({ children, 'data-full': full }: MermaidProps) {
     return () => {
       cancelled = true
     }
-  }, [chart, resolved, full, reactId, refresh, measure])
+  }, [chart, resolved, full, build, reactId, refresh, measure])
 
   return (
-    <div className="sd-mermaid" data-steps={steps}>
+    <div
+      className="sd-mermaid my-[0.7em]"
+      data-steps={steps}
+      data-build={build === 'true' ? 'true' : undefined}
+    >
       {/* The source is the fallback: hidden while Mermaid draws, shown only if
           Mermaid cannot run. */}
       <span className="sd-mermaid-source" hidden={!failed}>
         {chart}
       </span>
-      <span className="sd-mermaid-render" ref={target} />
+      <span className="sd-mermaid-render block w-full max-w-[min(100%,30em)] mx-auto" ref={target} />
     </div>
   )
 }

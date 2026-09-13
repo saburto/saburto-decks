@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 import { saburtoDecks } from '../src/mdx.ts'
 
 /**
@@ -11,7 +12,7 @@ import { saburtoDecks } from '../src/mdx.ts'
  */
 export default defineConfig({
   root: fileURLToPath(new URL('.', import.meta.url)),
-  plugins: [saburtoDecks()],
+  plugins: [tailwindcss(), saburtoDecks()],
   esbuild: { jsx: 'automatic' },
   build: { outDir: 'dist', emptyOutDir: true, target: 'es2022' },
   server: { port: 4174 },

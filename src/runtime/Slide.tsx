@@ -24,6 +24,10 @@ interface SlideState {
   refresh: () => void
   /** Where a diagram may be built and measured, off the host page's flow. */
   measure: HTMLElement | null
+  /** The deck's table of contents: one label per slide, in order (R17). */
+  titles: string[]
+  /** Go to a slide by its zero-based position, the way an entry does (R17). */
+  goTo: (index: number) => void
 }
 
 export const SlideContext = createContext<SlideState>({
@@ -32,7 +36,9 @@ export const SlideContext = createContext<SlideState>({
   step: 0,
   theme: 'light',
   refresh: () => {},
-  measure: null
+  measure: null,
+  titles: [],
+  goTo: () => {}
 })
 
 /**
@@ -58,7 +64,7 @@ export function Slide({ index, children }: { index?: string; children?: ReactNod
 
   return (
     <section
-      className="slide"
+      className="slide hidden w-full max-w-[72cqi] break-words data-[active]:block [&>:first-child]:mt-0 [&>:last-child]:mb-0"
       data-index={position}
       data-active={active ? '' : undefined}
       aria-roledescription="slide"

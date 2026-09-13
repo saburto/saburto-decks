@@ -6,4 +6,8 @@
  * build half lives in `./mdx`.
  */
 export { Deck, type DeckHandle, type DeckProps } from './runtime/Deck'
+export { Canvas, type CanvasProps } from './runtime/Canvas'
+export { Cover, type CoverProps } from './runtime/Cover'
+export { Agenda, type AgendaProps } from './runtime/Agenda'
+export { Columns, type ColumnsProps } from './runtime/Columns'
 export { Slide, type DeckComponent, type DeckMode, type DeckTheme } from './runtime/Slide'

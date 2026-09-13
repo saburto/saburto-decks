@@ -6,7 +6,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { DEMO, deck, goTo, nextSlide, state } from './helpers'
 
-const MOTION = 9
+const MOTION = 10
 
 const appear = (page: Page) => page.locator('#deck section.slide[data-active] .sd-motion[data-motion="appear"]')
 const move = (page: Page) => page.locator('#deck section.slide[data-active] .sd-motion[data-motion="move"]')
@@ -21,6 +21,14 @@ async function offsetFrom(page: Page, from: number): Promise<number> {
  * slide rather than the viewport, so the slide's own entrance animation — a
  * short rise — does not come into it. */
 async function belowSlideTop(page: Page): Promise<number> {
+  /* A slide enters with a short animation that moves it; measuring mid-flight
+     reads a position the reader never sees, so wait for it to settle. */
+  await page.evaluate(async () => {
+    const slide = (document.querySelector('#deck') as HTMLElement).shadowRoot?.querySelector(
+      'section.slide[data-active]'
+    )
+    if (slide) await Promise.all(slide.getAnimations().map((animation) => animation.finished))
+  })
   const slide = await page.locator('#deck section.slide[data-active]').boundingBox()
   const text = await page.locator('#deck section.slide[data-active] p').last().boundingBox()
   return Math.round((text?.y ?? 0) - (slide?.y ?? 0))
@@ -34,24 +42,24 @@ test.beforeEach(async ({ page }) => {
 test.describe('motion', () => {
   test('an object arrives on its step, and is counted and announced with the rest (R12, R16)', async ({ page }) => {
     await goTo(page, MOTION)
-    await expect(page.locator('#deck .counter')).toHaveText('10 / 10')
+    await expect(page.locator('#deck .counter')).toHaveText('11 / 11')
 
     /* The line that arrives and the line that moves are each a step, so the
        slide has three. */
     const waiting = await state(page)
     expect(waiting.stepCount).toBe(3)
     await expect(page.locator('#deck .step-dot')).toHaveCount(3)
-    await expect(page.locator('#deck .live')).toHaveText('Slide 10 of 10, step 1 of 3')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 11 of 11, step 1 of 3')
 
     /* It is not shown yet, and it is kept out of the accessibility tree so it
        is not read out or focused while it cannot be seen (N1). */
     await expect(appear(page)).toHaveCSS('opacity', '0')
     await expect(appear(page)).toHaveAttribute('inert', '')
 
-    /* Clicking the slide advances it, which is what "appears on click" means
-       here — the same click that moves any other step on (R12). */
+    /* The next control advances it, the same move that carries every other
+       step on (R12). */
     await page.locator('#deck').focus()
-    await page.locator('#deck section.slide[data-active] h2').click()
+    await page.keyboard.press('ArrowRight')
 
     expect((await state(page)).step).toBe(1)
     await expect(appear(page)).toHaveCSS('opacity', '1')
@@ -80,13 +88,13 @@ test.describe('motion', () => {
     /* Two steps on: the line has arrived and the box has moved. */
     await page.keyboard.press('ArrowRight')
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck .live')).toHaveText('Slide 10 of 10, step 3 of 3')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 11 of 11, step 3 of 3')
     await expect.poll(() => offsetFrom(page, start)).toBe(120)
 
     /* One step back: the box returns to where it was, and the arrived line is
        still on the slide. */
     await page.keyboard.press('ArrowLeft')
-    await expect(page.locator('#deck .live')).toHaveText('Slide 10 of 10, step 2 of 3')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 11 of 11, step 2 of 3')
     await expect.poll(() => offsetFrom(page, start)).toBe(0)
     await expect(appear(page)).toHaveCSS('opacity', '1')
 
