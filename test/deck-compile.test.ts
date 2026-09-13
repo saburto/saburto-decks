@@ -19,8 +19,8 @@ const compiled = await compile(source, {
 const output = String(compiled.value)
 
 describe('the demo deck', () => {
-  test('has exactly five slides', () => {
-    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(5)
+  test('has exactly seven slides', () => {
+    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(7)
     expect(output).toContain('_missingMdxReference("Slide"')
   })
 
@@ -33,7 +33,7 @@ describe('the demo deck', () => {
 
   test('every slide is addressed by index in document order', () => {
     const indices = Array.from(output.matchAll(/index: "(\d+)"/g), (match) => match[1])
-    expect(indices).toEqual(['0', '1', '2', '3', '4'])
+    expect(indices).toEqual(['0', '1', '2', '3', '4', '5', '6'])
   })
 
   test('the markdown rules between slides are gone', () => {
@@ -74,5 +74,18 @@ describe('code blocks', () => {
 
   test('never becomes a scroll container: no horizontal scrolling tab stop (R5)', () => {
     expect(output).not.toContain('tabIndex: "0"')
+  })
+})
+
+describe('diagrams', () => {
+  test('a mermaid fence becomes a Mermaid element, not code (R13)', () => {
+    /* Two fences in the demo deck: a sequence diagram and a flowchart. */
+    expect(output.match(/_jsx\(Mermaid,/g)).toHaveLength(2)
+    expect(output).toContain('_missingMdxReference("Mermaid"')
+    /* The source is carried through as the element's child... */
+    expect(output).toContain('sequenceDiagram\\n')
+    expect(output).toContain('flowchart LR\\n')
+    /* ...and is never handed to the highlighter as a language. */
+    expect(output).not.toContain('language-mermaid')
   })
 })

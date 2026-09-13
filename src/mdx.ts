@@ -19,6 +19,7 @@ import { rehypeDeckPlugins } from './build/rehype-plugins.ts'
 export { remarkDeckPlugins } from './build/remark-plugins.ts'
 export { rehypeDeckPlugins } from './build/rehype-plugins.ts'
 export { remarkSlides, splitSlides, type MdastNode } from './build/remark-slides.ts'
+export { remarkMermaid, isMermaid, wantsWholeDiagram, mermaidElement } from './build/remark-mermaid.ts'
 
 /** Wires deck compilation into a Vite (or Astro) build. */
 export function saburtoDecks() {

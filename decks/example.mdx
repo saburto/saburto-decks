@@ -63,3 +63,28 @@ export default function Post() {
   return <Deck ref={deck} slides={slides} />
 }
 ```
+
+---
+
+## Diagrams
+
+A [Mermaid](https://mermaid.js.org) diagram is drawn, not printed. A sequence diagram
+is revealed the way it declares itself: one participant, then one message at a time.
+
+```mermaid
+sequenceDiagram
+    Alice->>John: Hello John, how are you?
+    John-->>Alice: Great!
+    Alice-)John: See you later!
+```
+
+---
+
+## Other diagrams
+
+A diagram that is not a sequence diagram — a flowchart, say — is shown whole.
+
+```mermaid
+flowchart LR
+    A[Source] --> B[Deck]
+```

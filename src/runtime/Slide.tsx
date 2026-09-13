@@ -8,12 +8,29 @@ export type DeckTheme = 'light' | 'dark' | 'system'
 /** A compiled deck file: `import slides from './my-deck.mdx'`. */
 export type DeckComponent = ComponentType<Record<string, unknown>>
 
+/**
+ * What a slide and its contents know about the deck around them.
+ *
+ * `refresh` lets content that arrives after its first render — a diagram drawn
+ * by Mermaid, which is asynchronous — ask the deck to measure it and apply its
+ * step again (R13, R14).
+ */
 interface SlideState {
   index: number
   count: number
+  theme: DeckTheme
+  refresh: () => void
+  /** Where a diagram may be built and measured, off the host page's flow. */
+  measure: HTMLElement | null
 }
 
-export const SlideContext = createContext<SlideState>({ index: 0, count: 0 })
+export const SlideContext = createContext<SlideState>({
+  index: 0,
+  count: 0,
+  theme: 'light',
+  refresh: () => {},
+  measure: null
+})
 
 /**
  * One slide.

@@ -72,6 +72,17 @@ sequence, and from a slide's first step returns to the previous slide's last ste
 see how many steps the slide has and where in them they are. The host can drive and observe
 steps, as it can slides.
 
+**R13 — Diagrams.** A slide can contain a Mermaid diagram. The diagram is drawn as a diagram, not
+shown as its source, and it follows the deck's theme. Like all slide content, it is sized to the
+deck's box and is never scrolled. A diagram that is not a sequence diagram appears whole, as one
+step.
+
+**R14 — Diagram steps.** A sequence diagram is revealed one element at a time, in the order the
+diagram declares them: each participant, then each message or note. Those elements are steps of
+the slide, reached and reversed with the same navigation as any other step, and counted and
+announced with them. An author can turn a diagram's reveal off, so the whole diagram is shown at
+once.
+
 ## Non-functional requirements
 
 **N1 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
@@ -91,6 +102,8 @@ This version is done when:
    navigated forwards and backwards with the keyboard.
 3. Leaving present mode returns the reader to the slide and scroll position they were at.
 4. The host page's appearance is unchanged before and after the deck is embedded.
+5. A sequence diagram in a slide is revealed a participant and a message at a time as the reader
+   advances, and a diagram that is not a sequence diagram is shown whole.
 
 ## Fixed decisions from the owner
 

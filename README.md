@@ -52,8 +52,8 @@ Slide three.
 
 `---` is ordinary Markdown, so the file stays readable in any editor. Frontmatter's own `---` are
 parsed first, so they never split a slide. A slide may contain headings, paragraphs, lists, links,
-emphasis, inline code and highlighted code blocks (R3, R11); anything MDX can render will work,
-but nothing else is promised.
+emphasis, inline code, highlighted code blocks (R3, R11) and Mermaid diagrams (R13); anything MDX
+can render will work, but nothing else is promised.
 
 The deck's frontmatter `title` is available to the host as `frontmatter` from the same import.
 
@@ -91,6 +91,40 @@ same throughout — only the emphasis moves.
 
 Code follows the deck's theme: every token carries a light and a dark colour, and the deck picks
 one from the `theme` it was given, exactly as the rest of the slide does.
+
+### Diagrams
+
+A fenced `mermaid` block is drawn as a diagram, not shown as its source (R13):
+
+````mdx
+```mermaid
+sequenceDiagram
+    Alice->>John: Hello John, how are you?
+    John-->>Alice: Great!
+    Alice-)John: See you later!
+```
+````
+
+A **sequence diagram** is revealed one element at a time, in the order the diagram declares
+itself: each participant, then each message or note (R14). That reveal is part of the deck's
+navigation, exactly like a code block's steps — `→` moves to the next participant or message, the
+bar shows a dot per step, and the reader only leaves the slide after the last one. Other kinds of
+diagram, such as a flowchart or a pie chart, are shown whole.
+
+A diagram follows the deck's theme, and is redrawn when the host changes it. Like all slide
+content it is measured against the deck's box and scaled to fit, never scrolled.
+
+Mermaid is loaded only when a deck actually contains a diagram, and it is a dependency of the
+package, so a host's bundler brings it in on demand. A deck with no diagram never loads it.
+
+Write `{full}` in the fence meta to show a sequence diagram whole instead of stepping through it:
+
+````mdx
+```mermaid {full}
+sequenceDiagram
+    Alice->>John: Hello
+```
+````
 
 ## Embedding a deck
 

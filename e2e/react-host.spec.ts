@@ -14,16 +14,16 @@ const DEMO = 'http://127.0.0.1:4174/'
 test.beforeEach(async ({ page }) => {
   await page.goto(DEMO)
   await expect(page.locator('#deck')).toHaveAttribute('data-mode', 'embedded')
-  await expect(page.locator('#deck section.slide')).toHaveCount(5)
+  await expect(page.locator('#deck section.slide')).toHaveCount(7)
 })
 
 test.describe('a deck in a React page', () => {
   test('renders the deck, one slide at a time', async ({ page }) => {
-    await expect(page.locator('#deck .counter')).toHaveText('1 / 5')
+    await expect(page.locator('#deck .counter')).toHaveText('1 / 7')
     await expect(page.locator('#deck section.slide[data-active] h1')).toHaveText('Saburto Decks')
 
     await page.locator('#deck .bar button[aria-label="Next slide"]').click()
-    await expect(page.locator('#deck .counter')).toHaveText('2 / 5')
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 7')
   })
 
   test('is isolated from the host page in both directions (R8)', async ({ page }) => {
@@ -58,11 +58,11 @@ test.describe('a deck in a React page', () => {
     expect(surface.height).toBeCloseTo(viewport?.height ?? 0, 0)
 
     await page.keyboard.press('ArrowRight')
-    await expect(hostStatus(page)).toHaveText('present · slide 2/5')
+    await expect(hostStatus(page)).toHaveText('present · slide 2/7')
 
     await hostExitPresent(page)
     await expect(page.locator('#deck')).toHaveAttribute('data-mode', 'embedded')
-    await expect(hostStatus(page)).toHaveText('embedded · slide 2/5')
+    await expect(hostStatus(page)).toHaveText('embedded · slide 2/7')
   })
 
   test('keeps the reader in their place across a presentation (R7)', async ({ page }) => {

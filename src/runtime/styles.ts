@@ -186,6 +186,47 @@ export const deckStyles = /* css */ `
     border-start-end-radius: 0;
   }
 
+  /* ---- diagrams ----
+     A Mermaid diagram is drawn in the browser (R13) and is sized like every
+     other piece of slide content: it narrows with the deck's type and is
+     scaled to fit the box, never scrolled. A sequence diagram is revealed one
+     element at a time (R14); the elements not yet reached keep their place but
+     are not shown, so nothing moves as the drawing fills in. */
+  .sd-mermaid { margin-block: 0.7em; }
+  .sd-mermaid-render {
+    display: block;
+    width: 100%;
+    max-width: min(100%, 30em);
+    margin-inline: auto;
+  }
+  .sd-mermaid svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+  }
+  .sd-mermaid [data-sd-step] {
+    visibility: hidden;
+    opacity: 0;
+  }
+  .sd-mermaid [data-sd-step].sd-shown {
+    visibility: visible;
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sd-mermaid [data-sd-step] { transition: opacity 160ms ease-out; }
+  }
+  /* The source, shown only when Mermaid could not draw it. An author display
+     rule would otherwise beat the UA rule for [hidden], so it is restated. */
+  .sd-mermaid-source {
+    display: block;
+    white-space: pre-wrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72em;
+    color: var(--sd-muted);
+  }
+  .sd-mermaid-source[hidden] { display: none; }
+
   @media (prefers-reduced-motion: no-preference) {
     .slide[data-active] { animation: sd-enter 160ms ease-out both; }
   }

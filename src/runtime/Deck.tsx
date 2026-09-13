@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { Slide, SlideContext, type DeckComponent, type DeckMode, type DeckTheme } from './Slide'
+import { Mermaid } from './Mermaid'
 import { deckStyles } from './styles'
 
 const noop = () => {}
@@ -94,6 +95,27 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
   const place = useRef({ scrollY: 0, overflow: '', focus: null as HTMLElement | null })
   const holdsFullscreen = useRef(false)
 
+  /* Content that arrives after its first render — a diagram Mermaid drew —
+     asks the deck to look again, so it is measured and its step applied. */
+  const [, setRevision] = useState(0)
+  const refresh = useCallback(() => setRevision((revision) => revision + 1), [])
+
+  /* Where Mermaid builds and measures a diagram. It has to live in the light
+     DOM — Mermaid finds it by id, which does not cross a shadow boundary —
+     but it is fixed and invisible, so measuring a diagram never adds height to
+     the host page and never shifts where the reader is (R7, R13). */
+  const [measure, setMeasure] = useState<HTMLDivElement | null>(null)
+  useIsomorphicLayoutEffect(() => {
+    const host = hostRef.current
+    if (!host) return
+    const container = document.createElement('div')
+    container.setAttribute('aria-hidden', 'true')
+    container.style.cssText = `position: fixed; top: 0; left: 0; overflow: hidden; opacity: 0; pointer-events: none; width: ${host.clientWidth}px; height: ${host.clientHeight}px;`
+    document.body.append(container)
+    setMeasure(container)
+    return () => container.remove()
+  }, [])
+
   /* The shadow root is part of the contract (R8), so it is created once and
      the deck is portalled into it. */
   useIsomorphicLayoutEffect(() => {
@@ -102,13 +124,13 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
     setShadow(host.shadowRoot ?? host.attachShadow({ mode: 'open' }))
   }, [])
 
-  /** How many steps a slide has: the longest run of highlight states among
-     its code blocks. A slide without stepping code still has the one state it
-     arrives in. */
+  /** How many steps a slide has: the longest run of steps among its code
+     blocks and its diagrams. A slide without stepping content still has the
+     one state it arrives in. */
   const stepsIn = useCallback((slide: Element | null | undefined): number => {
     if (!slide) return 1
     let steps = 1
-    for (const block of slide.querySelectorAll('pre.shiki[data-steps]')) {
+    for (const block of slide.querySelectorAll('[data-steps]')) {
       steps = Math.max(steps, Number(block.getAttribute('data-steps')) || 1)
     }
     return steps
@@ -286,10 +308,12 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
 
   /** Shows the current step, Shiki's way: the lines whose `data-hl` names it
      carry `highlighted`, the block dims the rest, and a `{hide}` step takes
-     the block off the slide altogether. Only the active slide is touched —
+     the block off the slide altogether. A diagram is shown the same way, one
+     of its marked elements at a time (R14). Only the active slide is touched —
      the others are hidden, and are brought up to date when they become
-     active. Opacity does not change layout, so this needs no measure of its
-     own; hiding does, and `fitStage` follows this. */
+     active. Opacity and visibility do not change layout, so this needs no
+     measure of its own; hiding a code block does, and `fitStage` follows
+     this. */
   const applyStepHighlights = useCallback(() => {
     const active = shadow?.querySelector<HTMLElement>('section.slide[data-active]')
     if (!active) return
@@ -303,6 +327,13 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
         line.classList.toggle('highlighted', !hidden && steps.includes(String(at)))
       }
       block.classList.toggle('has-highlighted', !hidden)
+    }
+    for (const diagram of active.querySelectorAll<HTMLElement>('.sd-mermaid[data-steps]')) {
+      const total = Number(diagram.getAttribute('data-steps')) || 1
+      const at = Math.min(stepRef.current, total - 1)
+      for (const element of diagram.querySelectorAll<SVGElement>('[data-sd-step]')) {
+        element.classList.toggle('sd-shown', Number(element.getAttribute('data-sd-step')) <= at)
+      }
     }
   }, [shadow])
 
@@ -332,14 +363,23 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
     fitStage()
   })
 
-  /* A host page can resize the deck's box at any time. */
+  /* A host page can resize the deck's box at any time. The measuring
+     container follows it, so a diagram is laid out at the deck's own size. */
   useEffect(() => {
     const box = shadow?.querySelector('.deck')
     if (!box) return
-    const observer = new ResizeObserver(() => fitStage())
+    const follow = () => {
+      const host = hostRef.current
+      if (measure && host) {
+        measure.style.width = `${host.clientWidth}px`
+        measure.style.height = `${host.clientHeight}px`
+      }
+      fitStage()
+    }
+    const observer = new ResizeObserver(follow)
     observer.observe(box)
     return () => observer.disconnect()
-  }, [shadow, fitStage])
+  }, [shadow, fitStage, measure])
 
   /* Native rather than React's synthetic handler: this one must see keys typed
      anywhere inside the shadow root, and the host element is outside it. It
@@ -469,10 +509,12 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
             <style>{deckStyles}</style>
 
             <div className="deck">
-              {/* Re-keyed per slide so the entrance animation replays. */}
-              <div className="stage" key={index}>
-                <SlideContext.Provider value={{ index, count }}>
-                  <Slides components={{ Slide }} />
+              {/* The slide itself carries the entrance animation through
+                  [data-active]; changing the key here would remount every
+                  slide — and every diagram — on each move. */}
+              <div className="stage">
+                <SlideContext.Provider value={{ index, count, theme, refresh, measure }}>
+                  <Slides components={{ Slide, Mermaid }} />
                 </SlideContext.Provider>
               </div>
 
