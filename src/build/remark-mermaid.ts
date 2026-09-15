@@ -8,7 +8,7 @@
  * (R13). A fence whose meta says `full` is drawn whole rather than revealed a
  * step at a time (R14).
  */
-import type { MdastNode } from './remark-slides.ts'
+import { jsxAttribute, jsxElement, textNode, walk, type MdastNode } from './ast.ts'
 
 /** The fence language a diagram is written with. */
 const MERMAID = 'mermaid'
@@ -43,15 +43,10 @@ export function wantsBuiltDiagram(node: MdastNode): boolean {
  */
 export function mermaidElement(node: MdastNode): MdastNode {
   const attributes: MdastNode[] = []
-  if (wantsBuiltDiagram(node)) attributes.push({ type: 'mdxJsxAttribute', name: 'data-build', value: 'true' })
-  else if (wantsWholeDiagram(node)) attributes.push({ type: 'mdxJsxAttribute', name: 'data-full', value: 'true' })
+  if (wantsBuiltDiagram(node)) attributes.push(jsxAttribute('data-build', 'true'))
+  else if (wantsWholeDiagram(node)) attributes.push(jsxAttribute('data-full', 'true'))
 
-  return {
-    type: 'mdxJsxFlowElement',
-    name: 'Mermaid',
-    attributes,
-    children: [{ type: 'text', value: String(node.value ?? '') }]
-  }
+  return jsxElement('Mermaid', { attributes, children: [textNode(String(node.value ?? ''))] })
 }
 
 /**
@@ -60,17 +55,14 @@ export function mermaidElement(node: MdastNode): MdastNode {
  */
 export function remarkMermaid() {
   return (tree: MdastNode): undefined => {
-    const walk = (node: MdastNode): void => {
+    walk(tree, (node) => {
       const children = node.children
       if (!children) return
       for (let position = 0; position < children.length; position++) {
         const child = children[position]
-        if (!child) continue
-        if (isMermaid(child)) children[position] = mermaidElement(child)
-        else walk(child)
+        if (child && isMermaid(child)) children[position] = mermaidElement(child)
       }
-    }
-    walk(tree)
+    })
     return undefined
   }
 }

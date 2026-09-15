@@ -6,18 +6,7 @@
  * Authoring stays plain Markdown. `---` is a thematic break in Markdown, which
  * is exactly the semantics we want, so no custom syntax is introduced.
  */
-
-/** Minimal mdast/mdxast node shape — we only touch these node types. */
-export interface MdastNode {
-  type: string
-  name?: string
-  value?: unknown
-  children?: MdastNode[]
-  attributes?: MdastNode[]
-  data?: Record<string, unknown>
-  position?: unknown
-  [key: string]: unknown
-}
+import { attribute, jsxAttribute, jsxElement, type MdastNode } from './ast.ts'
 
 /** A node that MDX compiles to `<Slide>` / `_components.Slide`. */
 const SLIDE_COMPONENT = 'Slide'
@@ -32,17 +21,6 @@ const BREAK = 'thematicBreak'
  * hoisted so the frontmatter plugin finds it; imports are left in place and
  * are hoisted out of a slide by MDX itself. */
 const FILE_LEVEL = new Set(['yaml', 'mdxjsEsm'])
-
-/** The attribute `name` of an MDX element, if it has one. */
-export function attribute(node: MdastNode, name: string): MdastNode | undefined {
-  return node.attributes?.find((candidate) => candidate.name === name)
-}
-
-/** The value of an attribute written as a plain string, when it is one. */
-export function stringAttribute(node: MdastNode, name: string): string | undefined {
-  const found = attribute(node, name)
-  return typeof found?.value === 'string' ? found.value : undefined
-}
 
 /** Whether a node is the element that includes another file's slides (R18). */
 export function isSlidesElement(node: MdastNode | undefined): boolean {
@@ -96,20 +74,12 @@ function includedCount(node: MdastNode): number {
 /** The include, carrying the deck position its slides begin at (R18). */
 function withOffset(node: MdastNode, offset: number): MdastNode {
   const attributes = (node.attributes ?? []).filter((candidate) => candidate.name !== 'offset')
-  return {
-    ...node,
-    attributes: [...attributes, { type: 'mdxJsxAttribute', name: 'offset', value: String(offset) }]
-  }
+  return { ...node, attributes: [...attributes, jsxAttribute('offset', String(offset))] }
 }
 
 /** One slide, wrapped by `index` within the deck. */
 function slide(children: MdastNode[], index: number): MdastNode {
-  return {
-    type: 'mdxJsxFlowElement',
-    name: SLIDE_COMPONENT,
-    attributes: [{ type: 'mdxJsxAttribute', name: 'index', value: String(index) }],
-    children
-  }
+  return jsxElement(SLIDE_COMPONENT, { attributes: [jsxAttribute('index', String(index))], children })
 }
 
 /**

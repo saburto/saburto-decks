@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import { remarkSlides, splitSlides, type MdastNode } from '../src/build/remark-slides'
+import { remarkSlides, splitSlides } from '../src/build/remark-slides'
+import type { MdastNode } from '../src/build/ast'
 
 const run = (tree: MdastNode) => remarkSlides()(tree)
 

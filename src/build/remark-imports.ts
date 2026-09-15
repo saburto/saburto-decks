@@ -16,15 +16,8 @@ import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { createProcessor } from '@mdx-js/mdx'
 import remarkFrontmatter from 'remark-frontmatter'
-import {
-  attribute,
-  includeIn,
-  isIncludeOnly,
-  isSlidesElement,
-  slideGroups,
-  stringAttribute,
-  type MdastNode
-} from './remark-slides.ts'
+import { attribute, esmDefaultImport, expressionAttribute, stringAttribute, walk, type MdastNode } from './ast.ts'
+import { includeIn, isIncludeOnly, isSlidesElement, slideGroups } from './remark-slides.ts'
 
 /** Every include binds its own name, so two files in one deck cannot clash. */
 const BINDING = `__saburto_slides_`
@@ -48,50 +41,11 @@ export interface ImportOptions {
  * what a deck is, and frontmatter because a deck may carry it. */
 const parseFile = createProcessor({ remarkPlugins: [remarkFrontmatter] })
 
-const identifier = (name: string) => ({ type: 'Identifier', name })
-
-/** The estree MDX needs beside an expression it did not parse itself. */
-const expressionProgram = (expression: unknown) => ({
-  type: 'Program',
-  sourceType: 'module',
-  body: [{ type: 'ExpressionStatement', expression }]
-})
-
-/** The import of an included file: the text and the tree MDX compiles. */
-function importNode(binding: string, src: string): MdastNode {
-  const quoted = JSON.stringify(src)
-  return {
-    type: 'mdxjsEsm',
-    value: `import ${binding} from ${quoted}`,
-    data: {
-      estree: {
-        type: 'Program',
-        sourceType: 'module',
-        body: [
-          {
-            type: 'ImportDeclaration',
-            specifiers: [{ type: 'ImportDefaultSpecifier', local: identifier(binding) }],
-            source: { type: 'Literal', value: src, raw: quoted }
-          }
-        ]
-      }
-    }
-  }
-}
-
 /** The include element, rewritten to render the compiled module. */
 function renderElement(node: MdastNode, binding: string, count: number): void {
   node.attributes = [
     ...(node.attributes ?? []).filter((candidate) => candidate.name !== 'src'),
-    {
-      type: 'mdxJsxAttribute',
-      name: 'src',
-      value: {
-        type: 'mdxJsxAttributeValueExpression',
-        value: binding,
-        data: { estree: expressionProgram(identifier(binding)) }
-      }
-    }
+    expressionAttribute('src', binding)
   ]
   node.data = { ...node.data, sdSlides: count }
 }
@@ -136,12 +90,6 @@ export function includedSlides(
   }
 
   return total
-}
-
-/** Visits a node and everything under it. */
-function walk(node: MdastNode, visit: (node: MdastNode) => void): void {
-  visit(node)
-  for (const child of node.children ?? []) walk(child, visit)
 }
 
 /**
@@ -221,7 +169,10 @@ export function remarkImports(options: ImportOptions = {}) {
     /* MDX hoists imports wherever they are, but the deck's own file reads
        better with them at the top. */
     if (imports.length > 0) {
-      tree.children = [...imports.map(({ binding, src }) => importNode(binding, src)), ...(tree.children ?? [])]
+      tree.children = [
+        ...imports.map(({ binding, src }) => esmDefaultImport(binding, src)),
+        ...(tree.children ?? [])
+      ]
     }
 
     return undefined
