@@ -58,6 +58,47 @@ can render will work, but nothing else is promised.
 
 The deck's frontmatter `title` is available to the host as `frontmatter` from the same import.
 
+### Including another file
+
+A deck can be written as several files. Put `<Slides src="./part.mdx" />` where the included
+file's slides should go:
+
+```mdx
+# A slide of the deck's own
+
+---
+
+<Slides src="./pages/part-two.mdx" />
+
+---
+
+# Another slide of the deck's own
+```
+
+On a slide of its own, the include is that file's slides: they are ordered where the include is
+written, counted and navigated with the deck's other slides, and listed in the deck's table of
+contents. A file can hold any number of slides, and can include another file in turn.
+
+The same include can sit inside a slide instead — beside other content, in a column, in a stack —
+and then it is that slide's content: it adds no slides, and its steps count with the slide's own.
+
+```mdx
+<Columns title="…">
+
+<Slides src="./pages/part-two.mdx" />
+
+<Figure src={picture} alt="…" />
+
+</Columns>
+```
+
+An include is a real import of the file, so:
+
+- the included file's own relative imports and pictures resolve from its own folder;
+- editing the included file reloads the deck while it is being developed;
+- a file may include another file, but a file may not include itself;
+- the included file's frontmatter, if it has any, is ignored: only its slides are used.
+
 ### Code
 
 Fenced code is syntax-highlighted **at build time**. The highlighter runs while the deck is
@@ -271,6 +312,10 @@ two blocks side by side and any further blocks centred below.
   <div>…</div>
 </Columns>
 ```
+
+`<Cover>`, `<Agenda>`, `<Columns>`, `<Grid>` and `<Bullets>` spread over the whole stage, so one is
+the slide's content: a slide that uses one puts whatever else it holds inside one of its columns,
+blocks or cells — a passage placed beside the layout has no room left to occupy.
 
 ### Grids, blocks and stacks
 

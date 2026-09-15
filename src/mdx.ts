@@ -15,10 +15,10 @@
 import mdx from '@mdx-js/rollup'
 import { remarkDeckPlugins } from './build/remark-plugins.ts'
 import { rehypeDeckPlugins } from './build/rehype-plugins.ts'
-
 export { remarkDeckPlugins } from './build/remark-plugins.ts'
 export { rehypeDeckPlugins } from './build/rehype-plugins.ts'
-export { remarkSlides, splitSlides, type MdastNode } from './build/remark-slides.ts'
+export { remarkSlides, splitSlides, slideGroups, isInclude, isIncludeOnly, stringAttribute, type MdastNode } from './build/remark-slides.ts'
+export { remarkImports, includedSlides, type ImportOptions, type ReadInclude } from './build/remark-imports.ts'
 export { remarkMermaid, isMermaid, wantsWholeDiagram, mermaidElement } from './build/remark-mermaid.ts'
 
 /** Wires deck compilation into a Vite (or Astro) build. */

@@ -49,17 +49,39 @@ export const SlideContext = createContext<SlideState>({
 export const SlideNumberContext = createContext(0)
 
 /**
+ * Where an included file's slides begin in the deck that included it (R18).
+ * The build sets it from the slides before the include, so an included deck
+ * numbers its own slides from zero and the deck around it makes them its own.
+ */
+export const SlideOffsetContext = createContext(0)
+
+/**
+ * Whether a slide is already inside one. An include used within a slide is
+ * that slide's content, not slides of its own, so its slides render as plain
+ * content there (R18).
+ */
+export const SlideNestedContext = createContext(false)
+
+/**
  * One slide.
  *
  * `remark-slides` wraps every group of nodes between two `---` in this
- * component while the deck is compiled, so a deck author never writes it.
+ * component while the deck is compiled, so a deck author never writes it. A
+ * slide that is itself inside a slide — the slides of an included file used as
+ * content (R18) — has no place of its own: it renders its content and leaves
+ * the slide around it alone.
  *
  * All slides stay in the DOM and only the current one is shown. Nothing about
  * a slide is ever scrolled — see `#fitStage` in `Deck`.
  */
 export function Slide({ index, children }: { index?: string; children?: ReactNode }) {
   const { index: current, count } = useContext(SlideContext)
-  const position = Number(index ?? 0)
+  const offset = useContext(SlideOffsetContext)
+  const nested = useContext(SlideNestedContext)
+  const position = Number(index ?? 0) + offset
+
+  if (nested) return <>{children}</>
+
   const active = position === current
 
   return (
@@ -71,7 +93,9 @@ export function Slide({ index, children }: { index?: string; children?: ReactNod
       aria-label={`${position + 1} of ${count}`}
       inert={!active}
     >
-      <SlideNumberContext.Provider value={position}>{children}</SlideNumberContext.Provider>
+      <SlideNumberContext.Provider value={position}>
+        <SlideNestedContext.Provider value={true}>{children}</SlideNestedContext.Provider>
+      </SlideNumberContext.Provider>
     </section>
   )
 }

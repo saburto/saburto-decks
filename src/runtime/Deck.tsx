@@ -23,10 +23,33 @@ import { Grid } from './Grid'
 import { Mark } from './Mark'
 import { Mermaid } from './Mermaid'
 import { Appear, Move } from './Motion'
+import { Slides as SlidesComponent, DeckComponentsContext, type DeckComponents } from './Slides'
 import { Stack } from './Stack'
 import { deckStyles } from './styles'
 
 const noop = () => {}
+
+/** The components every MDX module a deck renders resolves against — the
+ * deck's own file and the files it includes alike (R18). Defined once, so
+ * every deck and every include shares the same map. */
+const deckComponents: DeckComponents = {
+  Slide,
+  Mermaid,
+  Mark,
+  Appear,
+  Move,
+  Canvas,
+  Cover,
+  Agenda,
+  Columns,
+  Grid,
+  Block,
+  Stack,
+  Figure,
+  Bullets,
+  Contents,
+  Slides: SlidesComponent
+}
 
 /** The deck's own controls share one button style. */
 const barButton =
@@ -623,7 +646,9 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
                   slide — and every diagram — on each move. */}
               <div className="stage flex-auto min-h-0 grid place-content-center relative overflow-hidden px-[6cqi] py-[4cqi] text-[clamp(0.9rem,2.4cqi,2.2rem)]">
                 <SlideContext.Provider value={{ index, count, step, theme, refresh, measure, titles, goTo }}>
-                  <Slides components={{ Slide, Mermaid, Mark, Appear, Move, Canvas, Cover, Agenda, Columns, Grid, Block, Stack, Figure, Bullets, Contents }} />
+                  <DeckComponentsContext.Provider value={deckComponents}>
+                    <Slides components={deckComponents} />
+                  </DeckComponentsContext.Provider>
 
                   {/* The contents sit over the stage, not over the whole deck,
                       so the bar — and the control that opened them — stays

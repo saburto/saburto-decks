@@ -6,6 +6,15 @@ const run = (tree: MdastNode) => remarkSlides()(tree)
 const p = (text: string): MdastNode => ({ type: 'paragraph', children: [{ type: 'text', value: text }] })
 const heading = (text: string): MdastNode => ({ type: 'heading', depth: 1, children: [{ type: 'text', value: text }] })
 const break_ = (): MdastNode => ({ type: 'thematicBreak' })
+const attribute = (node: MdastNode | undefined, name: string) =>
+  node?.attributes?.find((candidate) => candidate.name === name)
+/** An include as `remark-imports` leaves it: a file, and the slides it brings. */
+const include = (src: string, slides: number): MdastNode => ({
+  type: 'mdxJsxFlowElement',
+  name: 'Slides',
+  attributes: [{ type: 'mdxJsxAttribute', name: 'src', value: src }],
+  data: { sdSlides: slides }
+})
 
 describe('splitSlides', () => {
   test('splits on every thematic break', () => {
@@ -45,6 +54,32 @@ describe('splitSlides', () => {
 
   test('an empty or whitespace-only file yields no slides', () => {
     expect(splitSlides([])).toEqual([])
+  })
+
+  test('a slide that is an include stays an element, at its place in the deck (R18)', () => {
+    const slides = splitSlides([p('one'), break_(), include('./part.mdx', 3), break_(), p('five')])
+
+    expect(slides).toHaveLength(3)
+    expect(slides[1]?.name).toBe('Slides')
+    expect(attribute(slides[1], 'offset')?.value).toBe('1')
+    /* The slide after it is numbered for the three slides the include brings. */
+    expect(attribute(slides[2], 'index')?.value).toBe('4')
+  })
+
+  test('an include inside a slide is that slide\'s content (R18)', () => {
+    const slides = splitSlides([p('one'), break_(), p('two'), include('./part.mdx', 3)])
+
+    expect(slides).toHaveLength(2)
+    expect(slides[1]?.name).toBe('Slide')
+    expect(attribute(slides[1], 'index')?.value).toBe('1')
+    expect(slides[1]?.children?.map((node) => node.name ?? node.type)).toEqual(['paragraph', 'Slides'])
+  })
+
+  test('imports in a slide that is an include keep their place in the file (R18)', () => {
+    const esm: MdastNode = { type: 'mdxjsEsm', value: "import x from './part.mdx'" }
+    const slides = splitSlides([esm, include('./part.mdx', 2)])
+
+    expect(slides.map((node) => node.name ?? node.type)).toEqual(['mdxjsEsm', 'Slides'])
   })
 })
 

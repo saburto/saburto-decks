@@ -40,7 +40,7 @@ try {
   process.exit(1)
 }
 
-const compiled = await compile(source, {
+const compiled = await compile({ value: source, path: resolve(file) }, {
   remarkPlugins: remarkDeckPlugins,
   rehypePlugins: rehypeDeckPlugins
 })

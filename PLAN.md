@@ -106,6 +106,15 @@ the contents returns the reader to the deck. Opening the contents changes neithe
 layout nor the type size the deck settled on. An author can also place the contents on a slide,
 where they are that slide's own content and are sized with it.
 
+**R18 — Several files.** A deck can be written as more than one file: one file includes the
+slides of another. On a slide of its own, an include is those slides — ordered where the include
+was written, counted and navigated with the deck's own, and listed in the deck's contents. Used
+inside a slide, an include is that slide's content instead: it adds no slides and its steps count
+with the slide's. The same include can be used both ways. An included file may include another
+file, but not itself. An included file's own pictures and imports belong to it and resolve
+relative to it, not to the deck that included it. Changing an included file is reflected in the
+deck when it is rebuilt and while it is being developed.
+
 ## Non-functional requirements
 
 **N1 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
@@ -136,6 +145,9 @@ This version is done when:
    are on, and choose an entry to go to that slide; a slide with no heading is still listed,
    opening the contents does not change how the slide fits, and the contents can be the content
    of a slide the author writes.
+9. A deck can be written across files: an include brings another file's slides in as the deck's
+   own — ordered, counted, navigated and listed with them — while the same include inside a slide
+   is part of that slide, adding no slides and counting its steps with the slide's.
 
 ## Fixed decisions from the owner
 

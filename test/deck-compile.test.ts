@@ -6,21 +6,35 @@
  */
 import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { compile } from '@mdx-js/mdx'
 import { remarkDeckPlugins } from '../src/build/remark-plugins'
 import { rehypeDeckPlugins } from '../src/build/rehype-plugins'
 
-const source = readFileSync(new URL('../decks/example.mdx', import.meta.url), 'utf8')
+const here = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 
-const compiled = await compile(source, {
-  remarkPlugins: remarkDeckPlugins,
-  rehypePlugins: rehypeDeckPlugins
-})
-const output = String(compiled.value)
+/** Compiles a deck file the way a host's build does: from its own path, so an
+ * include of another file resolves the way it does in a real build. */
+const compileDeck = async (path: string) =>
+  String(
+    (
+      await compile(
+        { value: readFileSync(path, 'utf8'), path },
+        { remarkPlugins: remarkDeckPlugins, rehypePlugins: rehypeDeckPlugins }
+      )
+    ).value
+  )
+
+const output = await compileDeck(here('../decks/example.mdx'))
 
 describe('the demo deck', () => {
-  test('has exactly nineteen slides', () => {
-    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(19)
+  test('has twenty-two slides, two of them from an included file', async () => {
+    /* The deck's own file holds the other twenty: its nineteen slides and the
+       slide the nested include sits in. The two the include brings are
+       compiled with the included file (R18). */
+    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(20)
+    const included = await compileDeck(here('../decks/reused/imported.mdx'))
+    expect(included.match(/_jsxs?\(Slide,/g)).toHaveLength(2)
     expect(output).toContain('_missingMdxReference("Slide"')
   })
 
@@ -34,7 +48,8 @@ describe('the demo deck', () => {
   test('every slide is addressed by index in document order', () => {
     const indices = Array.from(output.matchAll(/index: "(\d+)"/g), (match) => match[1])
     expect(indices).toEqual([
-      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'
+      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
+      '11', '12', '13', '14', '15', '16', '17', '18', '21'
     ])
   })
 
@@ -122,6 +137,37 @@ describe('contents (R17)', () => {
     expect(output).toContain('_missingMdxReference("Contents", true)')
     /* One in the demo deck: the contents slide. */
     expect(output.match(/_jsx\(Contents,/g)).toHaveLength(1)
+  })
+})
+
+describe('included files (R18)', () => {
+  test('the deck imports the included file instead of copying its text', () => {
+    expect(output).toContain('import __saburto_slides_1 from "./reused/imported.mdx"')
+    expect(output).toContain('import __saburto_slides_2 from "./reused/inline.mdx"')
+    /* The included file's own picture import belongs to the included module,
+       where it resolves against that file's own folder. */
+    expect(output).not.toContain("'../layout-picture.svg'")
+  })
+
+  test('an include on a slide of its own brings its slides into the deck', () => {
+    /* The element stays where the author put it, with the deck position its
+       slides begin at: nineteen slides before it. */
+    expect(output).toContain('_jsx(Slides, {')
+    expect(output).toContain('src: __saburto_slides_1')
+    expect(output).toContain('offset: "19"')
+  })
+
+  test('an include inside a slide is content, not slides of its own', () => {
+    /* The slide around it is numbered for the two slides the include before it
+       brings, and the nested include has no place in the deck. */
+    expect(output).toContain('index: "21"')
+    expect(output).toContain('src: __saburto_slides_2')
+  })
+
+  test('the included file compiles as a deck of its own', async () => {
+    const included = await compileDeck(here('../decks/reused/imported.mdx'))
+
+    expect(included).toContain("import picture from '../layout-picture.svg'")
   })
 })
 

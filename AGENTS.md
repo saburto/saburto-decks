@@ -23,8 +23,8 @@ the traps in it.
 ## Layout
 
 ```
-src/runtime/     ships to the browser: Deck.tsx (the component), Slide.tsx, Cover.tsx, Agenda.tsx, Columns.tsx, Canvas.tsx, tailwind.css
-src/build/       build-time only, never shipped: the MDX → <Slide> transform
+src/runtime/     ships to the browser: Deck.tsx (the component), Slide.tsx, Slides.tsx, Cover.tsx, Agenda.tsx, Columns.tsx, Canvas.tsx, tailwind.css
+src/build/       build-time only, never shipped: the MDX → <Slide> transform, the <Slides> include
 src/mdx.ts       the Vite plugin and remark pipeline a host's config uses
 src/index.ts     the component entry — it must never import the build half
 decks/           example.mdx: the deck both demo hosts embed
@@ -106,3 +106,9 @@ Do not relitigate these without the owner.
 - **A presenting deck covers the page it is in,** so the host's own controls are unreachable while
   presenting. Host-driven exit is `exitPresent()` from the host's code; the reader's own exits are
   `Esc` and the deck's bar.
+- **An include is a real import, and the included file compiles as its own module (R18).**
+  `<Slides src="./part.mdx" />` becomes `import … from './part.mdx'`, not a copy of its text.
+  That is what makes the included file's own pictures resolve against its own folder and what
+  makes Vite watch it. Textual splicing was considered and rejected for exactly those reasons.
+  The include's slides are flattened into the deck when it stands on a slide of its own; inside a
+  slide, its `<Slide>` elements render transparently as that slide's content.

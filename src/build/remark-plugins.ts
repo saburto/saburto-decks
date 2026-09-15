@@ -1,5 +1,6 @@
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
+import remarkImports from './remark-imports.ts'
 import remarkMermaid from './remark-mermaid.ts'
 import remarkSlides from './remark-slides.ts'
 
@@ -9,9 +10,17 @@ import remarkSlides from './remark-slides.ts'
  * 1. `remark-frontmatter` — parse the YAML block. MDX v3 no longer does this
  *    for you, and without it `---` becomes a setext heading.
  * 2. `remark-mdx-frontmatter` — turn that block into `export const frontmatter`.
- * 3. `remark-mermaid` — turn a ```mermaid fence into a `<Mermaid>` element,
+ * 3. `remark-imports` — turn an include of another file into an import of it,
+ *    and leave the number of slides it brings on the element (R18).
+ * 4. `remark-mermaid` — turn a ```mermaid fence into a `<Mermaid>` element,
  *    before `remark-slides` wraps it into a slide (R13).
- * 4. `remark-slides` — wrap the remaining content into `<Slide>` elements and
- *    export the slide count.
+ * 5. `remark-slides` — wrap the remaining content into `<Slide>` elements,
+ *    numbering them in the deck the includes have made.
  */
-export const remarkDeckPlugins = [remarkFrontmatter, remarkMdxFrontmatter, remarkMermaid, remarkSlides]
+export const remarkDeckPlugins = [
+  remarkFrontmatter,
+  remarkMdxFrontmatter,
+  remarkImports,
+  remarkMermaid,
+  remarkSlides
+]

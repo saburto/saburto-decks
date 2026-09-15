@@ -1,0 +1,28 @@
+import picture from '../layout-picture.svg'
+
+## An imported file
+
+A deck can be written as several files. This slide lives in
+`decks/reused/imported.mdx`, and `decks/example.mdx` pulls it in where a slide
+would be, with <Mark type="highlight">`<Slides src="./reused/imported.mdx" />`</Mark>.
+
+A file can hold several slides, and the deck counts them as its own: the counter,
+the arrows and the contents move through them like any other slide.
+
+---
+
+<Columns title="A picture from the imported file's own folder" ratio={[3, 2]}>
+
+<Stack>
+
+The picture beside this text is imported by *this* file, from this file's own
+folder. An include is a real import, so the picture resolves here — not in the
+folder of the deck that included it.
+
+<Appear at={2}>Included slides carry steps of their own, counted with the deck's.</Appear>
+
+</Stack>
+
+<Figure src={picture} alt="An illustration of a slide with a title, text and a diagram" caption="A picture imported by the included file." />
+
+</Columns>
