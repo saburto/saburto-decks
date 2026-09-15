@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import { useStageHeight } from './stage'
+import { useStageBox } from './stage'
 
 export interface CoverProps {
   /** The title across the top. */
@@ -29,7 +29,7 @@ export interface CoverProps {
  * type size the deck settles on, exactly as the rest of a slide does.
  */
 export function Cover({ title, meta, children, left, right, className }: CoverProps) {
-  const { ref: box, height } = useStageHeight<HTMLElement>()
+  const { ref: box, height } = useStageBox<HTMLElement>()
 
   return (
     <main

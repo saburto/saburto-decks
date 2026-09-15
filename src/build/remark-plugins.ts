@@ -2,6 +2,7 @@ import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import remarkImports from './remark-imports.ts'
 import remarkMermaid from './remark-mermaid.ts'
+import remarkPalette from './remark-palette.ts'
 import remarkSlides from './remark-slides.ts'
 
 /**
@@ -16,11 +17,15 @@ import remarkSlides from './remark-slides.ts'
  *    before `remark-slides` wraps it into a slide (R13).
  * 5. `remark-slides` — wrap the remaining content into `<Slide>` elements,
  *    numbering them in the deck the includes have made.
+ * 6. `remark-palette` — give a deck that declares a palette the style element
+ *    that applies it (R20). Last, so the element is the deck's and not a
+ *    slide's.
  */
 export const remarkDeckPlugins = [
   remarkFrontmatter,
   remarkMdxFrontmatter,
   remarkImports,
   remarkMermaid,
-  remarkSlides
+  remarkSlides,
+  remarkPalette
 ]

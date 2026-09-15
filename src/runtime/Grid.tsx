@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useStageHeight } from './stage'
+import { useStageBox } from './stage'
 
 export interface GridProps {
   /** The title across the top. */
@@ -28,7 +28,7 @@ export interface GridProps {
  * scales with the deck's box and with the type size the deck settles on.
  */
 export function Grid({ title, lead, columns = 2, children, className }: GridProps) {
-  const { ref, height } = useStageHeight<HTMLElement>()
+  const { ref, height } = useStageBox<HTMLElement>()
 
   return (
     <main

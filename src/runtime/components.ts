@@ -22,6 +22,7 @@ import { Mermaid } from './Mermaid'
 import { Appear, Move } from './Motion'
 import { Slides } from './Slides'
 import { Stack } from './Stack'
+import { Stage } from './Stage'
 import type { DeckComponents } from './Slides'
 
 export const deckComponents: DeckComponents = {
@@ -38,6 +39,7 @@ export const deckComponents: DeckComponents = {
   Grid,
   Block,
   Stack,
+  Stage,
   Figure,
   Bullets,
   Contents,

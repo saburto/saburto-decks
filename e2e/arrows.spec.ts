@@ -71,7 +71,7 @@ test.describe('arrows', () => {
     const arrived = await state(page)
     expect(arrived.stepCount).toBe(4)
     await expect(page.locator('#deck .step-dot')).toHaveCount(4)
-    await expect(page.locator('#deck .live')).toHaveText('Slide 23 of 23, step 1 of 4')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 23 of 24, step 1 of 4')
     for (const nth of [0, 1, 2]) {
       await expect(paths(page, nth)).toHaveCount(0)
       await expect(appear(page, nth)).toHaveCSS('opacity', '0')
@@ -103,14 +103,21 @@ test.describe('arrows', () => {
     expect(now.step).toBe(3)
     await expect(paths(page, 2)).not.toHaveCount(0)
     await expect(appear(page, 2)).toHaveCSS('opacity', '1')
-    await expect(page.locator('#deck .live')).toHaveText('Slide 23 of 23, step 4 of 4')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 23 of 24, step 4 of 4')
 
-    /* This is the deck's last slide, so the last step is where the deck ends:
-       Next has nowhere further to go, and stays put. */
+    /* The arrows demo is no longer the deck's last slide, so Next leaves it
+       for the page after it; the deck's own end is where Next has nowhere
+       further to go, and stays put. */
     await page.keyboard.press('ArrowRight')
-    expect((await state(page)).index).toBe(ARROWS)
+    expect((await state(page)).index).toBe(ARROWS + 1)
+    await page.keyboard.press('ArrowRight')
+    expect((await state(page)).index).toBe(ARROWS + 1)
 
-    /* Previous takes the third arrow down again, and its block with it. */
+    /* Previous takes the reader back onto the arrows demo's last step, and the
+       third arrow down again with its block. */
+    await page.keyboard.press('ArrowLeft')
+    expect((await state(page)).index).toBe(ARROWS)
+    expect((await state(page)).step).toBe(3)
     await page.keyboard.press('ArrowLeft')
     expect((await state(page)).step).toBe(2)
     await expect(paths(page, 2)).toHaveCount(0)

@@ -23,35 +23,35 @@ test.beforeEach(async ({ page }) => {
   await page.goto(DEMO)
   /* The deck is an island: wait for it to arrive before asserting anything. */
   await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
-  await expect(page.locator('#deck section.slide')).toHaveCount(23)
+  await expect(page.locator('#deck section.slide')).toHaveCount(24)
 })
 
 test.describe('an embedded deck', () => {
-  test('shows its twenty-three slides one at a time', async ({ page }) => {
-    expect((await state(page)).count).toBe(23)
+  test('shows its twenty-four slides one at a time', async ({ page }) => {
+    expect((await state(page)).count).toBe(24)
 
-    for (let index = 0; index < 23; index++) {
+    for (let index = 0; index < 24; index++) {
       /* Jumping straight to a slide, so a stepped slide cannot stand in the
          way of the next one. */
       await goTo(page, index)
       const shown = await state(page)
       expect(shown.index).toBe(index)
       expect(shown.visible).toEqual([index])
-      await expect(page.locator('#deck .counter')).toHaveText(`${index + 1} / 23`)
+      await expect(page.locator('#deck .counter')).toHaveText(`${index + 1} / 24`)
     }
 
     /* The code slide has six steps; its last step is no longer the end of the
        deck, so Next moves on to the diagrams slide after it. */
     await goTo(page, 5)
     for (let i = 0; i < 5; i++) await nextSlide(page)
-    await expect(page.locator('#deck .counter')).toHaveText('6 / 23')
+    await expect(page.locator('#deck .counter')).toHaveText('6 / 24')
     await nextSlide(page)
-    await expect(page.locator('#deck .counter')).toHaveText('7 / 23')
+    await expect(page.locator('#deck .counter')).toHaveText('7 / 24')
   })
 
   test('highlights code, and follows the theme (R11)', async ({ page }) => {
     await goTo(page, 4)
-    await expect(page.locator('#deck .counter')).toHaveText('5 / 23')
+    await expect(page.locator('#deck .counter')).toHaveText('5 / 24')
 
     const code = page.locator('#deck section.slide[data-active] pre.shiki')
     await expect(code).toHaveCount(1)
@@ -83,7 +83,7 @@ test.describe('an embedded deck', () => {
   test('steps through a code block before leaving the slide (R11, R12)', async ({ page }) => {
     await goTo(page, 4)
     await page.locator('#deck').focus()
-    await expect(page.locator('#deck .counter')).toHaveText('5 / 23')
+    await expect(page.locator('#deck .counter')).toHaveText('5 / 24')
 
     /* Four steps; the slide arrives on the first, with line 1 highlighted. */
     let now = await state(page)
@@ -122,7 +122,7 @@ test.describe('an embedded deck', () => {
        says it, and the host has been told (R10, N1). */
     await expect(page.locator('#deck .step-dot')).toHaveCount(4)
     await expect(page.locator('#deck .step-dot[data-on]')).toHaveCount(1)
-    await expect(page.locator('#deck .live')).toHaveText('Slide 5 of 23, step 4 of 4')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 5 of 24, step 4 of 4')
     await expect(hostStatus(page)).toHaveText(/step 4\/4/)
 
     /* Previous walks the steps back, and from the first step returns to the
@@ -154,7 +154,7 @@ test.describe('an embedded deck', () => {
   test('walks the full Slidev sequence, {all|4|6|6-7|9|all} (R11, R12)', async ({ page }) => {
     await goTo(page, 5)
     await page.locator('#deck').focus()
-    await expect(page.locator('#deck .counter')).toHaveText('6 / 23')
+    await expect(page.locator('#deck .counter')).toHaveText('6 / 24')
 
     /* Six steps: every line, then one line, then another, then a pair, then
        another, then every line again. */
@@ -190,7 +190,7 @@ test.describe('an embedded deck', () => {
     for (const width of ['16rem', '24rem', '34rem', '44rem']) {
       await hostCss(page, `#deck { width: ${width}; --sd-aspect: 4 / 3 }`)
 
-      for (let index = 0; index < 23; index++) {
+      for (let index = 0; index < 24; index++) {
         await goTo(page, index)
         const measured = await state(page)
         expect(measured.index, `at slide ${index}`).toBe(index)
@@ -323,9 +323,9 @@ test.describe('an embedded deck', () => {
     /* Focused, the same key drives the deck instead. */
     await page.locator('#deck section.slide[data-active] h1').first().click()
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck .counter')).toHaveText('2 / 23')
+    await expect(page.locator('#deck .counter')).toHaveText('2 / 24')
     await page.keyboard.press('ArrowLeft')
-    await expect(page.locator('#deck .counter')).toHaveText('1 / 23')
+    await expect(page.locator('#deck .counter')).toHaveText('1 / 24')
   })
 
   test('lets Tab walk in and out of it while embedded (N1)', async ({ page }) => {
@@ -358,14 +358,14 @@ test.describe('an embedded deck', () => {
     await expect(deck(page)).toHaveAttribute('data-mode', 'present')
     await expect(hostStatus(page)).toHaveText('present')
     await page.keyboard.press('ArrowRight')
-    await expect(hostStatus(page)).toHaveText('present · slide 2/23')
+    await expect(hostStatus(page)).toHaveText('present · slide 2/24')
 
     /* A presenting deck covers the page, so the host's own logic is what ends
        it — the button above is no longer reachable, which is the point. */
     await hostExitPresent(page)
 
     await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
-    await expect(hostStatus(page)).toHaveText('embedded · slide 2/23')
+    await expect(hostStatus(page)).toHaveText('embedded · slide 2/24')
   })
 
   test('a handle the host took early keeps working (R10)', async ({ page }) => {
@@ -385,7 +385,7 @@ test.describe('an embedded deck', () => {
         3
       )
     )
-    await expect(page.locator('#deck .counter')).toHaveText('6 / 23')
+    await expect(page.locator('#deck .counter')).toHaveText('6 / 24')
     expect((await state(page)).step).toBe(3)
   })
 

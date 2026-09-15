@@ -371,3 +371,37 @@ Presenting <span data-id="arrow-word-screen">**fills the screen**</span>.
 <Arrow at={3} from="[data-id=arrow-step]@left" to="[data-id=arrow-word-step]@right" arc={-0.4} />
 
 <Arrow at={4} from="[data-id=arrow-screen]@left" to="[data-id=arrow-word-screen]@right" arc={0.4} headType="polygon" lineStyle="dashed" headSize={14} color="muted" width={2} />
+
+---
+
+<Stage className="flex flex-col gap-[1.2em]">
+
+## A page that fills the deck
+
+<div className="grid flex-1 grid-cols-2 items-start gap-[2em] text-[0.85em] leading-snug text-sd-muted">
+
+<div>
+
+A slide is normally one column of text that the deck centres in its box and fits. That is the right
+shape for a passage, and the wrong one for a page: a title band, columns that reach the edges, a
+foot at the foot have nowhere to stand.
+
+</div>
+
+<div>
+
+`<Stage>` is the room the deck has for a slide, measured and handed over — the whole width, the
+whole height, at whatever size the host gave the deck. Inside it, a slide is ordinary CSS.
+
+</div>
+
+</div>
+
+<p className="text-[0.7em] text-sd-muted">
+
+A foot, at the foot of the deck's own box. The deck still shrinks the type rather than scrolling,
+and follows its own box when the host resizes it.
+
+</p>
+
+</Stage>

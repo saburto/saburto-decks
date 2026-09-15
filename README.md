@@ -464,6 +464,41 @@ The utilities a deck can use are the ones the library's own stylesheet compiled:
 fixed stylesheet, not a Tailwind build of the host's. `@source` in `src/runtime/tailwind.css` decides
 what is compiled into it.
 
+### A layout that uses the deck's box
+
+A page-shaped slide — a title band, columns that reach the edges, a foot at the bottom — needs the
+room the deck has for a slide. That room is out of a deck author's reach: a slide is a column of
+text the deck centres in its box and fits, so its own box is neither the whole width nor a height
+anyone can name. `<Stage>` is that room, handed over:
+
+```mdx
+<Stage className="flex flex-col gap-[1em]">
+
+## A page that fills the deck
+
+<div className="grid flex-1 grid-cols-2 gap-[2em] text-[0.8em]">
+
+<p>…</p>
+
+<p>…</p>
+
+</div>
+
+<p className="text-[0.7em] text-sd-muted">A foot, at the foot of the deck's own box.</p>
+
+</Stage>
+```
+
+Inside it, a slide is ordinary CSS — flex, grid, a foot kept at the foot by `flex-1` above it. Two
+things still hold, and are why the box is measured rather than described in the deck's units: it
+follows the deck's box when the host resizes it, and it takes part in fitting, so a page whose
+content is too big gets a smaller type rather than a scroll (R5). The box is the whole room, which
+is wider than the measure a slide keeps its text to, so it is centred on the slide rather than laid
+out inside it.
+
+Like `<Cover>`, `<Agenda>`, `<Columns>`, `<Grid>` and `<Canvas>`, it spreads over the whole stage, so
+one of them is a slide's content: whatever else a slide holds goes inside it.
+
 ## Embedding a deck
 
 ### In Astro
@@ -590,6 +625,50 @@ The host page has the last word on both:
 | `--sd-surface`   | inline code and buttons                                                                               |
 | `--sd-highlight` | the colour a `<Mark type="highlight">` is drawn in (translucent, so the words stay readable under it) |
 | `--sd-code-dim`  | how far the lines outside the current step recede (default `0.3`)                                     |
+
+### The deck's own palette
+
+A deck can bring its own colours instead of taking the host page's, so that a deck in a house style
+is written once and reads the same wherever it is embedded. Declare them in the deck file's
+frontmatter, as a light set and a dark set:
+
+```mdx
+---
+title: Slidedocs
+palette:
+  light:
+    bg: '#ffffff'
+    fg: '#696969'
+    muted: '#64645d'
+    border: '#dedcd6'
+    accent: '#ff9f2b'
+    surface: '#f1f0ec'
+    highlight: 'rgba(255, 208, 0, 0.45)'
+  dark:
+    bg: '#17181a'
+    fg: '#c6c6c2'
+    muted: '#a8a8a2'
+    border: '#33342f'
+    accent: '#ff9f2b'
+    surface: '#232427'
+---
+```
+
+Each key is one of the variables above without its `--sd-` — `bg`, `fg`, `muted`, `border`,
+`accent`, `surface`, `highlight` — and every one is optional, as is a whole set: a deck that names
+only dark colours adds nothing to a light page. A colour may be written any way CSS writes one — a
+hex, an `oklch()`, a `var()`, a `color-mix()`.
+
+The palette is applied inside the deck's own shadow root, so it reaches nothing on the page, and it
+is the deck's own rather than the host's: a host rule on the deck's element still beats it, exactly
+as it beats the deck's built-in colours. The deck's own `<style>` beats it in turn, so a deck can
+declare a palette and then correct one colour of it:
+
+```mdx
+<style>{`
+  .deck { --sd-accent: #b45309 }
+`}</style>
+```
 
 ## Keyboard
 

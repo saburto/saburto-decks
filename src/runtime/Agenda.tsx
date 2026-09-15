@@ -1,5 +1,5 @@
 import { Children, type ReactNode } from 'react'
-import { useStageHeight } from './stage'
+import { useStageBox } from './stage'
 
 export interface AgendaProps {
   /** The title across the top. */
@@ -20,7 +20,7 @@ export interface AgendaProps {
  * and with the type size the deck settles on.
  */
 export function Agenda({ title, children, className }: AgendaProps) {
-  const { ref: box, height } = useStageHeight<HTMLElement>()
+  const { ref: box, height } = useStageBox<HTMLElement>()
 
   const blocks = Children.toArray(children).filter(
     (child) => !(typeof child === 'string' && child.trim() === '')

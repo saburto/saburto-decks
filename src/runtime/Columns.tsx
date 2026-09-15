@@ -1,5 +1,5 @@
 import { type CSSProperties, type ReactNode } from 'react'
-import { useStageHeight } from './stage'
+import { useStageBox } from './stage'
 
 export interface ColumnsProps {
   /** The title across the top. */
@@ -25,7 +25,7 @@ export interface ColumnsProps {
  * and with the type size the deck settles on.
  */
 export function Columns({ title, lead, ratio = [1, 1], children, className }: ColumnsProps) {
-  const { ref: box, height } = useStageHeight<HTMLElement>()
+  const { ref: box, height } = useStageBox<HTMLElement>()
 
   return (
     <main

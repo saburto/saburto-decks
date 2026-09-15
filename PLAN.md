@@ -123,6 +123,20 @@ size its type settles on. An arrow can be revealed as one of the slide's steps, 
 navigated with the others (R12); by default it appears with the slide. It is drawn solid, dashed or
 dotted, follows the deck's theme and palette, and respects the reader's reduced-motion preference.
 
+**R20 — A deck's own palette.** A deck can declare a palette of its own beside its title: the
+colours it is drawn in — the ground, the text, the secondary text, the rules, the accent, the
+surface and the highlight — as a light set and a dark set. A deck that declares one is drawn in it
+in both modes, and the theme the host chooses decides which set applies. A host that sets its own
+colours on the deck still has the last word, and a deck that declares no palette is drawn exactly
+as it was.
+
+**R21 — A layout that uses the deck's box.** A slide can be laid out against the box the deck has
+for it: a layout can take that box — its whole width and height, as the host sized it — and lay its
+content out in it as ordinary CSS, rather than being reflowed into the column the deck centres a
+slide in. A slide that takes the box is still fitted: its content gives way — the type shrinks —
+rather than being scrolled, and the box it was given follows the deck's box when the host resizes
+it.
+
 ## Non-functional requirements
 
 **N1 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
@@ -159,6 +173,10 @@ This version is done when:
 10. Two things on a slide can be joined by a hand-drawn arrow — from a point to an element, or
     between two elements — and the arrow can be one of the slide's steps without changing the
     words it joins or whether the slide fits.
+11. A deck can declare a palette of its own — a light set and a dark set — and is drawn in it in
+    both modes, while a host that sets its own colour on the deck still overrides it.
+12. A slide can be laid out against the box the deck has for it — its whole width and height — and
+    follows that box when the host resizes the deck, while still never being scrolled.
 
 ## Fixed decisions from the owner
 

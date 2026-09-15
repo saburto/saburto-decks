@@ -28,11 +28,11 @@ const compileDeck = async (path: string) =>
 const output = await compileDeck(here('../decks/example.mdx'))
 
 describe('the demo deck', () => {
-  test('has twenty-three slides, two of them from an included file', async () => {
-    /* The deck's own file holds the other twenty-one: its nineteen slides, the
-       slide the nested include sits in, and the arrows slide. The two the
-       include brings are compiled with the included file (R18). */
-    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(21)
+  test('has twenty-four slides, two of them from an included file', async () => {
+    /* The deck's own file holds the other twenty-two: its nineteen slides, the
+       slide the nested include sits in, the arrows slide and the stage slide.
+       The two the include brings are compiled with the included file (R18). */
+    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(22)
     const included = await compileDeck(here('../decks/reused/imported.mdx'))
     expect(included.match(/_jsxs?\(Slide,/g)).toHaveLength(2)
     expect(output).toContain('_missingMdxReference("Slide"')
@@ -68,7 +68,8 @@ describe('the demo deck', () => {
       '17',
       '18',
       '21',
-      '22'
+      '22',
+      '23'
     ])
   })
 

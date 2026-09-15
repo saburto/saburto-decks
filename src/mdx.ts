@@ -36,6 +36,16 @@ export {
   wantsWholeDiagram,
   mermaidElement
 } from './build/remark-mermaid.ts'
+export {
+  remarkPalette,
+  paletteCss,
+  paletteStyle,
+  declaredPalette,
+  usableColour,
+  PALETTE_TOKENS,
+  type DeckPalette,
+  type PaletteColours
+} from './build/remark-palette.ts'
 export { attribute, stringAttribute, walk, type MdastNode } from './build/ast.ts'
 
 /** Wires deck compilation into a Vite (or Astro) build. */

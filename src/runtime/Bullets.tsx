@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useStageHeight } from './stage'
+import { useStageBox } from './stage'
 
 export interface BulletsProps {
   /** The title across the top. */
@@ -29,7 +29,7 @@ export interface BulletsProps {
  * spread over the slide's full height.
  */
 export function Bullets({ title, lead, children, className }: BulletsProps) {
-  const { ref, height } = useStageHeight<HTMLElement>()
+  const { ref, height } = useStageBox<HTMLElement>()
 
   return (
     <main
