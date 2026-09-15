@@ -53,8 +53,8 @@ Slide three.
 `---` is ordinary Markdown, so the file stays readable in any editor. Frontmatter's own `---` are
 parsed first, so they never split a slide. A slide may contain headings, paragraphs, lists, links,
 emphasis, inline code, highlighted code blocks (R3, R11), hand-drawn annotations and Mermaid
-diagrams (R13), and animated objects (R16); anything MDX can render will work, but nothing else is
-promised.
+diagrams (R13), animated objects (R16), the layout components below, and pictures; anything MDX
+can render will work, but nothing else is promised.
 
 The deck's frontmatter `title` is available to the host as `frontmatter` from the same import.
 
@@ -271,6 +271,93 @@ two blocks side by side and any further blocks centred below.
   <div>…</div>
 </Columns>
 ```
+
+### Grids, blocks and stacks
+
+`<Grid>` is the companion to `<Columns>` for a slide of several short blocks of
+equal weight. It takes a title, a `columns` count, and its blocks as children:
+
+```mdx
+<Grid title="A grid of four" columns={2}>
+  <Block title="One">…</Block>
+  <Block title="Two">…</Block>
+  <Block title="Three">…</Block>
+  <Block title="Four">…</Block>
+</Grid>
+```
+
+`columns={2}` gives a 2×2, `columns={3}` a 3×2. A `<Block>` is a short heading
+and its text; any other child a slide holds — a paragraph, a `<Figure>`, a
+diagram — works as a cell too.
+
+`<Columns>` places its children side by side, so several blocks on one side of
+it have to be one child. `<Stack>` is that child: a column of blocks, spaced in
+the deck's own units.
+
+```mdx
+<Columns title="Three blocks in a column">
+  <Stack>
+    <Block title="One">…</Block>
+    <Block title="Two">…</Block>
+    <Block title="Three">…</Block>
+  </Stack>
+  <p>The other column.</p>
+</Columns>
+```
+
+### A picture on a slide
+
+A deck file can `import` a picture and hand it to a `<Figure>`, on its own in a
+column or as a cell of a grid:
+
+```mdx
+import picture from './figure.svg'
+
+<Columns title="A picture beside the text" ratio={[3, 2]}>
+  <p>…</p>
+  <Figure src={picture} alt="What the picture shows" caption="An optional caption." />
+</Columns>
+```
+
+The picture fills its column, keeps its proportions, and is capped at a height
+measured in the deck's own units, so a tall picture cannot push the slide out of
+its box. `alt` is required: the picture is not lost to a reader who cannot see
+it (N1). The two hosts' bundlers hand the import over differently — a URL under
+Vite, an object with the URL inside it under Astro's asset pipeline — and
+`Figure` accepts either.
+
+### Bullets
+
+`<Bullets>` is a title and a list, the list being ordinary Markdown:
+
+```mdx
+<Bullets title="What it buys you" lead="One file, two ways to read it.">
+
+- one file per deck
+- one source for both modes
+
+</Bullets>
+```
+
+The blank lines matter: they are what makes the list Markdown inside the
+component. The list is kept to a readable measure and centred in the room under
+the title, with the deck's accent on its markers.
+
+### The typical layouts
+
+Eight shapes come up again and again. Each is a layout component, or a
+composition of two, so the slide is the content and nothing else:
+
+| Layout | Built from |
+| --- | --- |
+| A title and two columns | `<Columns title>` with two children |
+| A title, two columns, one a picture | `<Columns title>` with a `<Figure>` column |
+| A title, two subtitles, four blocks | `<Columns title>` with two `<Stack>`s, each a heading and two blocks |
+| A title and four blocks in a 2×2 | `<Grid title columns={2}>` with four `<Block>`s |
+| Six blocks in a 3×2 | `<Grid title columns={3}>` with six `<Block>`s |
+| A title and bullets | `<Bullets title>` with a Markdown list |
+| A title, two columns, one a stack of three | `<Columns title>` with a `<Stack>` column |
+| A title, two columns, one a diagram | `<Columns title>` with a Mermaid fence and a passage |
 
 ### Spatial layout
 

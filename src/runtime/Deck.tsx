@@ -13,12 +13,17 @@ import { Slide, SlideContext, type DeckComponent, type DeckMode, type DeckTheme 
 import { contentsLabel } from './contents'
 import { Contents, ContentsEntries } from './Contents'
 import { Agenda } from './Agenda'
+import { Block } from './Block'
+import { Bullets } from './Bullets'
 import { Canvas } from './Canvas'
 import { Columns } from './Columns'
 import { Cover } from './Cover'
+import { Figure } from './Figure'
+import { Grid } from './Grid'
 import { Mark } from './Mark'
 import { Mermaid } from './Mermaid'
 import { Appear, Move } from './Motion'
+import { Stack } from './Stack'
 import { deckStyles } from './styles'
 
 const noop = () => {}
@@ -618,7 +623,7 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
                   slide — and every diagram — on each move. */}
               <div className="stage flex-auto min-h-0 grid place-content-center relative overflow-hidden px-[6cqi] py-[4cqi] text-[clamp(0.9rem,2.4cqi,2.2rem)]">
                 <SlideContext.Provider value={{ index, count, step, theme, refresh, measure, titles, goTo }}>
-                  <Slides components={{ Slide, Mermaid, Mark, Appear, Move, Canvas, Cover, Agenda, Columns, Contents }} />
+                  <Slides components={{ Slide, Mermaid, Mark, Appear, Move, Canvas, Cover, Agenda, Columns, Grid, Block, Stack, Figure, Bullets, Contents }} />
 
                   {/* The contents sit over the stage, not over the whole deck,
                       so the bar — and the control that opened them — stays

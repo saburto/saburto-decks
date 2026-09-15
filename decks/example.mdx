@@ -2,6 +2,8 @@
 title: Saburto Decks
 ---
 
+import picture from './layout-picture.svg'
+
 # Saburto Decks
 
 A deck is <Mark type="highlight">**one file**</Mark>. It sits in the page like any
@@ -141,3 +143,138 @@ while it waits, so nothing else on the slide moves when it shows up.
 <Move at={3} x={120}><strong>And this one slides right on the next.</strong></Move>
 
 Reading it backwards moves the line back, and takes the first one away again.
+
+---
+
+<Columns title="Two columns">
+
+Two columns are for two things that belong together: before and after, a
+problem and its fix, one idea against another.
+
+Each paragraph under the title is one column. A column can hold anything a
+slide holds — a stack of blocks, a picture, a diagram — and the pair is scaled
+to the deck's box like every other slide.
+
+</Columns>
+
+---
+
+<Columns title="A picture beside the text" ratio={[3, 2]}>
+
+A picture is a column too. Put a `<Figure>` on one side and the text on the
+other, and the deck lays them out like any two columns; `ratio` decides how
+the width is shared.
+
+<Figure src={picture} alt="An illustration of a slide with a title, text and a diagram" caption="A figure fills its column, keeps the picture's proportions, and carries a caption." />
+
+</Columns>
+
+---
+
+<Columns title="Two subtitles, four blocks">
+
+<Stack>
+
+## Why
+
+<Block>Two blocks of text sit under each subtitle, so the slide reads as two small sections rather than four loose boxes.</Block>
+
+<Block>A subtitle over a group is an ordinary heading inside the column; the stack is what keeps the group together as one column.</Block>
+
+</Stack>
+
+<Stack>
+
+## How
+
+<Block>Give a two-column layout two stacks and each stack becomes one of the columns.</Block>
+
+<Block>Anything a slide holds can be a block: text, a list, a figure, a diagram, another layout.</Block>
+
+</Stack>
+
+</Columns>
+
+---
+
+<Grid title="A grid of four" columns={2}>
+
+<Block title="One">The blocks of a grid are its children, laid out in as many columns as asked.</Block>
+
+<Block title="Two">Each block keeps its own heading, so a cell reads on its own.</Block>
+
+<Block title="Three">Two columns of two blocks: the classic 2×2.</Block>
+
+<Block title="Four">The grid is centred in the room under the title.</Block>
+
+</Grid>
+
+---
+
+<Grid title="Six blocks" columns={3}>
+
+<Block title="One">Six blocks in three columns make a 3×2.</Block>
+
+<Block title="Two">Each block is short and of equal weight.</Block>
+
+<Block title="Three">The blocks wrap into as many rows as they need.</Block>
+
+<Block title="Four">A cell can be a block, a paragraph, a figure or a diagram.</Block>
+
+<Block title="Five">The blocks are top-aligned in their row.</Block>
+
+<Block title="Six">The whole grid is scaled to fit the deck.</Block>
+
+</Grid>
+
+---
+
+<Bullets title="A title and bullets" lead="The list is ordinary Markdown.">
+
+- one file, read embedded or presented
+- the same slide scaled to any box
+- no script to paste, no second source
+
+</Bullets>
+
+---
+
+<Columns title="A diagram beside the text">
+
+```mermaid
+flowchart LR
+    A[Source] --> B[Deck]
+    B -->|Readers| C[Reader]
+```
+
+<div>
+
+A diagram is a column too. Put a Mermaid fence on one side and a passage on
+the other, and the deck draws it there like any other column.
+
+The flowchart is revealed a node and an edge at a time, exactly as it is on a
+slide of its own.
+
+</div>
+
+</Columns>
+
+---
+
+<Columns title="Three blocks in a column">
+
+<Stack>
+
+<Block title="One">A column can be a stack of short blocks.</Block>
+
+<Block title="Two">A two-column layout places its children side by side, so three blocks have to be one child.</Block>
+
+<Block title="Three">A stack is that child, and it spaces the blocks in the deck's own units.</Block>
+
+</Stack>
+
+The typical layouts are one question: what should the reader's eye do first? A
+grid answers it with rows and columns; a stack answers it with order; a
+picture answers it in one look.
+
+</Columns>

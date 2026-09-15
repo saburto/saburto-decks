@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#2f6fed" />
+    </marker>
+  </defs>
+
+  <rect width="480" height="320" rx="24" fill="#eef2fb" />
+  <rect x="36" y="34" width="408" height="252" rx="16" fill="#ffffff" stroke="#d8dce3" stroke-width="2" />
+
+  <!-- the title -->
+  <rect x="70" y="66" width="150" height="14" rx="7" fill="#16181d" />
+
+  <!-- a column of text -->
+  <rect x="70" y="104" width="118" height="8" rx="4" fill="#5b6472" opacity="0.5" />
+  <rect x="70" y="122" width="132" height="8" rx="4" fill="#5b6472" opacity="0.5" />
+  <rect x="70" y="140" width="96" height="8" rx="4" fill="#5b6472" opacity="0.5" />
+  <rect x="70" y="158" width="126" height="8" rx="4" fill="#5b6472" opacity="0.5" />
+  <rect x="70" y="176" width="110" height="8" rx="4" fill="#5b6472" opacity="0.5" />
+
+  <!-- a diagram beside it -->
+  <circle cx="316" cy="118" r="22" fill="#eef2fb" stroke="#2f6fed" stroke-width="3" />
+  <circle cx="392" cy="196" r="22" fill="#eef2fb" stroke="#2f6fed" stroke-width="3" />
+  <circle cx="292" cy="250" r="22" fill="#eef2fb" stroke="#2f6fed" stroke-width="3" />
+  <path d="M334 132 L374 180" fill="none" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrow)" />
+  <path d="M378 216 L308 242" fill="none" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrow)" />
+</svg>

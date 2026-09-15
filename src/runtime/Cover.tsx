@@ -1,5 +1,5 @@
-import { useContext, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
-import { SlideContext } from './Slide'
+import { type ReactNode } from 'react'
+import { useStageHeight } from './stage'
 
 export interface CoverProps {
   /** The title across the top. */
@@ -29,26 +29,7 @@ export interface CoverProps {
  * type size the deck settles on, exactly as the rest of a slide does.
  */
 export function Cover({ title, meta, children, left, right, className }: CoverProps) {
-  const { refresh } = useContext(SlideContext)
-  const box = useRef<HTMLElement | null>(null)
-  const [height, setHeight] = useState<number | undefined>(undefined)
-
-  useLayoutEffect(() => {
-    const stage = box.current?.closest<HTMLElement>('.stage')
-    if (!stage) return
-
-    const fit = () => {
-      const style = getComputedStyle(stage)
-      setHeight(
-        stage.clientHeight - Number.parseFloat(style.paddingTop) - Number.parseFloat(style.paddingBottom)
-      )
-    }
-
-    fit()
-    const observer = new ResizeObserver(fit)
-    observer.observe(stage)
-    return () => observer.disconnect()
-  }, [refresh])
+  const { ref: box, height } = useStageHeight<HTMLElement>()
 
   return (
     <main

@@ -1,5 +1,5 @@
-import { useContext, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { SlideContext } from './Slide'
+import { type CSSProperties, type ReactNode } from 'react'
+import { useStageHeight } from './stage'
 
 export interface ColumnsProps {
   /** The title across the top. */
@@ -25,26 +25,7 @@ export interface ColumnsProps {
  * and with the type size the deck settles on.
  */
 export function Columns({ title, lead, ratio = [1, 1], children, className }: ColumnsProps) {
-  const { refresh } = useContext(SlideContext)
-  const box = useRef<HTMLElement | null>(null)
-  const [height, setHeight] = useState<number | undefined>(undefined)
-
-  useLayoutEffect(() => {
-    const stage = box.current?.closest<HTMLElement>('.stage')
-    if (!stage) return
-
-    const fit = () => {
-      const style = getComputedStyle(stage)
-      setHeight(
-        stage.clientHeight - Number.parseFloat(style.paddingTop) - Number.parseFloat(style.paddingBottom)
-      )
-    }
-
-    fit()
-    const observer = new ResizeObserver(fit)
-    observer.observe(stage)
-    return () => observer.disconnect()
-  }, [refresh])
+  const { ref: box, height } = useStageHeight<HTMLElement>()
 
   return (
     <main

@@ -19,8 +19,8 @@ const compiled = await compile(source, {
 const output = String(compiled.value)
 
 describe('the demo deck', () => {
-  test('has exactly eleven slides', () => {
-    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(11)
+  test('has exactly nineteen slides', () => {
+    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(19)
     expect(output).toContain('_missingMdxReference("Slide"')
   })
 
@@ -33,7 +33,9 @@ describe('the demo deck', () => {
 
   test('every slide is addressed by index in document order', () => {
     const indices = Array.from(output.matchAll(/index: "(\d+)"/g), (match) => match[1])
-    expect(indices).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'])
+    expect(indices).toEqual([
+      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'
+    ])
   })
 
   test('the markdown rules between slides are gone', () => {
@@ -125,9 +127,9 @@ describe('contents (R17)', () => {
 
 describe('diagrams', () => {
   test('a mermaid fence becomes a Mermaid element, not code (R13)', () => {
-    /* Four fences in the demo deck: a sequence diagram, a flowchart, a state
-       diagram and a class diagram. */
-    expect(output.match(/_jsx\(Mermaid,/g)).toHaveLength(4)
+    /* Five fences in the demo deck: a sequence diagram, a flowchart, a state
+       diagram, a class diagram and a flowchart inside a column. */
+    expect(output.match(/_jsx\(Mermaid,/g)).toHaveLength(5)
     expect(output).toContain('_missingMdxReference("Mermaid"')
     /* The source is carried through as the element's child... */
     expect(output).toContain('sequenceDiagram\\n')
@@ -136,5 +138,26 @@ describe('diagrams', () => {
     expect(output).toContain('classDiagram\\n')
     /* ...and is never handed to the highlighter as a language. */
     expect(output).not.toContain('language-mermaid')
+  })
+})
+
+describe('layouts (R5)', () => {
+  test('every layout component is one the deck provides, not raw markup', () => {
+    for (const name of ['Columns', 'Grid', 'Block', 'Stack', 'Figure', 'Bullets']) {
+      expect(output).toContain(`_missingMdxReference("${name}"`)
+    }
+  })
+
+  test('the demo deck uses each of the typical layouts', () => {
+    /* The picture column and the bullets are one each; the diagram beside a
+       column's text is the deck's fifth diagram. */
+    expect(output.match(/_jsx\(Figure,/g)).toHaveLength(1)
+    expect(output.match(/_jsx\(Bullets,/g)).toHaveLength(1)
+    expect(output.match(/_jsxs?\(Grid,/g)).toHaveLength(2)
+    expect(output.match(/_jsxs?\(Stack,/g)).toHaveLength(3)
+  })
+
+  test('a picture is imported, so a deck carries its own assets', () => {
+    expect(output).toContain("import picture from './layout-picture.svg'")
   })
 })

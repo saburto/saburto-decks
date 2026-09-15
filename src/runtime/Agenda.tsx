@@ -1,5 +1,5 @@
-import { Children, useContext, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
-import { SlideContext } from './Slide'
+import { Children, type ReactNode } from 'react'
+import { useStageHeight } from './stage'
 
 export interface AgendaProps {
   /** The title across the top. */
@@ -20,32 +20,13 @@ export interface AgendaProps {
  * and with the type size the deck settles on.
  */
 export function Agenda({ title, children, className }: AgendaProps) {
-  const { refresh } = useContext(SlideContext)
-  const box = useRef<HTMLElement | null>(null)
-  const [height, setHeight] = useState<number | undefined>(undefined)
+  const { ref: box, height } = useStageHeight<HTMLElement>()
 
   const blocks = Children.toArray(children).filter(
     (child) => !(typeof child === 'string' && child.trim() === '')
   )
   const top = blocks.slice(0, 2)
   const below = blocks.slice(2)
-
-  useLayoutEffect(() => {
-    const stage = box.current?.closest<HTMLElement>('.stage')
-    if (!stage) return
-
-    const fit = () => {
-      const style = getComputedStyle(stage)
-      setHeight(
-        stage.clientHeight - Number.parseFloat(style.paddingTop) - Number.parseFloat(style.paddingBottom)
-      )
-    }
-
-    fit()
-    const observer = new ResizeObserver(fit)
-    observer.observe(stage)
-    return () => observer.disconnect()
-  }, [refresh])
 
   return (
     <main
