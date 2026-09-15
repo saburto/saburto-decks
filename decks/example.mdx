@@ -293,3 +293,81 @@ its content joins that slide, steps and all:
 <Slides src="./reused/inline.mdx" />
 
 The slide stays one slide, and the included content is part of it.
+
+---
+
+<style>{`
+/* The slide opens on its text alone: until the first arrow's step the passage
+   is centred across the whole slide, and the column that will hold the
+   explanations keeps its height without showing anything, so the type size
+   the slide settles on does not move when the arrows arrive (R16, R19).
+   Only where the two columns really sit side by side; stacked, they just
+   follow one another. */
+@media (min-width: 40rem) {
+  :host([data-step="0"]) .sd-arrows-demo > div > :first-child {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    align-self: center;
+    max-width: 32em;
+    margin-inline: auto;
+  }
+  :host([data-step="0"]) .sd-arrows-demo > div > :last-child {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+`}</style>
+
+<Columns title="Arrows" className="sd-arrows-demo">
+
+<div>
+
+A deck is <span data-id="arrow-word-file">**one file**</span>.
+
+A code block can be a <span data-id="arrow-word-step">**step**</span>.
+
+Presenting <span data-id="arrow-word-screen">**fills the screen**</span>.
+
+</div>
+
+<Stack gap={1.4}>
+
+<div data-id="arrow-file">
+
+<Appear at={2}>
+
+**One file.** The deck and the page it is read in are the same text.
+
+</Appear>
+
+</div>
+
+<div data-id="arrow-step">
+
+<Appear at={3}>
+
+**A step.** Any part can wait for the reader's next move.
+
+</Appear>
+
+</div>
+
+<div data-id="arrow-screen">
+
+<Appear at={4}>
+
+**The screen.** The same slide, on the whole viewport.
+
+</Appear>
+
+</div>
+
+</Stack>
+
+</Columns>
+
+<Arrow at={2} from="[data-id=arrow-file]@left" to="[data-id=arrow-word-file]@right" color="accent" />
+
+<Arrow at={3} from="[data-id=arrow-step]@left" to="[data-id=arrow-word-step]@right" arc={-0.4} />
+
+<Arrow at={4} from="[data-id=arrow-screen]@left" to="[data-id=arrow-word-screen]@right" arc={0.4} headType="polygon" lineStyle="dashed" headSize={14} color="muted" width={2} />

@@ -12,6 +12,7 @@
         "remark-frontmatter": "^5.0.0",
         "remark-mdx-frontmatter": "^5.2.0",
         "rough-notation": "^0.5.1",
+        "roughjs": "^4.6.6",
       },
       "devDependencies": {
         "@astrojs/react": "^6.0.5",

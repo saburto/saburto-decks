@@ -39,13 +39,14 @@ const HEADINGS = [
   'Three blocks in a column',
   'An imported file',
   "A picture from the imported file's own folder",
-  'Included inside a slide'
+  'Included inside a slide',
+  'Arrows'
 ]
 
 test.beforeEach(async ({ page }) => {
   await page.goto(DEMO)
   await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
-  await expect(page.locator('#deck section.slide')).toHaveCount(22)
+  await expect(page.locator('#deck section.slide')).toHaveCount(23)
 })
 
 test.describe('the table of contents', () => {
@@ -55,7 +56,7 @@ test.describe('the table of contents', () => {
       await contentsButton(page).click()
 
       await expect(panel(page)).toBeVisible()
-      await expect(entries(page)).toHaveCount(22)
+      await expect(entries(page)).toHaveCount(23)
       const listed = await titles(page).allTextContents()
       expect(listed).toEqual(HEADINGS)
 
@@ -83,10 +84,10 @@ test.describe('the table of contents', () => {
     await expect(panel(page)).toBeHidden()
     const moved = await state(page)
     expect(moved.index).toBe(6)
-    await expect(page.locator('#deck .counter')).toHaveText('7 / 22')
+    await expect(page.locator('#deck .counter')).toHaveText('7 / 23')
 
     /* Choosing is navigation, so the live region and the host are told (R10, N1). */
-    await expect(page.locator('#deck .live')).toHaveText(/^Slide 7 of 22/)
+    await expect(page.locator('#deck .live')).toHaveText(/^Slide 7 of 23/)
   })
 
   test('is driven by the keyboard (R17, N1)', async ({ page }) => {
@@ -147,7 +148,7 @@ test.describe('the table of contents', () => {
        slide marked. */
     const list = page.locator('#deck section.slide[data-active] .sd-contents')
     await expect(list).toBeVisible()
-    await expect(list.locator('[data-toc-entry]')).toHaveCount(22)
+    await expect(list.locator('[data-toc-entry]')).toHaveCount(23)
     expect(await list.locator('.contents-title').allTextContents()).toEqual(HEADINGS)
     await expect(list.locator('[data-toc-entry][aria-current="true"]')).toHaveCount(1)
 
@@ -155,7 +156,7 @@ test.describe('the table of contents', () => {
        does not also advance the deck. */
     await list.getByRole('button', { name: 'Motion', exact: true }).click()
     expect((await state(page)).index).toBe(10)
-    await expect(page.locator('#deck .counter')).toHaveText('11 / 22')
+    await expect(page.locator('#deck .counter')).toHaveText('11 / 23')
 
     /* On a slide it is slide content: measured with the slide, and no scroll. */
     await goTo(page, 1)

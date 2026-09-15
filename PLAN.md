@@ -115,6 +115,14 @@ file, but not itself. An included file's own pictures and imports belong to it a
 relative to it, not to the deck that included it. Changing an included file is reflected in the
 deck when it is rebuilt and while it is being developed.
 
+**R19 — Arrows.** A slide can join two things with a hand-drawn arrow: a straight line, or one
+that bows, with a head at one end or at both, drawn in the deck's palette. Each end is placed
+either at a point on the slide or snapped to an element on it, at a named side or corner of that
+element. The arrow is decoration: it never changes the things it joins, the slide's layout, or the
+size its type settles on. An arrow can be revealed as one of the slide's steps, counted and
+navigated with the others (R12); by default it appears with the slide. It is drawn solid, dashed or
+dotted, follows the deck's theme and palette, and respects the reader's reduced-motion preference.
+
 ## Non-functional requirements
 
 **N1 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
@@ -148,6 +156,9 @@ This version is done when:
 9. A deck can be written across files: an include brings another file's slides in as the deck's
    own — ordered, counted, navigated and listed with them — while the same include inside a slide
    is part of that slide, adding no slides and counting its steps with the slide's.
+10. Two things on a slide can be joined by a hand-drawn arrow — from a point to an element, or
+    between two elements — and the arrow can be one of the slide's steps without changing the
+    words it joins or whether the slide fits.
 
 ## Fixed decisions from the owner
 

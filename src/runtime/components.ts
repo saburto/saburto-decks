@@ -9,6 +9,7 @@
 import { Slide } from './Slide'
 import { Contents } from './Contents'
 import { Agenda } from './Agenda'
+import { Arrow } from './Arrow'
 import { Block } from './Block'
 import { Bullets } from './Bullets'
 import { Canvas } from './Canvas'
@@ -27,6 +28,7 @@ export const deckComponents: DeckComponents = {
   Slide,
   Mermaid,
   Mark,
+  Arrow,
   Appear,
   Move,
   Canvas,

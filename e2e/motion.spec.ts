@@ -42,14 +42,14 @@ test.beforeEach(async ({ page }) => {
 test.describe('motion', () => {
   test('an object arrives on its step, and is counted and announced with the rest (R12, R16)', async ({ page }) => {
     await goTo(page, MOTION)
-    await expect(page.locator('#deck .counter')).toHaveText('11 / 22')
+    await expect(page.locator('#deck .counter')).toHaveText('11 / 23')
 
     /* The line that arrives and the line that moves are each a step, so the
        slide has three. */
     const waiting = await state(page)
     expect(waiting.stepCount).toBe(3)
     await expect(page.locator('#deck .step-dot')).toHaveCount(3)
-    await expect(page.locator('#deck .live')).toHaveText('Slide 11 of 22, step 1 of 3')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 11 of 23, step 1 of 3')
 
     /* It is not shown yet, and it is kept out of the accessibility tree so it
        is not read out or focused while it cannot be seen (N1). */
@@ -88,13 +88,13 @@ test.describe('motion', () => {
     /* Two steps on: the line has arrived and the box has moved. */
     await page.keyboard.press('ArrowRight')
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck .live')).toHaveText('Slide 11 of 22, step 3 of 3')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 11 of 23, step 3 of 3')
     await expect.poll(() => offsetFrom(page, start)).toBe(120)
 
     /* One step back: the box returns to where it was, and the arrived line is
        still on the slide. */
     await page.keyboard.press('ArrowLeft')
-    await expect(page.locator('#deck .live')).toHaveText('Slide 11 of 22, step 2 of 3')
+    await expect(page.locator('#deck .live')).toHaveText('Slide 11 of 23, step 2 of 3')
     await expect.poll(() => offsetFrom(page, start)).toBe(0)
     await expect(appear(page)).toHaveCSS('opacity', '1')
 

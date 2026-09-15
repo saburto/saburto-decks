@@ -28,11 +28,11 @@ const compileDeck = async (path: string) =>
 const output = await compileDeck(here('../decks/example.mdx'))
 
 describe('the demo deck', () => {
-  test('has twenty-two slides, two of them from an included file', async () => {
-    /* The deck's own file holds the other twenty: its nineteen slides and the
-       slide the nested include sits in. The two the include brings are
-       compiled with the included file (R18). */
-    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(20)
+  test('has twenty-three slides, two of them from an included file', async () => {
+    /* The deck's own file holds the other twenty-one: its nineteen slides, the
+       slide the nested include sits in, and the arrows slide. The two the
+       include brings are compiled with the included file (R18). */
+    expect(output.match(/_jsxs?\(Slide,/g)).toHaveLength(21)
     const included = await compileDeck(here('../decks/reused/imported.mdx'))
     expect(included.match(/_jsxs?\(Slide,/g)).toHaveLength(2)
     expect(output).toContain('_missingMdxReference("Slide"')
@@ -49,7 +49,7 @@ describe('the demo deck', () => {
     const indices = Array.from(output.matchAll(/index: "(\d+)"/g), (match) => match[1])
     expect(indices).toEqual([
       '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
-      '11', '12', '13', '14', '15', '16', '17', '18', '21'
+      '11', '12', '13', '14', '15', '16', '17', '18', '21', '22'
     ])
   })
 
@@ -116,12 +116,32 @@ describe('annotations (R15)', () => {
   })
 })
 
+describe('arrows (R19)', () => {
+  test('<Arrow> is a component the deck provides, not raw markup', () => {
+    expect(output).toContain('_missingMdxReference("Arrow"')
+    /* Three in the demo deck: each points at a word on the left, and its block
+       appears on the right on the same step. */
+    expect(output.match(/_jsx\(Arrow,/g)).toHaveLength(3)
+  })
+
+  test('its ends, its look and its step survive compilation', () => {
+    expect(output).toContain('from: "[data-id=arrow-file]@left"')
+    expect(output).toContain('to: "[data-id=arrow-word-screen]@right"')
+    expect(output).toContain('lineStyle: "dashed"')
+    expect(output).toContain('headType: "polygon"')
+    expect(output).toContain('arc: -0.4')
+    /* The slide opens on the text alone; the arrows begin at the second step. */
+    expect(output).toContain('at: 4')
+  })
+})
+
 describe('motion (R16)', () => {
   test('<Appear> and <Move> are components the deck provides, not raw markup', () => {
     expect(output).toContain('_missingMdxReference("Appear"')
     expect(output).toContain('_missingMdxReference("Move"')
-    /* One of each in the demo deck. */
-    expect(output.match(/_jsxs?\(Appear,/g)).toHaveLength(1)
+    /* One <Move> on the motion slide; four <Appear>: its arriving line and the
+       arrows slide's three blocks, which appear one per step. */
+    expect(output.match(/_jsxs?\(Appear,/g)).toHaveLength(4)
     expect(output.match(/_jsxs?\(Move,/g)).toHaveLength(1)
   })
 
@@ -200,7 +220,7 @@ describe('layouts (R5)', () => {
     expect(output.match(/_jsx\(Figure,/g)).toHaveLength(1)
     expect(output.match(/_jsx\(Bullets,/g)).toHaveLength(1)
     expect(output.match(/_jsxs?\(Grid,/g)).toHaveLength(2)
-    expect(output.match(/_jsxs?\(Stack,/g)).toHaveLength(3)
+    expect(output.match(/_jsxs?\(Stack,/g)).toHaveLength(4)
   })
 
   test('a picture is imported, so a deck carries its own assets', () => {

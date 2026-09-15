@@ -52,9 +52,9 @@ Slide three.
 
 `---` is ordinary Markdown, so the file stays readable in any editor. Frontmatter's own `---` are
 parsed first, so they never split a slide. A slide may contain headings, paragraphs, lists, links,
-emphasis, inline code, highlighted code blocks (R3, R11), hand-drawn annotations and Mermaid
-diagrams (R13), animated objects (R16), the layout components below, and pictures; anything MDX
-can render will work, but nothing else is promised.
+emphasis, inline code, highlighted code blocks (R3, R11), hand-drawn annotations and arrows
+(R15, R19), and Mermaid diagrams (R13), animated objects (R16), the layout components below, and
+pictures; anything MDX can render will work, but nothing else is promised.
 
 The deck's frontmatter `title` is available to the host as `frontmatter` from the same import.
 
@@ -211,6 +211,47 @@ as it appears unless the reader prefers reduced motion.
 
 Annotations are an extra dependency only when a slide has one: a deck without a `<Mark>` never
 loads the library that draws it.
+
+### Arrows
+
+Join two things on a slide with a hand-drawn arrow, drawn with [Rough.js](https://roughjs.com/):
+
+```mdx
+<Arrow from="[data-id=note]@left" to="[data-id=code]@right" />
+
+<Arrow from="(10%, 80%)" to="(90%, 20%)" arc={0.4} twoWay color="accent" />
+
+<Arrow at={2} from="(50%, 95%)" to="[data-id=callout]@top" lineStyle="dashed" headType="polygon" />
+```
+
+Each end is either a point on the slide — `(x, y)`, with `%` a fraction of the slide's box and a
+bare number pixels — or a CSS selector for an element on the slide, optionally followed by an `@`
+and the side or corner to meet it at: `center`, `top`, `bottom`, `left`, `right`, `topleft`,
+`topright`, `bottomleft`, `bottomright`. Without one, the arrow meets the element's edge nearest
+the other end. Putting a `data-id` on an element is the simplest way to name it.
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `from` / `to` | a point or an element | the two ends: `"(10%, 80%)"` or `"[data-id=note]@left"` |
+| `at` | `number` | the step the arrow is revealed on, counted with the slide's other steps; with the slide when omitted |
+| `color` | a CSS colour, or a palette name (`accent`, `muted`, `fg`, `bg`, `border`, `highlight`) | the deck's own text colour by default |
+| `width` | `number` | the line's thickness in px; `2` by default |
+| `lineStyle` | `solid`, `dashed`, `dotted` | solid by default; the dash scales with `width` |
+| `headType` | `line`, `polygon` | two strokes by default, or a filled triangle |
+| `headSize` | `number` | how long the head is in px; it grows with the line when omitted |
+| `twoWay` | `boolean` | put a head at each end |
+| `arc` | `number` | how far the line bows: `0` is straight, and the sign turns the bow |
+| `roughness` | `number` | Rough.js' roughness: `0` is a clean line, `1` the default sketch |
+| `seed` | `number` | the shape's random seed; fixed by default, so the arrow keeps its shape as the deck resizes |
+
+The arrow is decoration: it lives beside the slide, never in the slide's flow, so it changes
+neither the things it joins nor how the slide fits. It draws itself in when the reader reaches it,
+like an annotation, and a reader who prefers reduced motion gets it at once (N1). An arrow with an
+`at` takes part in the slide's steps exactly as a code block's highlights do (R12), and a host
+drives them with `goToStep`.
+
+Arrows are an extra dependency only when a slide has one: a deck without an `<Arrow>` never loads
+Rough.js.
 
 ### Motion
 
