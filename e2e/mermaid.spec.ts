@@ -42,9 +42,9 @@ async function participants(page: Page): Promise<string[]> {
   return page.evaluate(() => {
     const host = document.querySelector('#deck') as HTMLElement
     const sequence = host.shadowRoot?.querySelector('section.slide[data-active] .sd-mermaid')
-    const names = Array.from(sequence?.querySelectorAll('[data-et="participant"].sd-shown') ?? []).map(
-      (box) => (box.textContent ?? '').trim()
-    )
+    const names = Array.from(
+      sequence?.querySelectorAll('[data-et="participant"].sd-shown') ?? []
+    ).map((box) => (box.textContent ?? '').trim())
     return names.sort()
   })
 }
@@ -108,7 +108,9 @@ test.describe('diagrams', () => {
     expect(sequence?.revealed).toBeLessThan(sequence?.total ?? 0)
 
     /* The source is never left on the slide as text. */
-    expect(await page.locator('#deck section.slide[data-active] .sd-mermaid-source:visible').count()).toBe(0)
+    expect(
+      await page.locator('#deck section.slide[data-active] .sd-mermaid-source:visible').count()
+    ).toBe(0)
   })
 
   test('reveals the sequence a participant and a message at a time (R14)', async ({ page }) => {
@@ -252,11 +254,16 @@ test.describe('diagrams', () => {
 
       for (const slide of [SEQUENCE, FLOWCHART, STATE, CLASS]) {
         await goTo(page, slide)
-        await expect(page.locator('#deck section.slide[data-active] .sd-mermaid svg')).toHaveCount(1)
+        await expect(page.locator('#deck section.slide[data-active] .sd-mermaid svg')).toHaveCount(
+          1
+        )
         const measured = await state(page)
         expect(measured.index).toBe(slide)
         expect(measured.clipped, `slide ${slide} clipped in a ${width} box`).toBeLessThanOrEqual(0)
-        expect(measured.clippedHorizontally, `slide ${slide} overflows at ${width}`).toBeLessThanOrEqual(0)
+        expect(
+          measured.clippedHorizontally,
+          `slide ${slide} overflows at ${width}`
+        ).toBeLessThanOrEqual(0)
       }
     }
   })

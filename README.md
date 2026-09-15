@@ -195,13 +195,13 @@ Press <Mark type="box">Full screen</Mark> to present, or
 <Mark type="circle" at={2} color="accent">Escape</Mark> to come back.
 ```
 
-| Prop | Type | Notes |
-| --- | --- | --- |
-| `type` | `highlight`, `underline`, `box`, `circle`, `strike-through`, `crossed-off`, `bracket` | what to draw; `highlight` by default |
-| `color` | a CSS colour, or a palette name (`accent`, `muted`, `fg`, `bg`, `highlight`) | a highlight uses `--sd-highlight`; the outline kinds use the text's own colour |
-| `at` | `number` | the step the mark is revealed on, counted with the slide's other steps; with the slide when omitted |
-| `multiline` | `boolean` | draw the mark per line, for a passage that wraps |
-| `brackets` | `left`, `right`, `top`, `bottom` | which side a `bracket` sits on |
+| Prop        | Type                                                                                  | Notes                                                                                               |
+| ----------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `type`      | `highlight`, `underline`, `box`, `circle`, `strike-through`, `crossed-off`, `bracket` | what to draw; `highlight` by default                                                                |
+| `color`     | a CSS colour, or a palette name (`accent`, `muted`, `fg`, `bg`, `highlight`)          | a highlight uses `--sd-highlight`; the outline kinds use the text's own colour                      |
+| `at`        | `number`                                                                              | the step the mark is revealed on, counted with the slide's other steps; with the slide when omitted |
+| `multiline` | `boolean`                                                                             | draw the mark per line, for a passage that wraps                                                    |
+| `brackets`  | `left`, `right`, `top`, `bottom`                                                      | which side a `bracket` sits on                                                                      |
 
 The mark is decoration — the words are on the slide whether or not the mark is — so it changes
 neither the text nor how the slide fits. A mark with an `at` takes part in the slide's steps: the
@@ -230,19 +230,19 @@ and the side or corner to meet it at: `center`, `top`, `bottom`, `left`, `right`
 `topright`, `bottomleft`, `bottomright`. Without one, the arrow meets the element's edge nearest
 the other end. Putting a `data-id` on an element is the simplest way to name it.
 
-| Prop | Type | Notes |
-| --- | --- | --- |
-| `from` / `to` | a point or an element | the two ends: `"(10%, 80%)"` or `"[data-id=note]@left"` |
-| `at` | `number` | the step the arrow is revealed on, counted with the slide's other steps; with the slide when omitted |
-| `color` | a CSS colour, or a palette name (`accent`, `muted`, `fg`, `bg`, `border`, `highlight`) | the deck's own text colour by default |
-| `width` | `number` | the line's thickness in px; `2` by default |
-| `lineStyle` | `solid`, `dashed`, `dotted` | solid by default; the dash scales with `width` |
-| `headType` | `line`, `polygon` | two strokes by default, or a filled triangle |
-| `headSize` | `number` | how long the head is in px; it grows with the line when omitted |
-| `twoWay` | `boolean` | put a head at each end |
-| `arc` | `number` | how far the line bows: `0` is straight, and the sign turns the bow |
-| `roughness` | `number` | Rough.js' roughness: `0` is a clean line, `1` the default sketch |
-| `seed` | `number` | the shape's random seed; fixed by default, so the arrow keeps its shape as the deck resizes |
+| Prop          | Type                                                                                   | Notes                                                                                                |
+| ------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `from` / `to` | a point or an element                                                                  | the two ends: `"(10%, 80%)"` or `"[data-id=note]@left"`                                              |
+| `at`          | `number`                                                                               | the step the arrow is revealed on, counted with the slide's other steps; with the slide when omitted |
+| `color`       | a CSS colour, or a palette name (`accent`, `muted`, `fg`, `bg`, `border`, `highlight`) | the deck's own text colour by default                                                                |
+| `width`       | `number`                                                                               | the line's thickness in px; `2` by default                                                           |
+| `lineStyle`   | `solid`, `dashed`, `dotted`                                                            | solid by default; the dash scales with `width`                                                       |
+| `headType`    | `line`, `polygon`                                                                      | two strokes by default, or a filled triangle                                                         |
+| `headSize`    | `number`                                                                               | how long the head is in px; it grows with the line when omitted                                      |
+| `twoWay`      | `boolean`                                                                              | put a head at each end                                                                               |
+| `arc`         | `number`                                                                               | how far the line bows: `0` is straight, and the sign turns the bow                                   |
+| `roughness`   | `number`                                                                               | Rough.js' roughness: `0` is a clean line, `1` the default sketch                                     |
+| `seed`        | `number`                                                                               | the shape's random seed; fixed by default, so the arrow keeps its shape as the deck resizes          |
 
 The arrow is decoration: it lives beside the slide, never in the slide's flow, so it changes
 neither the things it joins nor how the slide fits. It draws itself in when the reader reaches it,
@@ -270,15 +270,15 @@ drives them with `goToStep`. An object that has not been reached keeps its place
 with opacity and moved with a transform, never taken out of the flow — so nothing else on the slide
 shifts as the steps move, and the type size the deck settled on does not change under the reader.
 
-| Component | Prop | Notes |
-| --- | --- | --- |
-| both | `at` | the step it happens on, counted with the slide's other steps; with the slide when omitted |
-| both | `from` | where it starts: any of `opacity`, `x`, `y`, `rotate`, `scale` |
-| both | `to` | where it settles; `Appear` defaults to the resting value of everything `from` names |
-| `Move` | `x`, `y`, `rotate`, `scale` | shorthands for a single `to`: px, px, degrees, factor |
-| both | `transition` | a [Motion transition](https://motion.dev/docs/react-transitions), overriding the deck's short ease-out |
-| both | `layout` | animate to wherever the slide's layout puts it as well as to `to`; on for `Move` |
-| both | `as` | `span` (the default, for a passage inside a paragraph) or `div` |
+| Component | Prop                        | Notes                                                                                                  |
+| --------- | --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| both      | `at`                        | the step it happens on, counted with the slide's other steps; with the slide when omitted              |
+| both      | `from`                      | where it starts: any of `opacity`, `x`, `y`, `rotate`, `scale`                                         |
+| both      | `to`                        | where it settles; `Appear` defaults to the resting value of everything `from` names                    |
+| `Move`    | `x`, `y`, `rotate`, `scale` | shorthands for a single `to`: px, px, degrees, factor                                                  |
+| both      | `transition`                | a [Motion transition](https://motion.dev/docs/react-transitions), overriding the deck's short ease-out |
+| both      | `layout`                    | animate to wherever the slide's layout puts it as well as to `to`; on for `Move`                       |
+| both      | `as`                        | `span` (the default, for a passage inside a paragraph) or `div`                                        |
 
 `<Appear>` fades and rises in by default (`{ opacity: 0, y: 8 }`); `<Move>` starts wherever the
 object already is. An object that is not shown yet is kept out of the accessibility tree, and a
@@ -434,16 +434,16 @@ the title, with the deck's accent on its markers.
 Eight shapes come up again and again. Each is a layout component, or a
 composition of two, so the slide is the content and nothing else:
 
-| Layout | Built from |
-| --- | --- |
-| A title and two columns | `<Columns title>` with two children |
-| A title, two columns, one a picture | `<Columns title>` with a `<Figure>` column |
-| A title, two subtitles, four blocks | `<Columns title>` with two `<Stack>`s, each a heading and two blocks |
-| A title and four blocks in a 2×2 | `<Grid title columns={2}>` with four `<Block>`s |
-| Six blocks in a 3×2 | `<Grid title columns={3}>` with six `<Block>`s |
-| A title and bullets | `<Bullets title>` with a Markdown list |
-| A title, two columns, one a stack of three | `<Columns title>` with a `<Stack>` column |
-| A title, two columns, one a diagram | `<Columns title>` with a Mermaid fence and a passage |
+| Layout                                     | Built from                                                           |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| A title and two columns                    | `<Columns title>` with two children                                  |
+| A title, two columns, one a picture        | `<Columns title>` with a `<Figure>` column                           |
+| A title, two subtitles, four blocks        | `<Columns title>` with two `<Stack>`s, each a heading and two blocks |
+| A title and four blocks in a 2×2           | `<Grid title columns={2}>` with four `<Block>`s                      |
+| Six blocks in a 3×2                        | `<Grid title columns={3}>` with six `<Block>`s                       |
+| A title and bullets                        | `<Bullets title>` with a Markdown list                               |
+| A title, two columns, one a stack of three | `<Columns title>` with a `<Stack>` column                            |
+| A title, two columns, one a diagram        | `<Columns title>` with a Mermaid fence and a passage                 |
 
 ### Spatial layout
 
@@ -532,14 +532,14 @@ React is a peer dependency: the host's React is used, and a deck never carries a
 
 ## Props
 
-| Prop | Type | Notes |
-| --- | --- | --- |
-| `slides` | React component | the compiled deck: `import slides from './my-deck.mdx'` |
-| `defaultSlide` | `number` | which slide to start on |
-| `theme` | `'light' \| 'dark' \| 'system'` | the host decides; the deck never guesses |
-| `onSlideChange` | `(index, count) => void` | told when the slide changes |
-| `onStepChange` | `(step, stepCount) => void` | told when the step within a slide changes (R12) |
-| `onModeChange` | `(mode) => void` | told when the deck enters or leaves present mode |
+| Prop            | Type                            | Notes                                                   |
+| --------------- | ------------------------------- | ------------------------------------------------------- |
+| `slides`        | React component                 | the compiled deck: `import slides from './my-deck.mdx'` |
+| `defaultSlide`  | `number`                        | which slide to start on                                 |
+| `theme`         | `'light' \| 'dark' \| 'system'` | the host decides; the deck never guesses                |
+| `onSlideChange` | `(index, count) => void`        | told when the slide changes                             |
+| `onStepChange`  | `(step, stepCount) => void`     | told when the step within a slide changes (R12)         |
+| `onModeChange`  | `(mode) => void`                | told when the deck enters or leaves present mode        |
 
 Anything else — `id`, `className`, `style`, `aria-label`, `data-*` — goes to the deck's element in
 the page, so the host can lay it out like any other block.
@@ -567,7 +567,7 @@ always leave with `Esc`, or with the deck's own exit control.
 
 ## Sizing and theming
 
-The deck fills its container's width and is 16:9 by default. Its type is sized to *its own box*,
+The deck fills its container's width and is 16:9 by default. Its type is sized to _its own box_,
 not to the page or the viewport — 1cqi is 1% of the deck's width — and is shrunk further if a
 slide would not otherwise fit. **A slide is never scrolled**: it is scaled to fit instead.
 
@@ -579,28 +579,28 @@ The host page has the last word on both:
 #my-deck { --sd-bg: #fffdf5; --sd-accent: #b45309 }
 ```
 
-| Variable | Use |
-| --- | --- |
-| `--sd-aspect` | the deck's shape; `auto` to let the host's own `height` decide |
-| `--sd-bg` | deck background |
-| `--sd-fg` | body text |
-| `--sd-muted` | counter and secondary text |
-| `--sd-border` | hairlines |
-| `--sd-accent` | links |
-| `--sd-surface` | inline code and buttons |
+| Variable         | Use                                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------- |
+| `--sd-aspect`    | the deck's shape; `auto` to let the host's own `height` decide                                        |
+| `--sd-bg`        | deck background                                                                                       |
+| `--sd-fg`        | body text                                                                                             |
+| `--sd-muted`     | counter and secondary text                                                                            |
+| `--sd-border`    | hairlines                                                                                             |
+| `--sd-accent`    | links                                                                                                 |
+| `--sd-surface`   | inline code and buttons                                                                               |
 | `--sd-highlight` | the colour a `<Mark type="highlight">` is drawn in (translucent, so the words stay readable under it) |
-| `--sd-code-dim` | how far the lines outside the current step recede (default `0.3`) |
+| `--sd-code-dim`  | how far the lines outside the current step recede (default `0.3`)                                     |
 
 ## Keyboard
 
-| Key | Embedded (once the deck has focus) | Presenting |
-| --- | --- | --- |
-| `→` `↓` `PageDown` `Space` | next step or slide | next step or slide |
-| `←` `↑` `PageUp` | previous step or slide | previous step or slide |
-| `Home` / `End` | first / last slide | first / last slide |
-| `O` | open or close the contents | open or close the contents |
-| `Esc` | closes the contents, if open | closes the contents, else leaves present mode |
-| `Tab` | moves on through the page | cycles within the deck |
+| Key                        | Embedded (once the deck has focus) | Presenting                                    |
+| -------------------------- | ---------------------------------- | --------------------------------------------- |
+| `→` `↓` `PageDown` `Space` | next step or slide                 | next step or slide                            |
+| `←` `↑` `PageUp`           | previous step or slide             | previous step or slide                        |
+| `Home` / `End`             | first / last slide                 | first / last slide                            |
+| `O`                        | open or close the contents         | open or close the contents                    |
+| `Esc`                      | closes the contents, if open       | closes the contents, else leaves present mode |
+| `Tab`                      | moves on through the page          | cycles within the deck                        |
 
 The deck takes the keyboard **only while it has focus**; click it, or Tab to it. A click never
 advances the slide — the arrows, `Space`, `Page Up`/`Page Down` and the bar's controls do that.

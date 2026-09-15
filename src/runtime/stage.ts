@@ -40,7 +40,9 @@ export function useStageHeight<T extends HTMLElement = HTMLElement>(): StageHeig
          than the stage has and make a slide impossible to fit at any size. */
       setHeight(
         Math.floor(
-          stage.clientHeight - Number.parseFloat(style.paddingTop) - Number.parseFloat(style.paddingBottom)
+          stage.clientHeight -
+            Number.parseFloat(style.paddingTop) -
+            Number.parseFloat(style.paddingBottom)
         )
       )
       /* The deck fits the type against the height this layout had when it

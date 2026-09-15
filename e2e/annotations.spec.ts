@@ -18,7 +18,8 @@ const PRESENTING = 3
 const ofType = (page: Page, type: string) =>
   page.locator(`#deck section.slide[data-active] .sd-mark[data-mark="${type}"]`)
 /** The strokes rough-notation has actually drawn for a mark. */
-const strokes = (page: Page, type: string) => ofType(page, type).locator('svg.rough-annotation path')
+const strokes = (page: Page, type: string) =>
+  ofType(page, type).locator('svg.rough-annotation path')
 
 test.beforeEach(async ({ page }) => {
   await page.goto(DEMO)
@@ -42,7 +43,9 @@ test.describe('annotations', () => {
        translucent highlight colour instead. */
     const highlight = await page.evaluate(() => {
       const root = document.querySelector('#deck')?.shadowRoot
-      const path = root?.querySelector('section.slide[data-active] .sd-mark[data-mark="highlight"] svg path')
+      const path = root?.querySelector(
+        'section.slide[data-active] .sd-mark[data-mark="highlight"] svg path'
+      )
       const deck = root?.querySelector('.deck')
       /* A colour written as `#rrggbbaa` and the same colour written as
          `rgba(...)` are the same colour; the stylesheet is minified, so the
@@ -57,7 +60,9 @@ test.describe('annotations', () => {
       }
       return {
         drawn: normalise(path ? getComputedStyle(path).stroke : ''),
-        declared: normalise(deck ? getComputedStyle(deck).getPropertyValue('--sd-highlight').trim() : ''),
+        declared: normalise(
+          deck ? getComputedStyle(deck).getPropertyValue('--sd-highlight').trim() : ''
+        ),
         text: deck ? getComputedStyle(deck).color : ''
       }
     })
@@ -66,7 +71,9 @@ test.describe('annotations', () => {
 
     const drawn = await page.evaluate(() => {
       const root = document.querySelector('#deck')?.shadowRoot
-      const wrapper = root?.querySelector<HTMLElement>('section.slide[data-active] .sd-mark[data-mark="highlight"]')
+      const wrapper = root?.querySelector<HTMLElement>(
+        'section.slide[data-active] .sd-mark[data-mark="highlight"]'
+      )
       const words = wrapper?.querySelector('span')?.getBoundingClientRect()
       const path = wrapper?.querySelector('svg path')?.getBoundingClientRect()
       return { words, path }
@@ -150,7 +157,9 @@ test.describe('annotations', () => {
     /* Move away: the title slide's mark is out of sight, and is taken down
        rather than left drawn against a hidden box. */
     await goTo(page, WRITING)
-    const title = page.locator('#deck section.slide[data-index="0"] .sd-mark[data-mark="highlight"]')
+    const title = page.locator(
+      '#deck section.slide[data-index="0"] .sd-mark[data-mark="highlight"]'
+    )
     await expect(title.locator('svg path')).toHaveCount(0)
   })
 
@@ -162,7 +171,9 @@ test.describe('annotations', () => {
     const stroke = () =>
       page.evaluate(() => {
         const root = document.querySelector('#deck')?.shadowRoot
-        const path = root?.querySelector('section.slide[data-active] .sd-mark[data-mark="circle"] svg path')
+        const path = root?.querySelector(
+          'section.slide[data-active] .sd-mark[data-mark="circle"] svg path'
+        )
         return path ? getComputedStyle(path).stroke : ''
       })
 
@@ -185,10 +196,13 @@ test.describe('annotations', () => {
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.goto(DEMO)
     await goTo(page, TITLE)
-    await expect(strokes(page, 'highlight').first()).toHaveCSS('animation-name', 'rough-notation-dash')
+    await expect(strokes(page, 'highlight').first()).toHaveCSS(
+      'animation-name',
+      'rough-notation-dash'
+    )
   })
 
-  test("puts none of its styling in the host page (R8, R15)", async ({ page }) => {
+  test('puts none of its styling in the host page (R8, R15)', async ({ page }) => {
     await goTo(page, TITLE)
     await expect(strokes(page, 'highlight')).not.toHaveCount(0)
 

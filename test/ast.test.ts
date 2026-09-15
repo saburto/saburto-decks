@@ -48,7 +48,10 @@ describe('walk', () => {
     type: 'root',
     children: [
       { type: 'paragraph', children: [{ type: 'text', value: 'a' }] },
-      { type: 'blockquote', children: [{ type: 'paragraph', children: [{ type: 'text', value: 'b' }] }] }
+      {
+        type: 'blockquote',
+        children: [{ type: 'paragraph', children: [{ type: 'text', value: 'b' }] }]
+      }
     ]
   }
 
@@ -72,7 +75,8 @@ describe('walk', () => {
     const seen: string[] = []
     walk(replaced, (node) => {
       seen.push(node.type)
-      if (node.type === 'code') replaced.children = [jsxElement('Mermaid', { children: [textNode('x')] })]
+      if (node.type === 'code')
+        replaced.children = [jsxElement('Mermaid', { children: [textNode('x')] })]
     })
     expect(replaced.children?.[0]?.name).toBe('Mermaid')
     expect(seen).toEqual(['root', 'code', 'paragraph'])
@@ -113,7 +117,9 @@ describe('building nodes', () => {
       body: [
         {
           type: 'ImportDeclaration',
-          specifiers: [{ type: 'ImportDefaultSpecifier', local: { type: 'Identifier', name: '__slides' } }],
+          specifiers: [
+            { type: 'ImportDefaultSpecifier', local: { type: 'Identifier', name: '__slides' } }
+          ],
           source: { type: 'Literal', value: './part.mdx', raw: '"./part.mdx"' }
         }
       ]

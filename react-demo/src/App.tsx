@@ -61,7 +61,9 @@ export default function App() {
         <button
           type="button"
           id="present"
-          onClick={() => (mode === 'present' ? deck.current?.exitPresent() : deck.current?.present())}
+          onClick={() =>
+            mode === 'present' ? deck.current?.exitPresent() : deck.current?.present()
+          }
         >
           {mode === 'present' ? 'Exit, from the host' : 'Present, from the host'}
         </button>

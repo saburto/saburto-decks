@@ -48,8 +48,27 @@ describe('the demo deck', () => {
   test('every slide is addressed by index in document order', () => {
     const indices = Array.from(output.matchAll(/index: "(\d+)"/g), (match) => match[1])
     expect(indices).toEqual([
-      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
-      '11', '12', '13', '14', '15', '16', '17', '18', '21', '22'
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      '14',
+      '15',
+      '16',
+      '17',
+      '18',
+      '21',
+      '22'
     ])
   })
 
@@ -80,7 +99,9 @@ describe('code blocks', () => {
   test("uses Shiki's own highlight classes (R11, R12)", () => {
     /* The block and the lines of the first step are marked the way Shiki marks
        them, so stepping only has to move those marks. */
-    expect(output).toContain('className: "shiki shiki-themes vitesse-light vitesse-dark has-highlighted"')
+    expect(output).toContain(
+      'className: "shiki shiki-themes vitesse-light vitesse-dark has-highlighted"'
+    )
     expect(output).toContain('className: "line highlighted"')
   })
 

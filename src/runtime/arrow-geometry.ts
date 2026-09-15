@@ -160,10 +160,22 @@ export function closestEdgePoint(box: ArrowBox, toward: ArrowPoint): ArrowPoint 
 
 /** Where on a measured element an arrow meets it: a named side or corner, or
  * the edge point nearest the other end when it names none. */
-export function anchorPoint(box: ArrowBox, anchor: ArrowAnchor | null, toward: ArrowPoint): ArrowPoint {
+export function anchorPoint(
+  box: ArrowBox,
+  anchor: ArrowAnchor | null,
+  toward: ArrowPoint
+): ArrowPoint {
   if (anchor === null) return closestEdgePoint(box, toward)
-  const x = anchor.includes('left') ? box.x : anchor.includes('right') ? box.x + box.width : box.x + box.width / 2
-  const y = anchor.includes('top') ? box.y : anchor.includes('bottom') ? box.y + box.height : box.y + box.height / 2
+  const x = anchor.includes('left')
+    ? box.x
+    : anchor.includes('right')
+      ? box.x + box.width
+      : box.x + box.width / 2
+  const y = anchor.includes('top')
+    ? box.y
+    : anchor.includes('bottom')
+      ? box.y + box.height
+      : box.y + box.height / 2
   return { x, y }
 }
 
@@ -254,7 +266,12 @@ export function arcGeometry(point1: ArrowPoint, point2: ArrowPoint, arc: number)
  * a rotation alone aims it. An arc turns the head by a quarter turn from the
  * radius to its own tangent; `reverse` turns the other way, which is what the
  * head at the far end of a two-way arrow carries. */
-export function headTransform(point: ArrowPoint, angle: number, arc: number, reverse = false): string {
+export function headTransform(
+  point: ArrowPoint,
+  angle: number,
+  arc: number,
+  reverse = false
+): string {
   const turn = (arc >= 0 ? 90 : -90) * (reverse ? -1 : 1)
   const degrees = (angle * 180) / Math.PI + turn
   return `translate(${point.x},${point.y}) rotate(${degrees})`

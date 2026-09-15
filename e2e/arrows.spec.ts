@@ -39,7 +39,9 @@ async function drawingBox(page: Page, nth: number) {
     const root = document.querySelector('#deck')?.shadowRoot
     const svg = root?.querySelectorAll('.sd-arrow')[index]
     if (!svg) return null
-    const rects = Array.from(svg.querySelectorAll('path')).map((path) => path.getBoundingClientRect())
+    const rects = Array.from(svg.querySelectorAll('path')).map((path) =>
+      path.getBoundingClientRect()
+    )
     if (rects.length === 0) return null
     const left = Math.min(...rects.map((rect) => rect.left))
     const top = Math.min(...rects.map((rect) => rect.top))
@@ -58,7 +60,9 @@ test.beforeEach(async ({ page }) => {
 })
 
 test.describe('arrows', () => {
-  test('opens on the text alone, and takes up the arrows on the next step (R12, R19)', async ({ page }) => {
+  test('opens on the text alone, and takes up the arrows on the next step (R12, R19)', async ({
+    page
+  }) => {
     await goTo(page, ARROWS)
     await page.locator('#deck').focus()
 
@@ -169,7 +173,9 @@ test.describe('arrows', () => {
     const stroke = () =>
       page.evaluate(() => {
         const root = document.querySelector('#deck')?.shadowRoot
-        const path = root?.querySelectorAll('.sd-arrow')[0]?.querySelector('path[stroke="currentColor"]')
+        const path = root
+          ?.querySelectorAll('.sd-arrow')[0]
+          ?.querySelector('path[stroke="currentColor"]')
         return path ? getComputedStyle(path).stroke : ''
       })
 
@@ -191,6 +197,9 @@ test.describe('arrows', () => {
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.goto(DEMO)
     await goToFirstArrow(page)
-    await expect(arrow(page, 0).locator('.sd-arrow-stroke').first()).toHaveCSS('animation-name', 'sd-arrow-draw')
+    await expect(arrow(page, 0).locator('.sd-arrow-stroke').first()).toHaveCSS(
+      'animation-name',
+      'sd-arrow-draw'
+    )
   })
 })

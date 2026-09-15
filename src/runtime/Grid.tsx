@@ -42,7 +42,9 @@ export function Grid({ title, lead, columns = 2, children, className }: GridProp
         </h1>
       )}
       {lead !== undefined && (
-        <p className="mx-auto mt-[-1em] max-w-[50em] text-center text-[1em] text-sd-muted">{lead}</p>
+        <p className="mx-auto mt-[-1em] max-w-[50em] text-center text-[1em] text-sd-muted">
+          {lead}
+        </p>
       )}
       <div
         className="mx-auto grid w-full max-w-[64cqi] flex-1 content-center items-start gap-[1.5em]"

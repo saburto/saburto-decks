@@ -50,7 +50,9 @@ test.beforeEach(async ({ page }) => {
 })
 
 test.describe('the table of contents', () => {
-  test('is reachable from any slide and lists the slides by their headings (R17)', async ({ page }) => {
+  test('is reachable from any slide and lists the slides by their headings (R17)', async ({
+    page
+  }) => {
     for (const index of [0, 4, 9]) {
       await goTo(page, index)
       await contentsButton(page).click()
@@ -61,7 +63,9 @@ test.describe('the table of contents', () => {
       expect(listed).toEqual(HEADINGS)
 
       /* The reader's own slide is marked, wherever in the deck they are. */
-      await expect(page.locator('#deck .contents-panel [data-toc-entry][aria-current="true"]')).toHaveCount(1)
+      await expect(
+        page.locator('#deck .contents-panel [data-toc-entry][aria-current="true"]')
+      ).toHaveCount(1)
       await expect(
         page.locator('#deck .contents-panel [data-toc-entry][aria-current="true"] .contents-title')
       ).toHaveText(listed[index] ?? '')
@@ -97,7 +101,9 @@ test.describe('the table of contents', () => {
     /* `O` opens it, and focus lands on the reader's own slide. */
     await page.keyboard.press('o')
     await expect(panel(page)).toBeVisible()
-    await expect(page.locator('#deck [data-toc-entry]:focus .contents-title')).toHaveText('Presenting it')
+    await expect(page.locator('#deck [data-toc-entry]:focus .contents-title')).toHaveText(
+      'Presenting it'
+    )
 
     /* The arrow keys move through the entries, and the deck does not move
        under them while it is open. */
@@ -112,7 +118,9 @@ test.describe('the table of contents', () => {
     await expect(page.locator('#deck .bar button:focus')).toHaveText('Contents')
   })
 
-  test('dismisses on a click outside the panel without advancing the slide (R17)', async ({ page }) => {
+  test('dismisses on a click outside the panel without advancing the slide (R17)', async ({
+    page
+  }) => {
     await goTo(page, 6)
     await contentsButton(page).click()
     await expect(panel(page)).toBeVisible()

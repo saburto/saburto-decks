@@ -126,7 +126,9 @@ try {
   await page.waitForSelector('#deck')
   /* The deck is client-only (R8), so wait for the slides to exist at all. */
   await page.waitForFunction(
-    () => (document.querySelector('#deck')?.shadowRoot?.querySelectorAll('section.slide').length ?? 0) > 0
+    () =>
+      (document.querySelector('#deck')?.shadowRoot?.querySelectorAll('section.slide').length ?? 0) >
+      0
   )
 
   if (width || aspect) {
@@ -151,9 +153,11 @@ try {
   if (slide !== undefined || step !== undefined) {
     await page.evaluate(
       ({ at, within }) => {
-        const deck = (window as unknown as {
-          deck?: { goTo(index: number, step?: number): void; goToStep(step: number): void }
-        }).deck
+        const deck = (
+          window as unknown as {
+            deck?: { goTo(index: number, step?: number): void; goToStep(step: number): void }
+          }
+        ).deck
         if (at === null) deck?.goToStep(within as number)
         else deck?.goTo(at, within ?? undefined)
       },
@@ -169,7 +173,13 @@ try {
   const report = await state(page)
   const heading = await page.evaluate(() => {
     const shadow = (document.querySelector('#deck') as HTMLElement).shadowRoot
-    return shadow?.querySelector('section.slide[data-active] h1, section.slide[data-active] h2, section.slide[data-active] h3')?.textContent?.trim() ?? ''
+    return (
+      shadow
+        ?.querySelector(
+          'section.slide[data-active] h1, section.slide[data-active] h2, section.slide[data-active] h3'
+        )
+        ?.textContent?.trim() ?? ''
+    )
   })
 
   if (shot) {
@@ -180,14 +190,21 @@ try {
   if (asJson) {
     console.log(JSON.stringify({ ...report, heading, shot: shot ?? null }, null, 2))
   } else {
-    const row = (label: string, value: unknown) => console.log(`${label.padEnd(11)}${String(value)}`)
+    const row = (label: string, value: unknown) =>
+      console.log(`${label.padEnd(11)}${String(value)}`)
     row('url', url)
     row('mode', `${report.mode}   theme ${report.theme ?? '(none)'}`)
-    row('slide', `${report.index + 1}/${report.count}   step ${report.step + 1}/${report.stepCount}`)
+    row(
+      'slide',
+      `${report.index + 1}/${report.count}   step ${report.step + 1}/${report.stepCount}`
+    )
     row('heading', heading)
     row('type', `${report.typePx}px`)
     row('clipped', `${report.clipped}px vertically, ${report.clippedHorizontally}px horizontally`)
-    row('box', `host ${Math.round(report.box.width)}x${Math.round(report.box.height)}, surface ${Math.round(report.surface.width)}x${Math.round(report.surface.height)} ${report.surface.position}`)
+    row(
+      'box',
+      `host ${Math.round(report.box.width)}x${Math.round(report.box.height)}, surface ${Math.round(report.surface.width)}x${Math.round(report.surface.height)} ${report.surface.position}`
+    )
     row('counter', `${report.counter}   live "${report.live}"`)
     row('highlight', `${report.activeLines} line(s), ${report.hiddenCode} block(s) hidden`)
     row('visible', report.visible.join(' '))

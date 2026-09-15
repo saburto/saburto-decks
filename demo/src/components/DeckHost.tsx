@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Deck, type DeckComponent, type DeckHandle, type DeckMode, type DeckTheme } from '../../../src/index.ts'
+import {
+  Deck,
+  type DeckComponent,
+  type DeckHandle,
+  type DeckMode,
+  type DeckTheme
+} from '../../../src/index.ts'
 
 const THEMES: DeckTheme[] = ['light', 'dark', 'system']
 
@@ -53,7 +59,9 @@ export default function DeckHost({ slides }: { slides: DeckComponent }) {
         <button
           type="button"
           id="present"
-          onClick={() => (mode === 'present' ? deck.current?.exitPresent() : deck.current?.present())}
+          onClick={() =>
+            mode === 'present' ? deck.current?.exitPresent() : deck.current?.present()
+          }
         >
           {mode === 'present' ? 'Exit, from the host' : 'Present, from the host'}
         </button>

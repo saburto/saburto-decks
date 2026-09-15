@@ -45,10 +45,17 @@ export function Canvas({ width = 960, height = 590, children }: CanvasProps) {
     const fit = () => {
       const style = getComputedStyle(stage)
       const room = {
-        width: stage.clientWidth - Number.parseFloat(style.paddingLeft) - Number.parseFloat(style.paddingRight),
-        height: stage.clientHeight - Number.parseFloat(style.paddingTop) - Number.parseFloat(style.paddingBottom)
+        width:
+          stage.clientWidth -
+          Number.parseFloat(style.paddingLeft) -
+          Number.parseFloat(style.paddingRight),
+        height:
+          stage.clientHeight -
+          Number.parseFloat(style.paddingTop) -
+          Number.parseFloat(style.paddingBottom)
       }
-      if (room.width > 0 && room.height > 0) setScale(Math.min(room.width / width, room.height / height))
+      if (room.width > 0 && room.height > 0)
+        setScale(Math.min(room.width / width, room.height / height))
     }
 
     fit()

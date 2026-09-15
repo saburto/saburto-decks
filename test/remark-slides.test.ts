@@ -4,8 +4,15 @@ import type { MdastNode } from '../src/build/ast'
 
 const run = (tree: MdastNode) => remarkSlides()(tree)
 
-const p = (text: string): MdastNode => ({ type: 'paragraph', children: [{ type: 'text', value: text }] })
-const heading = (text: string): MdastNode => ({ type: 'heading', depth: 1, children: [{ type: 'text', value: text }] })
+const p = (text: string): MdastNode => ({
+  type: 'paragraph',
+  children: [{ type: 'text', value: text }]
+})
+const heading = (text: string): MdastNode => ({
+  type: 'heading',
+  depth: 1,
+  children: [{ type: 'text', value: text }]
+})
 const break_ = (): MdastNode => ({ type: 'thematicBreak' })
 const attribute = (node: MdastNode | undefined, name: string) =>
   node?.attributes?.find((candidate) => candidate.name === name)
@@ -29,9 +36,7 @@ describe('splitSlides', () => {
   test('labels slides with their index as a string attribute', () => {
     const slides = splitSlides([p('one'), break_(), p('two')])
 
-    expect(slides[1]?.attributes).toEqual([
-      { type: 'mdxJsxAttribute', name: 'index', value: '1' }
-    ])
+    expect(slides[1]?.attributes).toEqual([{ type: 'mdxJsxAttribute', name: 'index', value: '1' }])
   })
 
   test('no break means a single slide', () => {
@@ -67,13 +72,16 @@ describe('splitSlides', () => {
     expect(attribute(slides[2], 'index')?.value).toBe('4')
   })
 
-  test('an include inside a slide is that slide\'s content (R18)', () => {
+  test("an include inside a slide is that slide's content (R18)", () => {
     const slides = splitSlides([p('one'), break_(), p('two'), include('./part.mdx', 3)])
 
     expect(slides).toHaveLength(2)
     expect(slides[1]?.name).toBe('Slide')
     expect(attribute(slides[1], 'index')?.value).toBe('1')
-    expect(slides[1]?.children?.map((node) => node.name ?? node.type)).toEqual(['paragraph', 'Slides'])
+    expect(slides[1]?.children?.map((node) => node.name ?? node.type)).toEqual([
+      'paragraph',
+      'Slides'
+    ])
   })
 
   test('imports in a slide that is an include keep their place in the file (R18)', () => {
@@ -99,7 +107,11 @@ describe('remarkSlides', () => {
 
     run(tree)
 
-    expect(tree.children?.map((c) => c.type)).toEqual(['yaml', 'mdxJsxFlowElement', 'mdxJsxFlowElement'])
+    expect(tree.children?.map((c) => c.type)).toEqual([
+      'yaml',
+      'mdxJsxFlowElement',
+      'mdxJsxFlowElement'
+    ])
     expect(tree.children?.[1]).toEqual({
       type: 'mdxJsxFlowElement',
       name: 'Slide',

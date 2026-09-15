@@ -7,7 +7,17 @@
  * deck and is told when it changes).
  */
 import { expect, test } from '@playwright/test'
-import { DEMO, deck, goTo, hostCss, hostExitPresent, hostPresentButton, hostStatus, nextSlide, state } from './helpers'
+import {
+  DEMO,
+  deck,
+  goTo,
+  hostCss,
+  hostExitPresent,
+  hostPresentButton,
+  hostStatus,
+  nextSlide,
+  state
+} from './helpers'
 
 test.beforeEach(async ({ page }) => {
   await page.goto(DEMO)
@@ -45,21 +55,24 @@ test.describe('an embedded deck', () => {
 
     const code = page.locator('#deck section.slide[data-active] pre.shiki')
     await expect(code).toHaveCount(1)
-    await expect(page.locator('#deck section.slide[data-active] .sd-code-title')).toHaveText('Post.tsx')
+    await expect(page.locator('#deck section.slide[data-active] .sd-code-title')).toHaveText(
+      'Post.tsx'
+    )
 
     /* Highlighted means coloured: the tokens do not all share one colour. */
-    const colors = await code.locator('span').evaluateAll((spans) =>
-      Array.from(new Set(spans.map((span) => getComputedStyle(span).color)))
-    )
+    const colors = await code
+      .locator('span')
+      .evaluateAll((spans) =>
+        Array.from(new Set(spans.map((span) => getComputedStyle(span).color)))
+      )
     expect(colors.length).toBeGreaterThan(1)
 
     /* The current step's line is marked the way Shiki marks it, and the rest
        of the code recedes rather than the marked line being boxed. */
     await expect(page.locator('#deck section.slide[data-active] .line.highlighted')).toHaveCount(1)
-    await expect(page.locator('#deck section.slide[data-active] .line:not(.highlighted)').first()).toHaveCSS(
-      'opacity',
-      '0.3'
-    )
+    await expect(
+      page.locator('#deck section.slide[data-active] .line:not(.highlighted)').first()
+    ).toHaveCSS('opacity', '0.3')
 
     /* Shiki emits both themes; the deck's own palette picks one. */
     await expect(code).toHaveCSS('background-color', 'rgb(255, 255, 255)')
@@ -100,7 +113,10 @@ test.describe('an embedded deck', () => {
     expect(now.hiddenCode).toBe(0)
     expect(now.activeLines).toBe(0)
     await expect(page.locator('#deck section.slide[data-active] pre.shiki')).toBeVisible()
-    await expect(page.locator('#deck section.slide[data-active] .line').first()).toHaveCSS('opacity', '0.3')
+    await expect(page.locator('#deck section.slide[data-active] .line').first()).toHaveCSS(
+      'opacity',
+      '0.3'
+    )
 
     /* The dots show where in the step sequence the reader is, the live region
        says it, and the host has been told (R10, N1). */
@@ -178,8 +194,13 @@ test.describe('an embedded deck', () => {
         await goTo(page, index)
         const measured = await state(page)
         expect(measured.index, `at slide ${index}`).toBe(index)
-        expect(measured.clipped, `slide ${index} is clipped in a ${width} box`).toBeLessThanOrEqual(0)
-        expect(measured.clippedHorizontally, `slide ${index} overflows sideways at ${width}`).toBeLessThanOrEqual(0)
+        expect(measured.clipped, `slide ${index} is clipped in a ${width} box`).toBeLessThanOrEqual(
+          0
+        )
+        expect(
+          measured.clippedHorizontally,
+          `slide ${index} overflows sideways at ${width}`
+        ).toBeLessThanOrEqual(0)
       }
     }
 
@@ -225,10 +246,18 @@ test.describe('an embedded deck', () => {
        purpose. Snapshot one of those, take the deck away, and compare. */
     const snapshot = () =>
       page.evaluate(() => {
-        const paragraph = getComputedStyle(document.querySelector('.wrap > section > p') as HTMLElement)
+        const paragraph = getComputedStyle(
+          document.querySelector('.wrap > section > p') as HTMLElement
+        )
         const heading = getComputedStyle(document.querySelector('.wrap > h1') as HTMLElement)
         return {
-          paragraph: [paragraph.color, paragraph.fontFamily, paragraph.lineHeight, paragraph.borderLeftWidth, paragraph.paddingLeft],
+          paragraph: [
+            paragraph.color,
+            paragraph.fontFamily,
+            paragraph.lineHeight,
+            paragraph.borderLeftWidth,
+            paragraph.paddingLeft
+          ],
           heading: [heading.color, heading.textTransform, heading.textDecorationLine]
         }
       })
@@ -251,8 +280,14 @@ test.describe('an embedded deck', () => {
     const heading = page.locator('#deck section.slide[data-active] h1').first()
     await expect(heading).toHaveCSS('text-transform', 'none')
     await expect(heading).toHaveCSS('color', 'rgb(22, 24, 29)')
-    await expect(page.locator('#deck section.slide[data-active] p').first()).toHaveCSS('border-left-width', '0px')
-    await expect(page.locator('#deck section.slide[data-active] p').first()).toHaveCSS('font-family', /ui-sans-serif/)
+    await expect(page.locator('#deck section.slide[data-active] p').first()).toHaveCSS(
+      'border-left-width',
+      '0px'
+    )
+    await expect(page.locator('#deck section.slide[data-active] p').first()).toHaveCSS(
+      'font-family',
+      /ui-sans-serif/
+    )
   })
 
   test('the deck styles do not reach into the host page (R8)', async ({ page }) => {
@@ -299,12 +334,16 @@ test.describe('an embedded deck', () => {
     const stops: string[] = []
     for (let i = 0; i < 8; i++) {
       await page.keyboard.press('Tab')
-      stops.push(await page.evaluate(() => {
-        const host = document.querySelector('#deck') as HTMLElement
-        const inside = host.shadowRoot?.activeElement
-        if (inside) return `deck:${inside.textContent?.trim()}`
-        return document.activeElement === host ? 'deck:itself' : `page:${(document.activeElement as HTMLElement | null)?.tagName.toLowerCase() ?? 'body'}`
-      }))
+      stops.push(
+        await page.evaluate(() => {
+          const host = document.querySelector('#deck') as HTMLElement
+          const inside = host.shadowRoot?.activeElement
+          if (inside) return `deck:${inside.textContent?.trim()}`
+          return document.activeElement === host
+            ? 'deck:itself'
+            : `page:${(document.activeElement as HTMLElement | null)?.tagName.toLowerCase() ?? 'body'}`
+        })
+      )
     }
 
     /* Embedded, the deck must not trap focus: Tab has to be able to leave. */
@@ -335,11 +374,16 @@ test.describe('an embedded deck', () => {
        to keep working, steps included. */
     await page.waitForFunction(() => Boolean((window as unknown as { deck?: unknown }).deck))
     await page.evaluate(() => {
-      ;(window as unknown as { early?: unknown }).early = (window as unknown as { deck?: unknown }).deck
+      ;(window as unknown as { early?: unknown }).early = (
+        window as unknown as { deck?: unknown }
+      ).deck
     })
 
     await page.evaluate(() =>
-      (window as unknown as { early: { goTo(index: number, step?: number): void } }).early.goTo(5, 3)
+      (window as unknown as { early: { goTo(index: number, step?: number): void } }).early.goTo(
+        5,
+        3
+      )
     )
     await expect(page.locator('#deck .counter')).toHaveText('6 / 23')
     expect((await state(page)).step).toBe(3)

@@ -16,7 +16,8 @@ export const deck = (page: Page) => page.locator('#deck')
 export const bar = (page: Page) => page.locator('#deck .bar')
 
 /** Advances one slide using the deck's own control, as a reader would. */
-export const nextSlide = (page: Page) => page.locator('#deck .bar button[aria-label="Next slide"]').click()
+export const nextSlide = (page: Page) =>
+  page.locator('#deck .bar button[aria-label="Next slide"]').click()
 
 /** The deck's own way in and out of present mode. */
 export const fullScreen = (page: Page) => page.locator('#deck .bar button').last().click()
@@ -140,7 +141,8 @@ export async function focusPath(page: Page): Promise<string> {
   return page.evaluate(() => {
     const host = document.querySelector('#deck') as HTMLElement
     const inside = host.shadowRoot?.activeElement
-    if (inside) return `deck:${inside.getAttribute('aria-label') ?? inside.textContent?.trim() ?? ''}`
+    if (inside)
+      return `deck:${inside.getAttribute('aria-label') ?? inside.textContent?.trim() ?? ''}`
     if (document.activeElement === host) return 'deck:itself'
     const outside = document.activeElement as HTMLElement | null
     if (!outside || outside === document.body) return 'page:body'

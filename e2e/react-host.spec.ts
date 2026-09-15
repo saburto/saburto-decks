@@ -29,13 +29,21 @@ test.describe('a deck in a React page', () => {
   test('is isolated from the host page in both directions (R8)', async ({ page }) => {
     /* The host page styles h1 and p loudly; the deck ignores it. */
     await expect(page.locator('.wrap > h1')).toHaveCSS('text-transform', 'uppercase')
-    await expect(page.locator('#deck section.slide[data-active] h1')).toHaveCSS('text-transform', 'none')
-    await expect(page.locator('#deck section.slide[data-active] h1')).not.toHaveCSS('color', 'rgb(220, 20, 60)')
+    await expect(page.locator('#deck section.slide[data-active] h1')).toHaveCSS(
+      'text-transform',
+      'none'
+    )
+    await expect(page.locator('#deck section.slide[data-active] h1')).not.toHaveCSS(
+      'color',
+      'rgb(220, 20, 60)'
+    )
 
     /* And the host's own appearance is untouched by the deck being there. */
     const snapshot = () =>
       page.evaluate(() => {
-        const paragraph = getComputedStyle(document.querySelector('.wrap > section > p') as HTMLElement)
+        const paragraph = getComputedStyle(
+          document.querySelector('.wrap > section > p') as HTMLElement
+        )
         return [paragraph.color, paragraph.borderLeftWidth, paragraph.fontFamily]
       })
     const withDeck = await snapshot()
@@ -51,7 +59,10 @@ test.describe('a deck in a React page', () => {
     await expect(hostStatus(page)).toHaveText('present')
 
     const surface = await page.evaluate(() => {
-      const rect = document.querySelector('#deck')!.shadowRoot!.querySelector('.deck')!.getBoundingClientRect()
+      const rect = document
+        .querySelector('#deck')!
+        .shadowRoot!.querySelector('.deck')!
+        .getBoundingClientRect()
       return { width: rect.width, height: rect.height }
     })
     expect(surface.width).toBeCloseTo(viewport?.width ?? 0, 0)

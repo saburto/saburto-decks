@@ -16,7 +16,14 @@ import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { createProcessor } from '@mdx-js/mdx'
 import remarkFrontmatter from 'remark-frontmatter'
-import { attribute, esmDefaultImport, expressionAttribute, stringAttribute, walk, type MdastNode } from './ast.ts'
+import {
+  attribute,
+  esmDefaultImport,
+  expressionAttribute,
+  stringAttribute,
+  walk,
+  type MdastNode
+} from './ast.ts'
 import { includeIn, isIncludeOnly, isSlidesElement, slideGroups } from './remark-slides.ts'
 
 /** Every include binds its own name, so two files in one deck cannot clash. */

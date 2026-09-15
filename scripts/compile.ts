@@ -40,10 +40,13 @@ try {
   process.exit(1)
 }
 
-const compiled = await compile({ value: source, path: resolve(file) }, {
-  remarkPlugins: remarkDeckPlugins,
-  rehypePlugins: rehypeDeckPlugins
-})
+const compiled = await compile(
+  { value: source, path: resolve(file) },
+  {
+    remarkPlugins: remarkDeckPlugins,
+    rehypePlugins: rehypeDeckPlugins
+  }
+)
 
 let output = String(compiled.value)
 if (grep) {

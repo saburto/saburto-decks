@@ -79,7 +79,10 @@ function withOffset(node: MdastNode, offset: number): MdastNode {
 
 /** One slide, wrapped by `index` within the deck. */
 function slide(children: MdastNode[], index: number): MdastNode {
-  return jsxElement(SLIDE_COMPONENT, { attributes: [jsxAttribute('index', String(index))], children })
+  return jsxElement(SLIDE_COMPONENT, {
+    attributes: [jsxAttribute('index', String(index))],
+    children
+  })
 }
 
 /**

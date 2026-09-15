@@ -57,10 +57,7 @@ export function deckCommand(key: string, presenting: boolean): DeckCommand {
 
 /** What the contents should do about a key. */
 export type ContentsCommand =
-  | { kind: 'close' }
-  | { kind: 'focus'; entry: number }
-  | { kind: 'tab' }
-  | { kind: 'none' }
+  { kind: 'close' } | { kind: 'focus'; entry: number } | { kind: 'tab' } | { kind: 'none' }
 
 /**
  * The contents' own keyboard. `active` is the focused entry's index, or -1
@@ -77,7 +74,9 @@ export function contentsCommand(key: string, active: number, entryCount: number)
     case 'Tab':
       return { kind: 'tab' }
     case 'ArrowDown':
-      return entryCount === 0 ? { kind: 'none' } : { kind: 'focus', entry: Math.min(active + 1, entryCount - 1) }
+      return entryCount === 0
+        ? { kind: 'none' }
+        : { kind: 'focus', entry: Math.min(active + 1, entryCount - 1) }
     case 'ArrowUp':
       return entryCount === 0 ? { kind: 'none' } : { kind: 'focus', entry: Math.max(active - 1, 0) }
     case 'Home':

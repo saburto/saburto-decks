@@ -42,7 +42,11 @@ const generator = rough.generator()
  * reaches back along −x, so a rotation alone aims it. */
 const HEAD_ANGLE = Math.PI / 6
 
-export function drawArrow(point1: ArrowPoint, point2: ArrowPoint, style: ArrowStyle): ArrowDrawing | null {
+export function drawArrow(
+  point1: ArrowPoint,
+  point2: ArrowPoint,
+  style: ArrowStyle
+): ArrowDrawing | null {
   const geometry = arcGeometry(point1, point2, style.arc)
   if (!geometry) return null
 
@@ -58,8 +62,14 @@ export function drawArrow(point1: ArrowPoint, point2: ArrowPoint, style: ArrowSt
     .flatMap((path) => splitPathDefinition(path.d).map((d) => ({ d, filled: false })))
 
   const headLength = headLengthFor(geometry.length, style.headSize)
-  const tail = [-headLength * Math.cos(HEAD_ANGLE), headLength * Math.sin(HEAD_ANGLE)] as [number, number]
-  const tip = [-headLength * Math.cos(HEAD_ANGLE), -headLength * Math.sin(HEAD_ANGLE)] as [number, number]
+  const tail = [-headLength * Math.cos(HEAD_ANGLE), headLength * Math.sin(HEAD_ANGLE)] as [
+    number,
+    number
+  ]
+  const tip = [-headLength * Math.cos(HEAD_ANGLE), -headLength * Math.sin(HEAD_ANGLE)] as [
+    number,
+    number
+  ]
 
   /* The head is always at the far end; a two-way arrow carries the same head,
      facing back the way it came, at the near end. */
@@ -69,7 +79,13 @@ export function drawArrow(point1: ArrowPoint, point2: ArrowPoint, style: ArrowSt
   const heads = ends.map(([point, angle, reverse]) => {
     const drawables =
       style.headType === 'polygon'
-        ? [generator.polygon([tail, [0, 0], tip], { ...base, fill: 'currentColor', fillStyle: 'solid' })]
+        ? [
+            generator.polygon([tail, [0, 0], tip], {
+              ...base,
+              fill: 'currentColor',
+              fillStyle: 'solid'
+            })
+          ]
         : [generator.line(tail[0], tail[1], 0, 0, base), generator.line(tip[0], tip[1], 0, 0, base)]
 
     const paths = drawables.flatMap((drawable) =>

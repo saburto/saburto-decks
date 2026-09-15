@@ -64,7 +64,7 @@ Each of these has already cost time here.
   root without the owner's say-so.
 - **The deck's host is a `div`, and outer rules beat `:host` for the host element itself.** That is
   why the properties that reach the deck's text (font, colour, line-height) are set again on
-  `.deck` *inside* the shadow root. Keep them there.
+  `.deck` _inside_ the shadow root. Keep them there.
 - **The stylesheet is Tailwind v4, compiled into the shadow root.** `src/runtime/tailwind.css`
   imports Tailwind's theme and utilities (not preflight — the deck has its own reset) and holds the
   CSS Tailwind cannot express; `styles.ts` hands the compiled string to the shadow root. A utility

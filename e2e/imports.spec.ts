@@ -31,7 +31,9 @@ test.describe('a file included on a slide of its own', () => {
 
     await goTo(page, 20)
     await expect(page.locator('#deck .counter')).toHaveText('21 / 23')
-    await expect(active(page).locator('h1')).toHaveText("A picture from the imported file's own folder")
+    await expect(active(page).locator('h1')).toHaveText(
+      "A picture from the imported file's own folder"
+    )
     /* It fits at a readable size: the banded layout is the slide's content, so
        nothing beside it made the deck shrink the type to nothing. */
     expect((await state(page)).typePx).toBeGreaterThan(12)
@@ -44,7 +46,9 @@ test.describe('a file included on a slide of its own', () => {
     await expect(picture).toHaveCount(1)
     await expect(picture).toHaveAttribute('src', /layout-picture/)
     /* It resolved, not just appeared: the browser decoded a real image. */
-    await expect.poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
+    await expect
+      .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
   })
 
   test("carries its steps into the deck's navigation (R12, R18)", async ({ page }) => {

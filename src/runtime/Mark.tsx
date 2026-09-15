@@ -26,13 +26,7 @@ import { stepAt } from './steps'
 
 /** The annotation kinds rough-notation knows how to draw. */
 export type MarkType =
-  | 'highlight'
-  | 'underline'
-  | 'box'
-  | 'circle'
-  | 'strike-through'
-  | 'crossed-off'
-  | 'bracket'
+  'highlight' | 'underline' | 'box' | 'circle' | 'strike-through' | 'crossed-off' | 'bracket'
 
 /** Where a bracket annotation sits, when it is a bracket. */
 export type MarkBracket = 'left' | 'right' | 'top' | 'bottom'
@@ -107,7 +101,14 @@ export interface MarkProps {
   children?: ReactNode
 }
 
-export function Mark({ type = 'highlight', color, at, multiline = false, brackets, children }: MarkProps) {
+export function Mark({
+  type = 'highlight',
+  color,
+  at,
+  multiline = false,
+  brackets,
+  children
+}: MarkProps) {
   const { index, step, theme } = useContext(SlideContext)
   const slide = useContext(SlideNumberContext)
   const target = useRef<HTMLSpanElement | null>(null)
@@ -140,7 +141,9 @@ export function Mark({ type = 'highlight', color, at, multiline = false, bracket
       })
       /* The drawing is decoration: the words already carry the meaning, so the
          mark is kept out of the accessibility tree (N1, R15). */
-      element.parentElement?.querySelector('svg.rough-annotation')?.setAttribute('aria-hidden', 'true')
+      element.parentElement
+        ?.querySelector('svg.rough-annotation')
+        ?.setAttribute('aria-hidden', 'true')
       setReady((revision) => revision + 1)
     })()
 

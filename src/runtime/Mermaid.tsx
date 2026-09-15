@@ -97,7 +97,9 @@ export function Mermaid({ children, 'data-full': full, 'data-build': build }: Me
         }
         const whole = full === 'true'
         const built = build === 'true'
-        setSteps(!drawn ? 1 : built ? assignClassSteps(drawn) : whole ? 1 : assignDiagramSteps(drawn))
+        setSteps(
+          !drawn ? 1 : built ? assignClassSteps(drawn) : whole ? 1 : assignDiagramSteps(drawn)
+        )
         setFailed(false)
       } catch {
         if (cancelled) return
@@ -127,7 +129,10 @@ export function Mermaid({ children, 'data-full': full, 'data-build': build }: Me
       <span className="sd-mermaid-source" hidden={!failed}>
         {chart}
       </span>
-      <span className="sd-mermaid-render block w-full max-w-[min(100%,30em)] mx-auto" ref={target} />
+      <span
+        className="sd-mermaid-render block w-full max-w-[min(100%,30em)] mx-auto"
+        ref={target}
+      />
     </div>
   )
 }

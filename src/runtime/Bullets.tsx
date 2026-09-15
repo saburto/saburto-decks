@@ -43,7 +43,9 @@ export function Bullets({ title, lead, children, className }: BulletsProps) {
         </h1>
       )}
       {lead !== undefined && (
-        <p className="mx-auto mt-[-1em] max-w-[50em] text-center text-[1em] text-sd-muted">{lead}</p>
+        <p className="mx-auto mt-[-1em] max-w-[50em] text-center text-[1em] text-sd-muted">
+          {lead}
+        </p>
       )}
       <div className="mx-auto flex w-full max-w-[46em] flex-1 items-center text-[1.1em] leading-snug [&_li+li]:mt-[0.5em] [&_li::marker]:text-sd-accent [&_ul]:my-0">
         {children}

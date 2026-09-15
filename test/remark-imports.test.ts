@@ -13,7 +13,10 @@ import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { remarkImports } from '../src/build/remark-imports'
 import { remarkSlides } from '../src/build/remark-slides'
 
-async function compileDeck(files: Record<string, string>, entry = '/deck/main.mdx'): Promise<string> {
+async function compileDeck(
+  files: Record<string, string>,
+  entry = '/deck/main.mdx'
+): Promise<string> {
   const read = (path: string): string => {
     const source = files[path]
     if (source === undefined) throw new Error(`no such file: ${path}`)
@@ -23,7 +26,12 @@ async function compileDeck(files: Record<string, string>, entry = '/deck/main.md
   const compiled = await compile(
     { value: files[entry] ?? '', path: entry },
     {
-      remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, [remarkImports, { read }], remarkSlides]
+      remarkPlugins: [
+        remarkFrontmatter,
+        remarkMdxFrontmatter,
+        [remarkImports, { read }],
+        remarkSlides
+      ]
     }
   )
   return String(compiled.value)
@@ -96,9 +104,9 @@ describe('remarkImports (R18)', () => {
   })
 
   test('an included file that is not there is a build error', async () => {
-    await expect(compileDeck({ '/deck/main.mdx': '<Slides src="./missing.mdx" />\n' })).rejects.toThrow(
-      /included file not found/
-    )
+    await expect(
+      compileDeck({ '/deck/main.mdx': '<Slides src="./missing.mdx" />\n' })
+    ).rejects.toThrow(/included file not found/)
   })
 
   test('a file that includes itself is a build error, not a stack overflow', async () => {

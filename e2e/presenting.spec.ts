@@ -6,7 +6,15 @@
  * silently fail in a browser without the Fullscreen API).
  */
 import { expect, test, type Page } from '@playwright/test'
-import { DEMO, deck, fullScreen, hostExitPresent, hostPresentButton, hostStatus, state } from './helpers'
+import {
+  DEMO,
+  deck,
+  fullScreen,
+  hostExitPresent,
+  hostPresentButton,
+  hostStatus,
+  state
+} from './helpers'
 
 /** Enter present mode the way a reader would: the button inside the deck. */
 const enterPresent = (page: Page) => fullScreen(page)
@@ -97,12 +105,15 @@ test.describe('present mode', () => {
     const stops: string[] = []
     for (let i = 0; i < 6; i++) {
       await page.keyboard.press('Tab')
-      stops.push(await page.evaluate(() => {
-        const host = document.querySelector('#deck') as HTMLElement
-        const inside = host.shadowRoot?.activeElement
-        if (inside) return `deck:${inside.getAttribute('aria-label') ?? inside.textContent?.trim()}`
-        return document.activeElement === host ? 'deck:itself' : 'OUTSIDE'
-      }))
+      stops.push(
+        await page.evaluate(() => {
+          const host = document.querySelector('#deck') as HTMLElement
+          const inside = host.shadowRoot?.activeElement
+          if (inside)
+            return `deck:${inside.getAttribute('aria-label') ?? inside.textContent?.trim()}`
+          return document.activeElement === host ? 'deck:itself' : 'OUTSIDE'
+        })
+      )
     }
 
     expect(stops).not.toContain('OUTSIDE')
@@ -137,11 +148,17 @@ test.describe('present mode', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await enterPresent(page)
 
-    await expect(page.locator('#deck section.slide[data-active]')).toHaveCSS('animation-name', 'none')
+    await expect(page.locator('#deck section.slide[data-active]')).toHaveCSS(
+      'animation-name',
+      'none'
+    )
 
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.keyboard.press('ArrowRight')
-    await expect(page.locator('#deck section.slide[data-active]')).toHaveCSS('animation-name', 'sd-enter')
+    await expect(page.locator('#deck section.slide[data-active]')).toHaveCSS(
+      'animation-name',
+      'sd-enter'
+    )
   })
 
   test('leaves fullscreen behind when the host says so (R6, R10)', async ({ page }) => {

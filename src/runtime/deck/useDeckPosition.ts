@@ -10,7 +10,14 @@
  */
 import { useCallback, useRef, useState, type RefObject } from 'react'
 import { contentsLabel } from '../contents'
-import { countSteps, resolvePosition, stepBack, stepForward, type Position, type StepsAt } from '../steps'
+import {
+  countSteps,
+  resolvePosition,
+  stepBack,
+  stepForward,
+  type Position,
+  type StepsAt
+} from '../steps'
 
 export interface DeckPositionOptions {
   shadow: ShadowRoot | null
@@ -77,7 +84,10 @@ export function useDeckPosition({
     [shadow]
   )
 
-  const slideAt = useCallback((position: number): Element | null => slides()[position] ?? null, [slides])
+  const slideAt = useCallback(
+    (position: number): Element | null => slides()[position] ?? null,
+    [slides]
+  )
 
   /** How many steps a slide has: the longest run of steps among its code
    * blocks and its diagrams (R12). */

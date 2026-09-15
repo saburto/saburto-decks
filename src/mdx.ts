@@ -17,9 +17,25 @@ import { remarkDeckPlugins } from './build/remark-plugins.ts'
 import { rehypeDeckPlugins } from './build/rehype-plugins.ts'
 export { remarkDeckPlugins } from './build/remark-plugins.ts'
 export { rehypeDeckPlugins } from './build/rehype-plugins.ts'
-export { remarkSlides, splitSlides, slideGroups, isInclude, isIncludeOnly } from './build/remark-slides.ts'
-export { remarkImports, includedSlides, type ImportOptions, type ReadInclude } from './build/remark-imports.ts'
-export { remarkMermaid, isMermaid, wantsWholeDiagram, mermaidElement } from './build/remark-mermaid.ts'
+export {
+  remarkSlides,
+  splitSlides,
+  slideGroups,
+  isInclude,
+  isIncludeOnly
+} from './build/remark-slides.ts'
+export {
+  remarkImports,
+  includedSlides,
+  type ImportOptions,
+  type ReadInclude
+} from './build/remark-imports.ts'
+export {
+  remarkMermaid,
+  isMermaid,
+  wantsWholeDiagram,
+  mermaidElement
+} from './build/remark-mermaid.ts'
 export { attribute, stringAttribute, walk, type MdastNode } from './build/ast.ts'
 
 /** Wires deck compilation into a Vite (or Astro) build. */

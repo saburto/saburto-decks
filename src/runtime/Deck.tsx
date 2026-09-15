@@ -24,7 +24,14 @@
  * the only order that works: read the slides, show the step, fit the type —
  * and the markup a host renders into the page.
  */
-import { forwardRef, useCallback, useImperativeHandle, useRef, useState, type HTMLAttributes } from 'react'
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type HTMLAttributes
+} from 'react'
 import { createPortal } from 'react-dom'
 import { SlideContext, type DeckComponent, type DeckMode, type DeckTheme } from './Slide'
 import { deckComponents } from './components'
@@ -68,7 +75,17 @@ export interface DeckProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
-  { slides: Slides, defaultSlide = 0, theme = 'light', onSlideChange, onStepChange, onModeChange, className, style, ...rest },
+  {
+    slides: Slides,
+    defaultSlide = 0,
+    theme = 'light',
+    onSlideChange,
+    onStepChange,
+    onModeChange,
+    className,
+    style,
+    ...rest
+  },
   ref
 ) {
   const hostRef = useRef<HTMLDivElement | null>(null)

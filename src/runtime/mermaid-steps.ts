@@ -51,7 +51,9 @@ function sequenceNumber(element: Element, pattern: RegExp): number | null {
 
 function lifelineFor(svg: Element, id: string): Element | null {
   return (
-    Array.from(svg.querySelectorAll(LIFELINE)).find((line) => line.getAttribute('data-id') === id) ?? null
+    Array.from(svg.querySelectorAll(LIFELINE)).find(
+      (line) => line.getAttribute('data-id') === id
+    ) ?? null
   )
 }
 
@@ -80,7 +82,8 @@ export function assignSequenceSteps(svg: Element): number {
 
   /* The diagram's declaration order is its `N`, not its document order: the
      SVG lists a later participant first (R14). */
-  const rank = (element: Element) => sequenceNumber(element, /^root-(\d+)$/) ?? Number.MAX_SAFE_INTEGER
+  const rank = (element: Element) =>
+    sequenceNumber(element, /^root-(\d+)$/) ?? Number.MAX_SAFE_INTEGER
   participants.sort((a, b) => rank(a) - rank(b))
 
   let step = 0
@@ -173,7 +176,9 @@ export function assignClassSteps(svg: Element): number {
   let steps = 0
   for (const element of svg.querySelectorAll<Element>('[class]')) {
     const names = (element.getAttribute('class') ?? '').split(/\s+/)
-    const found = names.map((name) => /^step(\d+)$/.exec(name)?.[1]).find((value) => value !== undefined)
+    const found = names
+      .map((name) => /^step(\d+)$/.exec(name)?.[1])
+      .find((value) => value !== undefined)
     if (!found) continue
     const step = Number(found) - 1
     element.setAttribute(REVEAL_ATTRIBUTE, String(step))

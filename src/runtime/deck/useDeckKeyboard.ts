@@ -81,7 +81,11 @@ export function useDeckKeyboard({
           case 'tab': {
             /* The contents are one control: Tab stays within them until they
                are dismissed. */
-            const to = wrapFocus(event.shiftKey, active ? buttons.indexOf(active) : -1, buttons.length)
+            const to = wrapFocus(
+              event.shiftKey,
+              active ? buttons.indexOf(active) : -1,
+              buttons.length
+            )
             if (to === null) return
             event.preventDefault()
             buttons[to]?.focus()
@@ -133,5 +137,18 @@ export function useDeckKeyboard({
 
     host.addEventListener('keydown', onKeyDown)
     return () => host.removeEventListener('keydown', onKeyDown)
-  }, [hostRef, shadow, next, prev, goTo, countRef, openRef, panelRef, openPanel, close, modeRef, onExit])
+  }, [
+    hostRef,
+    shadow,
+    next,
+    prev,
+    goTo,
+    countRef,
+    openRef,
+    panelRef,
+    openPanel,
+    close,
+    modeRef,
+    onExit
+  ])
 }

@@ -90,9 +90,18 @@ describe('closestEdgePoint', () => {
   })
 
   test('a box with no width or height lands on its own line', () => {
-    expect(closestEdgePoint({ x: 10, y: 0, width: 0, height: 50 }, { x: 10, y: 25 })).toEqual({ x: 10, y: 25 })
-    expect(closestEdgePoint({ x: 10, y: 0, width: 0, height: 50 }, { x: 40, y: 90 })).toEqual({ x: 10, y: 50 })
-    expect(closestEdgePoint({ x: 0, y: 0, width: 40, height: 0 }, { x: 90, y: 0 })).toEqual({ x: 40, y: 0 })
+    expect(closestEdgePoint({ x: 10, y: 0, width: 0, height: 50 }, { x: 10, y: 25 })).toEqual({
+      x: 10,
+      y: 25
+    })
+    expect(closestEdgePoint({ x: 10, y: 0, width: 0, height: 50 }, { x: 40, y: 90 })).toEqual({
+      x: 10,
+      y: 50
+    })
+    expect(closestEdgePoint({ x: 0, y: 0, width: 40, height: 0 }, { x: 90, y: 0 })).toEqual({
+      x: 40,
+      y: 0
+    })
   })
 })
 
@@ -223,12 +232,18 @@ describe('drawArrow', () => {
     const drawing = drawArrow({ x: 0, y: 0 }, { x: 300, y: 120 }, { ...style, twoWay: true })!
     expect(drawing.heads).toHaveLength(2)
     const rotation = (transform: string) => Number(transform.match(/rotate\(([-\d.]+)\)/)![1])
-    const apart = Math.abs(Math.abs(rotation(drawing.heads[0]!.transform) - rotation(drawing.heads[1]!.transform)) - 180)
+    const apart = Math.abs(
+      Math.abs(rotation(drawing.heads[0]!.transform) - rotation(drawing.heads[1]!.transform)) - 180
+    )
     expect(apart).toBeLessThan(1e-6)
   })
 
   test('a polygon head is a filled shape', () => {
-    const drawing = drawArrow({ x: 0, y: 0 }, { x: 300, y: 120 }, { ...style, headType: 'polygon' })!
+    const drawing = drawArrow(
+      { x: 0, y: 0 },
+      { x: 300, y: 120 },
+      { ...style, headType: 'polygon' }
+    )!
     expect(drawing.heads[0]!.paths.some((path) => path.filled)).toBe(true)
   })
 

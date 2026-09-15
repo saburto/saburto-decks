@@ -259,7 +259,12 @@ export function Arrow({
         if (!element) return null
         const rect = element.getBoundingClientRect()
         return {
-          box: { x: rect.left - origin.left, y: rect.top - origin.top, width: rect.width, height: rect.height },
+          box: {
+            x: rect.left - origin.left,
+            y: rect.top - origin.top,
+            width: rect.width,
+            height: rect.height
+          },
           element
         }
       }
@@ -280,8 +285,18 @@ export function Arrow({
       const next =
         tail && head
           ? draw!(
-              tail.point ?? anchorPoint(tail.box!, fromSpec!.kind === 'element' ? fromSpec!.anchor : null, centreOf(head)),
-              head.point ?? anchorPoint(head.box!, toSpec!.kind === 'element' ? toSpec!.anchor : null, centreOf(tail)),
+              tail.point ??
+                anchorPoint(
+                  tail.box!,
+                  fromSpec!.kind === 'element' ? fromSpec!.anchor : null,
+                  centreOf(head)
+                ),
+              head.point ??
+                anchorPoint(
+                  head.box!,
+                  toSpec!.kind === 'element' ? toSpec!.anchor : null,
+                  centreOf(tail)
+                ),
               { width, headType, headSize, roughness, seed, twoWay, arc }
             )
           : null
@@ -305,7 +320,23 @@ export function Arrow({
       mutations.disconnect()
       slideElement.removeEventListener('animationend', schedule)
     }
-  }, [draw, onSlide, revealed, step, stage, fromSpec, toSpec, refresh, width, headType, headSize, roughness, seed, twoWay, arc])
+  }, [
+    draw,
+    onSlide,
+    revealed,
+    step,
+    stage,
+    fromSpec,
+    toSpec,
+    refresh,
+    width,
+    headType,
+    headSize,
+    roughness,
+    seed,
+    twoWay,
+    arc
+  ])
 
   const paletteClass = color ? PALETTE_CLASS[color] : undefined
   const colour = color && !paletteClass ? ({ color } as CSSProperties) : undefined

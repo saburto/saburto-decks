@@ -13,8 +13,16 @@ import {
 } from '../src/build/remark-mermaid'
 import type { MdastNode } from '../src/build/ast'
 
-const code = (value: string, meta = ''): MdastNode => ({ type: 'code', lang: 'mermaid', meta, value })
-const paragraph = (text: string): MdastNode => ({ type: 'paragraph', children: [{ type: 'text', value: text }] })
+const code = (value: string, meta = ''): MdastNode => ({
+  type: 'code',
+  lang: 'mermaid',
+  meta,
+  value
+})
+const paragraph = (text: string): MdastNode => ({
+  type: 'paragraph',
+  children: [{ type: 'text', value: text }]
+})
 
 describe('a mermaid fence', () => {
   test('is recognised, and other code fences are not', () => {

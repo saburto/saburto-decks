@@ -16,8 +16,8 @@
  * deck's own chrome is Tailwind utilities on the components.
  */
 @layer theme, base, components, utilities;
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities);
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
 
 @source "../**/*.{ts,tsx,mdx}";
 @source "../../decks/**/*.mdx";
@@ -33,7 +33,7 @@
   --color-sd-accent: var(--sd-accent);
   --color-sd-surface: var(--sd-surface);
   --color-sd-highlight: var(--sd-highlight);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -70,7 +70,7 @@
 }
 
 /* The host chooses the theme explicitly so the deck never guesses. */
-:host([data-theme="dark"]) {
+:host([data-theme='dark']) {
   --sd-bg: #111318;
   --sd-fg: #e8eaed;
   --sd-muted: #9aa4b2;
@@ -80,7 +80,7 @@
   --sd-highlight: rgba(255, 208, 0, 0.32);
 }
 @media (prefers-color-scheme: dark) {
-  :host([data-theme="system"]) {
+  :host([data-theme='system']) {
     --sd-bg: #111318;
     --sd-fg: #e8eaed;
     --sd-muted: #9aa4b2;
@@ -97,18 +97,54 @@
 @layer base {
   /* Tailwind's utilities assume `border-box` (its preflight sets this); the
      deck keeps its own reset instead of preflight, so it sets it here. */
-  *, ::before, ::after { box-sizing: border-box; }
-  h1, h2, h3, h4 { line-height: 1.15; text-wrap: balance; font-weight: 700; }
-  h1 { font-size: 1.9em; }
-  h2 { font-size: 1.45em; }
-  h3 { font-size: 1.15em; }
-  p, ul, ol, blockquote { margin-block: 0.85em; }
-  ul, ol { padding-inline-start: 1.4em; }
-  ul { list-style: disc outside; }
-  ol { list-style: decimal outside; }
-  li + li { margin-block-start: 0.3em; }
-  a { color: var(--sd-accent); text-decoration-thickness: from-font; }
-  strong { font-weight: 700; }
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.15;
+    text-wrap: balance;
+    font-weight: 700;
+  }
+  h1 {
+    font-size: 1.9em;
+  }
+  h2 {
+    font-size: 1.45em;
+  }
+  h3 {
+    font-size: 1.15em;
+  }
+  p,
+  ul,
+  ol,
+  blockquote {
+    margin-block: 0.85em;
+  }
+  ul,
+  ol {
+    padding-inline-start: 1.4em;
+  }
+  ul {
+    list-style: disc outside;
+  }
+  ol {
+    list-style: decimal outside;
+  }
+  li + li {
+    margin-block-start: 0.3em;
+  }
+  a {
+    color: var(--sd-accent);
+    text-decoration-thickness: from-font;
+  }
+  strong {
+    font-weight: 700;
+  }
   code {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.9em;
@@ -133,21 +169,46 @@
     overflow-wrap: anywhere;
     tab-size: 2;
   }
-  pre.shiki code { font-family: inherit; font-size: inherit; background: none; padding: 0; border-radius: 0; }
-  pre.shiki, pre.shiki span { color: var(--shiki-light); }
-  pre.shiki { background-color: var(--shiki-light-bg); }
+  pre.shiki code {
+    font-family: inherit;
+    font-size: inherit;
+    background: none;
+    padding: 0;
+    border-radius: 0;
+  }
+  pre.shiki,
+  pre.shiki span {
+    color: var(--shiki-light);
+  }
+  pre.shiki {
+    background-color: var(--shiki-light-bg);
+  }
   /* Shiki's convention, and Slidev's: the current step's lines keep the colour
      they always had, and the lines it does not name recede. Nothing about the
      highlighted line changes, so a line of code looks the same whether or not
      it is the one being shown (R12). */
-  pre.shiki.has-highlighted .line:not(.highlighted) { opacity: var(--sd-code-dim, 0.3); }
-  pre.shiki[hidden], .sd-code-title[hidden] { display: none; }
-  :host([data-theme="dark"]) pre.shiki, :host([data-theme="dark"]) pre.shiki span { color: var(--shiki-dark); }
-  :host([data-theme="dark"]) pre.shiki { background-color: var(--shiki-dark-bg); }
+  pre.shiki.has-highlighted .line:not(.highlighted) {
+    opacity: var(--sd-code-dim, 0.3);
+  }
+  pre.shiki[hidden],
+  .sd-code-title[hidden] {
+    display: none;
+  }
+  :host([data-theme='dark']) pre.shiki,
+  :host([data-theme='dark']) pre.shiki span {
+    color: var(--shiki-dark);
+  }
+  :host([data-theme='dark']) pre.shiki {
+    background-color: var(--shiki-dark-bg);
+  }
   @media (prefers-color-scheme: dark) {
-    :host([data-theme="system"]) pre.shiki,
-    :host([data-theme="system"]) pre.shiki span { color: var(--shiki-dark); }
-    :host([data-theme="system"]) pre.shiki { background-color: var(--shiki-dark-bg); }
+    :host([data-theme='system']) pre.shiki,
+    :host([data-theme='system']) pre.shiki span {
+      color: var(--shiki-dark);
+    }
+    :host([data-theme='system']) pre.shiki {
+      background-color: var(--shiki-dark-bg);
+    }
   }
 
   /* The file a snippet came from, as a bar the code panel sits under. */
@@ -176,15 +237,32 @@
      scaled to fit the box, never scrolled. A sequence diagram is revealed one
      element at a time (R14); the elements not yet reached keep their place but
      are not shown, so nothing moves as the drawing fills in. */
-  .sd-mermaid svg { display: block; width: 100%; height: auto; max-width: 100%; }
-  .sd-mermaid:not([data-build]) [data-sd-step] { visibility: hidden; opacity: 0; }
-  .sd-mermaid:not([data-build]) [data-sd-step].sd-shown { visibility: visible; opacity: 1; }
+  .sd-mermaid svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+  }
+  .sd-mermaid:not([data-build]) [data-sd-step] {
+    visibility: hidden;
+    opacity: 0;
+  }
+  .sd-mermaid:not([data-build]) [data-sd-step].sd-shown {
+    visibility: visible;
+    opacity: 1;
+  }
   /* A {build} diagram is shown whole; only the current step's part comes
      forward and the rest recede. */
-  .sd-mermaid[data-build] [data-sd-step] { opacity: 0.2; }
-  .sd-mermaid[data-build] [data-sd-step].sd-current { opacity: 1; }
+  .sd-mermaid[data-build] [data-sd-step] {
+    opacity: 0.2;
+  }
+  .sd-mermaid[data-build] [data-sd-step].sd-current {
+    opacity: 1;
+  }
   @media (prefers-reduced-motion: no-preference) {
-    .sd-mermaid [data-sd-step] { transition: opacity 160ms ease-out; }
+    .sd-mermaid [data-sd-step] {
+      transition: opacity 160ms ease-out;
+    }
   }
   /* The source, shown only when Mermaid could not draw it. An author display
      rule would otherwise beat the UA rule for [hidden], so it is restated. */
@@ -195,20 +273,32 @@
     font-size: 0.72em;
     color: var(--sd-muted);
   }
-  .sd-mermaid-source[hidden] { display: none; }
+  .sd-mermaid-source[hidden] {
+    display: none;
+  }
 }
 
 /* ---- motion (R16) ----
    The library writes the object's opacity and transform inline; the component
    carries the layout utilities. The slide's own entrance animation. */
 @media (prefers-reduced-motion: no-preference) {
-  .slide[data-active] { animation: sd-enter 160ms ease-out both; }
+  .slide[data-active] {
+    animation: sd-enter 160ms ease-out both;
+  }
   /* A board is portalled out of its slide, so it enters on its own. */
-  .sd-canvas { animation: sd-enter 160ms ease-out both; }
+  .sd-canvas {
+    animation: sd-enter 160ms ease-out both;
+  }
 }
 @keyframes sd-enter {
-  from { opacity: 0; transform: translateY(0.35em); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ---- annotations (R15) ----
@@ -216,7 +306,9 @@
    annotations live in, rather than in document.head where the library would
    otherwise put them: nothing of the deck's styling belongs in the host page. */
 @keyframes rough-notation-dash {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* ---- arrows (R19) ----
@@ -225,10 +317,14 @@
    on the head that follows it. Both are declared here, in the shadow tree the
    drawing lives in, and the component skips them under reduced motion. */
 @keyframes sd-arrow-draw {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 @keyframes sd-arrow-appear {
-  to { visibility: visible; }
+  to {
+    visibility: visible;
+  }
 }
 .sd-arrow-stroke {
   animation-name: sd-arrow-draw;
@@ -248,12 +344,22 @@
    reliance on the Fullscreen API also means a browser without it still gets a
    full-screen deck (R9); native fullscreen, when available, is requested on
    top and only removes the browser chrome. */
-:host([data-mode="present"]) {
+:host([data-mode='present']) {
   background: transparent;
   overflow: visible;
   outline: none;
 }
-:host([data-mode="present"]) .deck { position: fixed; inset: 0; z-index: 2147483647; }
-:host([data-mode="present"])::backdrop { background: var(--sd-bg); }
-:host([data-mode="present"]) .stage { padding: 5cqi 8cqi; }
-:host([data-mode="present"]) .bar { opacity: 0.35; }
+:host([data-mode='present']) .deck {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+}
+:host([data-mode='present'])::backdrop {
+  background: var(--sd-bg);
+}
+:host([data-mode='present']) .stage {
+  padding: 5cqi 8cqi;
+}
+:host([data-mode='present']) .bar {
+  opacity: 0.35;
+}

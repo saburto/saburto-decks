@@ -143,7 +143,7 @@ export function effectiveTransition(
   reduced: boolean,
   transition: Transition | undefined
 ): Transition {
-  return active && !reduced ? transition ?? DEFAULT_TRANSITION : STILL
+  return active && !reduced ? (transition ?? DEFAULT_TRANSITION) : STILL
 }
 
 /** The same state as a plain style, for the moment before the library arrives.
@@ -180,7 +180,17 @@ interface AnimatedProps {
   children?: ReactNode
 }
 
-function Animated({ kind, at, start, end, transition, layout, as, className, children }: AnimatedProps) {
+function Animated({
+  kind,
+  at,
+  start,
+  end,
+  transition,
+  layout,
+  as,
+  className,
+  children
+}: AnimatedProps) {
   const { index, step } = useContext(SlideContext)
   const slide = useContext(SlideNumberContext)
   const library = useMotionLibrary()
@@ -221,9 +231,9 @@ function Animated({ kind, at, start, end, transition, layout, as, className, chi
     )
   }
 
-  const Component = (
-    as === 'div' ? library.motion.div : library.motion.span
-  ) as unknown as AnimatedComponent
+  const Component = (as === 'div'
+    ? library.motion.div
+    : library.motion.span) as unknown as AnimatedComponent
 
   return (
     <Component

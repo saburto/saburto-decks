@@ -152,7 +152,11 @@ export interface CodeBlockState {
 }
 
 /** The state a code block is in at `step`, from the steps it declares. */
-export function codeBlockState(total: number, hide: readonly number[], step: number): CodeBlockState {
+export function codeBlockState(
+  total: number,
+  hide: readonly number[],
+  step: number
+): CodeBlockState {
   const at = Math.max(0, Math.min(step, total - 1))
   const hidden = hide.includes(at)
   return { at, hidden, dims: !hidden }
@@ -173,7 +177,8 @@ export function lineHighlighted(highlight: readonly number[], state: CodeBlockSt
 function setCodeHidden(block: HTMLElement, hidden: boolean): void {
   block.hidden = hidden
   const title = block.previousElementSibling
-  if (title instanceof HTMLElement && title.classList.contains('sd-code-title')) title.hidden = hidden
+  if (title instanceof HTMLElement && title.classList.contains('sd-code-title'))
+    title.hidden = hidden
 }
 
 /** Shows `step` on a Shiki-highlighted code block. */
@@ -206,7 +211,11 @@ export interface DiagramVisibility {
 }
 
 /** How one marked element of a diagram is shown at `at`. */
-export function diagramVisibility(elementStep: number, at: number, built: boolean): DiagramVisibility {
+export function diagramVisibility(
+  elementStep: number,
+  at: number,
+  built: boolean
+): DiagramVisibility {
   return built
     ? { className: 'sd-current', on: elementStep === at }
     : { className: 'sd-shown', on: elementStep <= at }

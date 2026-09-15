@@ -5,7 +5,7 @@
 To make **infodecks** easy to create. An infodeck is a deck meant to be read rather than
 projected: a document that uses slides and spatial layout to explain something, and that is worth
 treating as a form of writing in its own right
-([Martin Fowler, *Infodeck*](https://martinfowler.com/bliki/Infodeck.html)).
+([Martin Fowler, _Infodeck_](https://martinfowler.com/bliki/Infodeck.html)).
 
 The form is poorly served by the tools that exist. Presentation software takes over the whole page
 and is built for an audience in a room; hand-written article HTML has no deck behaviour at all. So

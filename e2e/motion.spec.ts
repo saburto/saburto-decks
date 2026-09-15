@@ -8,8 +8,10 @@ import { DEMO, deck, goTo, nextSlide, state } from './helpers'
 
 const MOTION = 10
 
-const appear = (page: Page) => page.locator('#deck section.slide[data-active] .sd-motion[data-motion="appear"]')
-const move = (page: Page) => page.locator('#deck section.slide[data-active] .sd-motion[data-motion="move"]')
+const appear = (page: Page) =>
+  page.locator('#deck section.slide[data-active] .sd-motion[data-motion="appear"]')
+const move = (page: Page) =>
+  page.locator('#deck section.slide[data-active] .sd-motion[data-motion="move"]')
 
 /** How far an object sits from where it started, in px. */
 async function offsetFrom(page: Page, from: number): Promise<number> {
@@ -40,7 +42,9 @@ test.beforeEach(async ({ page }) => {
 })
 
 test.describe('motion', () => {
-  test('an object arrives on its step, and is counted and announced with the rest (R12, R16)', async ({ page }) => {
+  test('an object arrives on its step, and is counted and announced with the rest (R12, R16)', async ({
+    page
+  }) => {
     await goTo(page, MOTION)
     await expect(page.locator('#deck .counter')).toHaveText('11 / 23')
 
@@ -103,7 +107,9 @@ test.describe('motion', () => {
     await expect(appear(page)).toHaveCSS('opacity', '0')
   })
 
-  test('a reader who prefers reduced motion gets the object in its place, with no animation (N1)', async ({ page }) => {
+  test('a reader who prefers reduced motion gets the object in its place, with no animation (N1)', async ({
+    page
+  }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.goto(DEMO)
     await expect(deck(page)).toHaveAttribute('data-mode', 'embedded')
