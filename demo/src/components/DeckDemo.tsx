@@ -1,5 +1,5 @@
 import DeckHost from './DeckHost.tsx'
-import slides from '../../../decks/slidedocs.mdx'
+import slides from '../../../decks/example.mdx'
 
 /**
  * The Astro page's interactive part: the example deck, driven by the page.

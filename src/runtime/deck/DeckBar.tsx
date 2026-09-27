@@ -1,5 +1,5 @@
 /**
- * The deck's control bar (R6, R12, R17).
+ * The deck's control bar (R6, R12, R17, R22).
  *
  * Deliberately presentational: every value it shows and every control it
  * offers comes in as a prop, so it can be rendered and asserted on without a
@@ -44,7 +44,7 @@ export function DeckBar({
 }: DeckBarProps) {
   return (
     <div
-      className="bar flex-none flex gap-[0.4rem] items-center justify-center px-3 py-2 text-[clamp(0.75rem,1.7cqi,1.05rem)] opacity-60 transition-opacity duration-150 hover:opacity-100 focus-within:opacity-100"
+      className="bar flex-none flex gap-[0.4rem] items-center justify-center px-3 py-2 text-[clamp(0.75rem,1.7cqi,1.05rem)]"
       role="toolbar"
       aria-label="Deck controls"
     >

@@ -20,6 +20,8 @@ export default function DeckHost({ slides }: { slides: DeckComponent }) {
   const deck = useRef<DeckHandle>(null)
   const [theme, setTheme] = useState<DeckTheme>('light')
   const [mode, setMode] = useState<DeckMode>('embedded')
+  /** Whether the deck shows its own bar (R22). */
+  const [controls, setControls] = useState(true)
   const [at, setAt] = useState('')
   const [step, setStep] = useState('')
 
@@ -72,6 +74,15 @@ export default function DeckHost({ slides }: { slides: DeckComponent }) {
           {step ? ` · step ${step}` : ''}
         </output>
 
+        <button
+          type="button"
+          id="controls"
+          aria-pressed={controls}
+          onClick={() => setControls((current) => !current)}
+        >
+          {controls ? 'Hide deck bar' : 'Show deck bar'}
+        </button>
+
         <div className="theme" role="group" aria-label="Theme">
           {THEMES.map((name) => (
             <button
@@ -92,6 +103,7 @@ export default function DeckHost({ slides }: { slides: DeckComponent }) {
         ref={setDeck}
         slides={slides}
         theme={theme}
+        controls={controls}
         onSlideChange={onSlideChange}
         onStepChange={onStepChange}
         onModeChange={onModeChange}

@@ -7,7 +7,12 @@
  * to give every slide a heading.
  */
 import { describe, expect, test } from 'bun:test'
-import { contentsLabel } from '../src/runtime/contents.ts'
+import {
+  contentsLabel,
+  headingText,
+  sameOutline,
+  type ContentsSlide
+} from '../src/runtime/contents.ts'
 
 describe('contentsLabel', () => {
   test("names an entry by the slide's own heading", () => {
@@ -26,5 +31,32 @@ describe('contentsLabel', () => {
 
   test('treats a heading that is only whitespace as no heading', () => {
     expect(contentsLabel('   \n\t ', 1)).toBe('Slide 2')
+  })
+})
+
+describe('headingText', () => {
+  test('collapses whitespace, and has no text for a blank heading', () => {
+    expect(headingText('  Why\n  it   matters ')).toBe('Why it matters')
+    expect(headingText('   ')).toBeNull()
+    expect(headingText(undefined)).toBeNull()
+  })
+})
+
+describe('sameOutline', () => {
+  const outline: ContentsSlide[] = [
+    { title: 'First', sections: [] },
+    { title: 'Second', sections: ['Why', 'How'] }
+  ]
+
+  test('holds when the slides and their sections say the same thing', () => {
+    expect(sameOutline(outline, structuredClone(outline))).toBe(true)
+  })
+
+  test('fails when a slide, or a section under one, changes', () => {
+    expect(sameOutline(outline, outline.slice(0, 1))).toBe(false)
+    expect(sameOutline(outline, [{ ...outline[0]! }, { ...outline[1]!, title: 'Later' }])).toBe(
+      false
+    )
+    expect(sameOutline(outline, [outline[0]!, { ...outline[1]!, sections: ['Why'] }])).toBe(false)
   })
 })

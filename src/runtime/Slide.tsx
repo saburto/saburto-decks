@@ -1,4 +1,5 @@
 import { createContext, useContext, type ComponentType, type ReactNode } from 'react'
+import type { ContentsSlide } from './contents'
 
 export type DeckMode = 'embedded' | 'present'
 
@@ -24,8 +25,9 @@ interface SlideState {
   refresh: () => void
   /** Where a diagram may be built and measured, off the host page's flow. */
   measure: HTMLElement | null
-  /** The deck's table of contents: one label per slide, in order (R17). */
-  titles: string[]
+  /** The deck's table of contents: each slide's name and its own second-level
+   * headings, in order (R17). */
+  outline: ContentsSlide[]
   /** Go to a slide by its zero-based position, the way an entry does (R17). */
   goTo: (index: number) => void
 }
@@ -37,7 +39,7 @@ export const SlideContext = createContext<SlideState>({
   theme: 'light',
   refresh: () => {},
   measure: null,
-  titles: [],
+  outline: [],
   goTo: () => {}
 })
 

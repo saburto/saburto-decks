@@ -287,16 +287,17 @@ reader who prefers reduced motion gets it in its place with no animation at all 
 ### Contents
 
 Every deck carries a table of contents, built from its slides' own first headings — one entry per
-slide, with the reader's own slide marked. It is available from any slide, in embedded mode and
-while presenting alike.
+slide, with the slide's own second-level headings listed under it, and the reader's own slide
+marked. It is available from any slide, in embedded mode and while presenting alike.
 
-Open it with the **Contents** control in the bar, or by pressing `O` while the deck has focus.
-Choosing an entry goes to that slide; `Esc`, the close control or a click outside the panel
-dismisses it and returns the reader to the deck. The position in the list is announced, so a
-screen reader user can tell where they are before moving.
+Open it with the **Contents** control in the bar, or by pressing `O` while the deck has focus. It
+opens as a sidebar over the stage, so the slide keeps its size. Choosing an entry goes to the
+slide that holds it; `Esc`, the close control or a click outside the panel dismisses it and
+returns the reader to the deck. The position in the list is announced, so a screen reader user can
+tell where they are before moving.
 
 A slide with no heading is still listed, by its number. The list scrolls when a deck has more
-slides than fit — the contents are a control, not a slide, and no slide is ever scrolled. Opening
+entries than fit — the contents are a control, not a slide, and no slide is ever scrolled. Opening
 the contents does not change the slide's layout or the type size it settled on.
 
 The same list can be a slide of its own. Put `<Contents />` where the contents should appear and
@@ -310,6 +311,14 @@ the deck's slides are listed there too — the same entries, each jumping to its
 
 On a slide the contents are ordinary slide content: they are measured with the rest of the slide
 and scaled to fit it, and they never scroll.
+
+### The control bar
+
+A deck shows its own controls by default: **‹** and **›** for previous and next, the reader's
+position in the deck, a dot per step on a slide that has them, **Contents**, and the way in and
+out of present mode. A host that renders controls of its own can turn the bar off with
+`controls={false}`; the keyboard, the contents and the deck itself are unaffected. Either way, the
+bar never dims.
 
 ### Cover layout
 
@@ -572,6 +581,7 @@ React is a peer dependency: the host's React is used, and a deck never carries a
 | `slides`        | React component                 | the compiled deck: `import slides from './my-deck.mdx'` |
 | `defaultSlide`  | `number`                        | which slide to start on                                 |
 | `theme`         | `'light' \| 'dark' \| 'system'` | the host decides; the deck never guesses                |
+| `controls`      | `boolean`                       | show the deck's own bar; `true` by default (R22)        |
 | `onSlideChange` | `(index, count) => void`        | told when the slide changes                             |
 | `onStepChange`  | `(step, stepCount) => void`     | told when the step within a slide changes (R12)         |
 | `onModeChange`  | `(mode) => void`                | told when the deck enters or leaves present mode        |

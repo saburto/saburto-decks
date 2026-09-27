@@ -61,9 +61,10 @@ export type ContentsCommand =
 
 /**
  * The contents' own keyboard. `active` is the focused entry's index, or -1
- * when none of them holds focus; `entryCount` is how many slides there are.
- * Arrow keys move through the entries and stop at the ends; Tab wraps within
- * the contents, because they are one control until dismissed (R17, N1).
+ * when none of them holds focus; `entryCount` is how many entries the contents
+ * have — the slides and their second-level headings. Arrow keys move through
+ * the entries and stop at the ends; Tab wraps within the contents, because
+ * they are one control until dismissed (R17, N1).
  */
 export function contentsCommand(key: string, active: number, entryCount: number): ContentsCommand {
   switch (key) {

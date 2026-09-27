@@ -360,6 +360,3 @@
 :host([data-mode='present']) .stage {
   padding: 5cqi 8cqi;
 }
-:host([data-mode='present']) .bar {
-  opacity: 0.35;
-}

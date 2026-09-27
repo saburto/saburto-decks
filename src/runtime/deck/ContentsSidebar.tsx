@@ -1,10 +1,11 @@
 /**
- * The deck's table of contents as an overlay (R17).
+ * The deck's table of contents as a sidebar (R17, R22).
  *
- * The same list as the `<Contents />` an author puts on a slide, over the
- * stage rather than over the whole deck, so the bar — and the control that
- * opened them — stays put. It is a control, not slide content, so a long list
- * may scroll where a slide never would.
+ * The same list as the `<Contents />` an author puts on a slide, opened over
+ * the stage and anchored to its left edge. It overlays the slide rather than
+ * taking room from it, so opening it changes neither the slide's layout nor
+ * the type size the deck settled on. It is a control, not slide content, so a
+ * long list may scroll where a slide never would.
  *
  * It is presentational: the entries come from `SlideContext`, and opening,
  * dismissing and moving focus are the caller's — which is what lets the panel
@@ -13,17 +14,17 @@
 import type { RefObject } from 'react'
 import { ContentsEntries } from '../Contents'
 
-export interface ContentsDialogProps {
+export interface ContentsSidebarProps {
   /** The panel, for the keyboard to find its entries and buttons. */
   panelRef?: RefObject<HTMLDivElement | null>
   /** Dismissed by the reader: Escape, the close control, or a click outside. */
   onClose: () => void
 }
 
-export function ContentsDialog({ panelRef, onClose }: ContentsDialogProps) {
+export function ContentsSidebar({ panelRef, onClose }: ContentsSidebarProps) {
   return (
     <div
-      className="contents absolute inset-0 z-[1] flex items-center justify-center p-2 text-[clamp(0.75rem,1.7cqi,1.05rem)] bg-[color-mix(in_srgb,var(--sd-bg)_85%,transparent)]"
+      className="contents absolute inset-0 z-[1] flex justify-start text-[clamp(0.75rem,1.7cqi,1.05rem)] bg-[color-mix(in_srgb,var(--sd-bg)_60%,transparent)]"
       role="dialog"
       aria-modal="true"
       aria-label="Table of contents"
@@ -32,7 +33,7 @@ export function ContentsDialog({ panelRef, onClose }: ContentsDialogProps) {
         if (event.target === event.currentTarget) onClose()
       }}
     >
-      <div className="contents-panel flex flex-col w-[min(100%,30em)] max-h-full px-[1em] pt-[0.8em] pb-[0.9em] text-sd-fg bg-sd-bg border border-sd-border rounded-[0.6em] shadow-[0_0.5em_2em_rgba(0,0,0,0.18)]">
+      <div className="contents-panel contents-sidebar flex flex-col h-full w-[min(100%,20em)] px-[1em] pt-[0.8em] pb-[0.9em] text-sd-fg bg-sd-bg border-r border-sd-border shadow-[0_0.5em_2em_rgba(0,0,0,0.18)]">
         <div className="contents-head flex items-baseline justify-between gap-[1em] mb-[0.4em]">
           <p
             className="contents-heading m-0 text-sd-muted text-[0.8em] font-semibold tracking-[0.08em] uppercase"
@@ -59,4 +60,4 @@ export function ContentsDialog({ panelRef, onClose }: ContentsDialogProps) {
   )
 }
 
-export default ContentsDialog
+export default ContentsSidebar

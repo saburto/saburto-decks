@@ -2,19 +2,24 @@
  * The table of contents (R17).
  *
  * Every deck carries one, built from the slides' own headings and reachable
- * from any slide. It is a control, not a slide: it opens over the stage, close
- * enough to the deck to be dismissible and never able to change how a slide
- * fits.
+ * from any slide. It is a control, not a slide: it opens as a sidebar over the
+ * stage, close enough to the deck to be dismissible and never able to change
+ * how a slide fits.
  */
 import { expect, test, type Page } from '@playwright/test'
 import { DEMO, deck, fullScreen, goTo, state } from './helpers'
 
 const contentsButton = (page: Page) => page.locator('#deck .bar button', { hasText: 'Contents' })
 const panel = (page: Page) => page.locator('#deck [role="dialog"][aria-label="Table of contents"]')
+const sidebar = (page: Page) => page.locator('#deck .contents-sidebar')
 /* Scoped to the panel: the slides' own `<Contents />` carries the same classes,
    and lives in the same shadow root. */
-const entries = (page: Page) => page.locator('#deck .contents-panel [data-toc-entry]')
-const titles = (page: Page) => page.locator('#deck .contents-panel .contents-title')
+const slideEntries = (page: Page) => page.locator('#deck .contents-panel [data-toc-slide]')
+const sectionEntries = (page: Page) => page.locator('#deck .contents-panel [data-toc-section]')
+const titles = (page: Page) =>
+  page.locator('#deck .contents-panel [data-toc-slide] .contents-title')
+const sections = (page: Page) =>
+  page.locator('#deck .contents-panel [data-toc-section] .contents-title')
 
 /** The example deck's slides, by their own first headings. */
 const HEADINGS = [
@@ -59,16 +64,16 @@ test.describe('the table of contents', () => {
       await contentsButton(page).click()
 
       await expect(panel(page)).toBeVisible()
-      await expect(entries(page)).toHaveCount(24)
+      await expect(slideEntries(page)).toHaveCount(24)
       const listed = await titles(page).allTextContents()
       expect(listed).toEqual(HEADINGS)
 
       /* The reader's own slide is marked, wherever in the deck they are. */
       await expect(
-        page.locator('#deck .contents-panel [data-toc-entry][aria-current="true"]')
+        page.locator('#deck .contents-panel [data-toc-slide][aria-current="true"]')
       ).toHaveCount(1)
       await expect(
-        page.locator('#deck .contents-panel [data-toc-entry][aria-current="true"] .contents-title')
+        page.locator('#deck .contents-panel [data-toc-slide][aria-current="true"] .contents-title')
       ).toHaveText(listed[index] ?? '')
 
       /* The control toggles, and Escape dismisses. */
@@ -78,6 +83,34 @@ test.describe('the table of contents', () => {
       await page.keyboard.press('Escape')
       await expect(panel(page)).toBeHidden()
     }
+  })
+
+  test('lists a slide’s own second-level headings under it, and goes to that slide (R17)', async ({
+    page
+  }) => {
+    await goTo(page, 0)
+    await contentsButton(page).click()
+
+    /* One slide in the example deck has second-level headings. */
+    await expect(sectionEntries(page)).toHaveCount(2)
+    await expect(sections(page)).toHaveText(['Why', 'How'])
+
+    /* The text is indented under the slide it belongs to, even though the
+       entry itself is still full-width. */
+    const chosen = await page
+      .getByRole('button', { name: 'How', exact: true })
+      .locator('.contents-title')
+      .boundingBox()
+    const parent = await slideEntries(page).nth(13).locator('.contents-title').boundingBox()
+    expect(chosen?.x).toBeGreaterThan(parent?.x ?? 0)
+    expect(chosen?.y).toBeGreaterThan(parent?.y ?? 0)
+
+    await page.getByRole('button', { name: 'How', exact: true }).click()
+
+    await expect(panel(page)).toBeHidden()
+    const moved = await state(page)
+    expect(moved.index).toBe(13)
+    await expect(page.locator('#deck .counter')).toHaveText('14 / 24')
   })
 
   test('goes to the chosen slide and dismisses itself (R17)', async ({ page }) => {
@@ -102,7 +135,7 @@ test.describe('the table of contents', () => {
     /* `O` opens it, and focus lands on the reader's own slide. */
     await page.keyboard.press('o')
     await expect(panel(page)).toBeVisible()
-    await expect(page.locator('#deck [data-toc-entry]:focus .contents-title')).toHaveText(
+    await expect(page.locator('#deck [data-toc-slide]:focus .contents-title')).toHaveText(
       'Presenting it'
     )
 
@@ -126,11 +159,46 @@ test.describe('the table of contents', () => {
     await contentsButton(page).click()
     await expect(panel(page)).toBeVisible()
 
-    /* The backdrop, just inside the top-left of the stage. */
-    await panel(page).click({ position: { x: 4, y: 4 } })
+    /* The backdrop, to the right of the sidebar. */
+    const box = await panel(page).boundingBox()
+    await panel(page).click({ position: { x: (box?.width ?? 0) - 8, y: 8 } })
 
     await expect(panel(page)).toBeHidden()
     expect((await state(page)).index).toBe(6)
+  })
+
+  test('opens as a sidebar against the stage’s left edge (R17)', async ({ page }) => {
+    await goTo(page, 6)
+    const before = await state(page)
+
+    await contentsButton(page).click()
+    await expect(sidebar(page)).toBeVisible()
+
+    const stage = await page.locator('#deck .stage').boundingBox()
+    const panelBox = await sidebar(page).boundingBox()
+    expect(panelBox?.x).toBeCloseTo(stage?.x ?? 0, 0)
+    expect(panelBox?.height).toBeCloseTo(stage?.height ?? 0, 0)
+
+    /* A sidebar over the slide, not a column beside it: nothing refits. */
+    const after = await state(page)
+    expect(after.typePx).toBeCloseTo(before.typePx, 5)
+  })
+
+  test('brings the reader’s own entry into the list’s view, however long the deck (R17)', async ({
+    page
+  }) => {
+    await goTo(page, 20)
+    await contentsButton(page).click()
+
+    const list = await page.locator('#deck .contents-panel .contents-list').boundingBox()
+    const current = await page
+      .locator('#deck .contents-panel [data-toc-slide][aria-current="true"]')
+      .boundingBox()
+
+    expect(current?.y).toBeGreaterThanOrEqual(list?.y ?? 0)
+    expect((current?.y ?? 0) + (current?.height ?? 0)).toBeLessThanOrEqual(
+      (list?.y ?? 0) + (list?.height ?? 0)
+    )
   })
 
   test('is reachable while presenting (R6, R17)', async ({ page }) => {
@@ -157,9 +225,12 @@ test.describe('the table of contents', () => {
        slide marked. */
     const list = page.locator('#deck section.slide[data-active] .sd-contents')
     await expect(list).toBeVisible()
-    await expect(list.locator('[data-toc-entry]')).toHaveCount(24)
-    expect(await list.locator('.contents-title').allTextContents()).toEqual(HEADINGS)
-    await expect(list.locator('[data-toc-entry][aria-current="true"]')).toHaveCount(1)
+    await expect(list.locator('[data-toc-slide]')).toHaveCount(24)
+    await expect(list.locator('[data-toc-section]')).toHaveCount(2)
+    expect(await list.locator('[data-toc-slide] .contents-title').allTextContents()).toEqual(
+      HEADINGS
+    )
+    await expect(list.locator('[data-toc-slide][aria-current="true"]')).toHaveCount(1)
 
     /* Choosing an entry goes to that slide; the click belongs to the entry and
        does not also advance the deck. */

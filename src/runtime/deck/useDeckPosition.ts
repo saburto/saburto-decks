@@ -9,7 +9,7 @@
  * count and its table of contents follow the file (R17, R18).
  */
 import { useCallback, useRef, useState, type RefObject } from 'react'
-import { contentsLabel } from '../contents'
+import { contentsLabel, headingText, sameOutline, type ContentsSlide } from '../contents'
 import {
   countSteps,
   resolvePosition,
@@ -32,8 +32,9 @@ export interface DeckPosition {
   count: number
   step: number
   stepCount: number
-  /** The table of contents' labels, one per slide (R17). */
-  titles: string[]
+  /** The deck's table of contents: each slide's name and its own second-level
+   * headings, in order (R17). */
+  outline: ContentsSlide[]
   /** The refs the deck's listeners read, so they never act on a stale value. */
   indexRef: RefObject<number>
   countRef: RefObject<number>
@@ -66,7 +67,7 @@ export function useDeckPosition({
   const [count, setCount] = useState(0)
   const [step, setStep] = useState(0)
   const [stepCount, setStepCount] = useState(0)
-  const [titles, setTitles] = useState<string[]>([])
+  const [outline, setOutline] = useState<ContentsSlide[]>([])
 
   /* Mirrors of the state, for the listeners and callbacks that outlive a
      render and must not read a stale closure. */
@@ -158,16 +159,17 @@ export function useDeckPosition({
     setCount((current) => (current === total ? current : total))
 
     /* The contents' entries follow the slides themselves: each is named by the
-       slide's own first heading, and a slide without one is named by its
-       number (R17). */
-    const nextTitles = all.map((slide, position) =>
-      contentsLabel(slide.querySelector('h1, h2, h3, h4, h5, h6')?.textContent, position)
-    )
-    setTitles((current) =>
-      current.length === nextTitles.length && current.every((title, at) => title === nextTitles[at])
-        ? current
-        : nextTitles
-    )
+       slide's own first heading, a slide without one is named by its number,
+       and the slide's own second-level headings sit under it (R17). */
+    const nextOutline = all.map((slide, position) => {
+      const heading = slide.querySelector('h1, h2, h3, h4, h5, h6')
+      const sections = Array.from(slide.querySelectorAll('h2'))
+        .filter((element) => element !== heading)
+        .map((element) => headingText(element.textContent))
+        .filter((text): text is string => text !== null)
+      return { title: contentsLabel(heading?.textContent, position), sections }
+    })
+    setOutline((current) => (sameOutline(current, nextOutline) ? current : nextOutline))
 
     const position = Math.max(0, Math.min(indexRef.current, total - 1))
     indexRef.current = position
@@ -190,7 +192,7 @@ export function useDeckPosition({
     count,
     step,
     stepCount,
-    titles,
+    outline,
     indexRef,
     countRef,
     stepRef,

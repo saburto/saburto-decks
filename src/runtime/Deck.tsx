@@ -17,8 +17,8 @@
  * - `deck/usePresentMode` takes the screen and gives it back (R6, R7, R9).
  * - `deck/useStageLayout` sizes the type to the deck's box (R5) and keeps the
  *   place a diagram is measured in (R13).
- * - `deck/useContents` and `deck/useDeckKeyboard` own the controls and the
- *   keyboard (R17, N1).
+ * - `deck/useContents` and `deck/useDeckKeyboard` own the contents and the
+ *   keyboard (R17, R22, N1).
  *
  * All that is left here is the one layout effect that ties them together — in
  * the only order that works: read the slides, show the step, fit the type —
@@ -39,7 +39,7 @@ import { DeckComponentsContext } from './Slides'
 import { deckStyles } from './styles'
 import { applySteps } from './steps'
 import { DeckBar } from './deck/DeckBar'
-import { ContentsDialog } from './deck/ContentsDialog'
+import { ContentsSidebar } from './deck/ContentsSidebar'
 import { useIsomorphicLayoutEffect } from './deck/dom'
 import { useContents } from './deck/useContents'
 import { useDeckKeyboard } from './deck/useDeckKeyboard'
@@ -66,6 +66,10 @@ export interface DeckProps extends HTMLAttributes<HTMLDivElement> {
   /** Which slide to start on. */
   defaultSlide?: number
   theme?: DeckTheme
+  /** Show the deck's own controls — previous, next, position, the contents and
+   * present mode. On by default (R22); a host that renders its own turns it
+   * off and keeps the keyboard and the contents. */
+  controls?: boolean
   /** Told when the slide changes, so a host can show where the reader is. */
   onSlideChange?: (index: number, count: number) => void
   /** Told when the step within a slide changes, and how many it has (R12). */
@@ -79,6 +83,7 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
     slides: Slides,
     defaultSlide = 0,
     theme = 'light',
+    controls = true,
     onSlideChange,
     onStepChange,
     onModeChange,
@@ -110,7 +115,7 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
     stage.fit()
   })
 
-  const contents = useContents({ indexRef: position.indexRef })
+  const contents = useContents({ indexRef: position.indexRef, hostRef })
 
   useDeckKeyboard({
     hostRef,
@@ -143,7 +148,13 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
          space the deck occupies is already correct in the server-rendered
          HTML, before the deck itself arrives. A host can override it with
          `--sd-aspect`, or by passing its own `style`. */
-      style={{ aspectRatio: 'var(--sd-aspect, 16 / 9)', ...style }}
+      style={{
+        aspectRatio: 'var(--sd-aspect, 16 / 9)',
+        ...style,
+        /* A slide changes inside the deck; the page's scroll must not shift
+           under the reader when it does (R7). */
+        overflowAnchor: 'none'
+      }}
       tabIndex={rest.tabIndex ?? 0}
       data-mode={present.mode}
       data-theme={theme}
@@ -168,7 +179,7 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
                     theme,
                     refresh,
                     measure: stage.measure,
-                    titles: position.titles,
+                    outline: position.outline,
                     goTo: position.goTo
                   }}
                 >
@@ -181,24 +192,28 @@ export const Deck = forwardRef<DeckHandle, DeckProps>(function Deck(
                       put. They are a control, not slide content, so a long
                       list may scroll where a slide never would (R17). */}
                   {contents.open && (
-                    <ContentsDialog panelRef={contents.panelRef} onClose={contents.close} />
+                    <ContentsSidebar panelRef={contents.panelRef} onClose={contents.close} />
                   )}
                 </SlideContext.Provider>
               </div>
 
-              <DeckBar
-                index={position.index}
-                count={position.count}
-                step={position.step}
-                stepCount={position.stepCount}
-                mode={present.mode}
-                contentsOpen={contents.open}
-                contentsButtonRef={contents.buttonRef}
-                onPrev={position.prev}
-                onNext={position.next}
-                onToggleContents={contents.toggle}
-                onTogglePresent={present.mode === 'present' ? present.exitPresent : present.present}
-              />
+              {controls && (
+                <DeckBar
+                  index={position.index}
+                  count={position.count}
+                  step={position.step}
+                  stepCount={position.stepCount}
+                  mode={present.mode}
+                  contentsOpen={contents.open}
+                  contentsButtonRef={contents.buttonRef}
+                  onPrev={position.prev}
+                  onNext={position.next}
+                  onToggleContents={contents.toggle}
+                  onTogglePresent={
+                    present.mode === 'present' ? present.exitPresent : present.present
+                  }
+                />
+              )}
             </div>
 
             {/* Announced on every position change so a screen reader user knows

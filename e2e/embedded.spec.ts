@@ -28,6 +28,8 @@ test.beforeEach(async ({ page }) => {
 
 test.describe('an embedded deck', () => {
   test('shows its twenty-four slides one at a time', async ({ page }) => {
+    /* A full walk of the deck, one jump and one fit per slide. */
+    test.slow()
     expect((await state(page)).count).toBe(24)
 
     for (let index = 0; index < 24; index++) {
@@ -187,6 +189,8 @@ test.describe('an embedded deck', () => {
   })
 
   test('never scrolls: a slide is scaled to fit the box instead', async ({ page }) => {
+    /* Ninety-six jumps and fits; it is a slow test by nature. */
+    test.slow()
     for (const width of ['16rem', '24rem', '34rem', '44rem']) {
       await hostCss(page, `#deck { width: ${width}; --sd-aspect: 4 / 3 }`)
 

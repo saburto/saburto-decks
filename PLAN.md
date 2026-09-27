@@ -99,10 +99,11 @@ motion. The reader's reduced-motion preference is respected: without animation, 
 in the right place.
 
 **R17 — Contents.** A deck has a table of contents built from its slides: an entry per slide,
-named by the slide's own first heading, with the slide the reader is on marked. A slide without a
-heading still has an entry. The reader can open the contents from any slide, in either mode, and
-choosing an entry goes to that slide. Opening and choosing are keyboard-operable and dismissing
-the contents returns the reader to the deck. Opening the contents changes neither a slide's
+named by the slide's own first heading, with the slide's own second-level headings listed under
+it, and the slide the reader is on marked. A slide without a heading still has an entry. The
+reader can open the contents as a sidebar from any slide, in either mode, and choosing an entry
+goes to the slide that holds it. Opening and choosing are keyboard-operable and dismissing the
+contents returns the reader to the deck. Opening the contents changes neither a slide's
 layout nor the type size the deck settled on. An author can also place the contents on a slide,
 where they are that slide's own content and are sized with it.
 
@@ -137,6 +138,11 @@ slide in. A slide that takes the box is still fitted: its content gives way — 
 rather than being scrolled, and the box it was given follows the deck's box when the host resizes
 it.
 
+**R22 — Controls.** A deck shows its own controls by default: previous, next, where the reader is
+in the deck, and a control that opens the contents. They are keyboard-operable and visible in
+both modes. A host can hide them; hiding them changes nothing else — the keyboard, the contents
+and the deck itself stay as they are.
+
 ## Non-functional requirements
 
 **N1 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
@@ -164,9 +170,9 @@ This version is done when:
 7. An object on a slide can be made to arrive on one step and to move on a later one, keeping its
    place while it waits, and the motion reverses when the reader steps back.
 8. From any slide, in either mode, the reader can open a table of contents, see which slide they
-   are on, and choose an entry to go to that slide; a slide with no heading is still listed,
-   opening the contents does not change how the slide fits, and the contents can be the content
-   of a slide the author writes.
+   are on, and choose an entry to go to that slide; a slide's own second-level headings are
+   listed under its entry, a slide with no heading is still listed, opening the contents does not
+   change how the slide fits, and the contents can be the content of a slide the author writes.
 9. A deck can be written across files: an include brings another file's slides in as the deck's
    own — ordered, counted, navigated and listed with them — while the same include inside a slide
    is part of that slide, adding no slides and counting its steps with the slide's.

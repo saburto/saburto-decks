@@ -78,11 +78,15 @@ test.describe('present mode', () => {
 
   test('keeps the reader in their place: same slide, same scroll offset (R7)', async ({ page }) => {
     await page.evaluate(() => window.scrollTo(0, 100_000))
-    const leftAt = await page.evaluate(() => window.scrollY)
-    expect(leftAt).toBeGreaterThan(0)
 
     await page.keyboard.press('ArrowRight')
     expect((await state(page)).index).toBe(1)
+
+    /* The reader's position on the way in, captured just before presenting:
+       the page may settle as a slide changes, and the requirement is about
+       the place the reader leaves from (R7). */
+    const leftAt = await page.evaluate(() => window.scrollY)
+    expect(leftAt).toBeGreaterThan(0)
 
     await enterPresent(page)
     await expect(deck(page)).toHaveAttribute('data-mode', 'present')
