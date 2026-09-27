@@ -1,9 +1,9 @@
 # saburto-decks
 
 Write [**infodecks**](https://martinfowler.com/bliki/Infodeck.html) — decks meant to be read — in
-MDX. Author one file, then use it two ways: **embedded** in a page, showing one slide at a time in
-a box the page provides, and **presented full screen** from the same file. No second copy, no
-audience-facing slides-plus-article.
+MDX. Author one file, then use it as the moment needs: **embedded** in a page, showing one slide
+at a time in a box the page provides, **presented full screen** from the same file, or **served
+straight from the file** by one command. No second copy, no audience-facing slides-plus-article.
 
 A deck is a React component. Embedding one is importing a component and rendering it, whether the
 host page is an Astro site or a plain React app.
@@ -20,10 +20,54 @@ bun run build     # the library, then both demo hosts
 bun run demo      # → http://127.0.0.1:4173/  (the Astro host)
 bun run dev       # the Astro host with hot reload
 bun run dev:react # the React host with hot reload
+bun run serve     # the command line, serving decks/example.mdx
+bun run cli       # the command line: bun run cli <deck.mdx> [options]
 ```
 
 Two demo hosts are in this repository, deliberately: `demo/` is an **Astro** site, `react-demo/`
 is a **plain React app**, and both embed the same deck from `decks/example.mdx`.
+
+## From the command line
+
+A deck file can be served on its own, with no host page written and nothing installed:
+
+```bash
+bunx @saburto/saburto-decks demo.mdx    # or: npx @saburto/saburto-decks demo.mdx
+```
+
+Or pipe one in, when the deck is not a file yet — `-` names standard input, and a pipe needs no
+argument at all:
+
+```bash
+cat demo.mdx | bunx @saburto/saburto-decks -
+bunx @saburto/saburto-decks - < demo.mdx
+```
+
+A piped deck is served from a copy of its text, so it has no folder of its own: an include, or a
+picture referenced by a relative path, has nothing to resolve against. Serve a deck that uses
+either as a file.
+
+The deck fills the window with its own controls: the arrow keys and the bar move through it, the
+contents open from the bar, and Full screen presents it. A theme switch sits in the bottom corner
+of the page. The slide the reader is on is kept in the URL, so a reload — including the one a save
+causes — puts them back where they were.
+
+While the command runs, the deck file and the files it includes are watched: saving any of them
+updates the browser. The command carries its own compiler and React, so the folder it is run from
+needs nothing in it. It needs Node 20.19 or newer, or Bun.
+
+| Option            | Default     | What it does                                         |
+| ----------------- | ----------- | ---------------------------------------------------- |
+| `--port <number>` | `4173`      | the port to serve on                                 |
+| `--host <name>`   | `127.0.0.1` | the address to bind; `0.0.0.0` for the local network |
+| `--theme <name>`  | `light`     | `light`, `dark` or `system`                          |
+| `-o`, `--open`    |             | open the browser once the server is up               |
+| `-h`, `--help`    |             | usage                                                |
+
+Press `o` to open the browser, and `q` or Ctrl-C to stop.
+
+The page it serves is an ordinary host page — the smallest one that fills the deck's box — so what
+the browser shows is what any page embedding a deck shows.
 
 ## Writing a deck
 

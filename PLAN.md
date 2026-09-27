@@ -9,8 +9,9 @@ treating as a form of writing in its own right
 
 The form is poorly served by the tools that exist. Presentation software takes over the whole page
 and is built for an audience in a room; hand-written article HTML has no deck behaviour at all. So
-a deck is authored once and used two ways: **embedded** inside an existing web page, and
-**presented full screen** from the same source.
+a deck is authored once and used without a second copy: **embedded** inside an existing web page,
+**presented full screen** from the same source, or **served straight from its file** when there is
+no page to embed it in.
 
 ## Users
 
@@ -143,6 +144,17 @@ in the deck, and a control that opens the contents. They are keyboard-operable a
 both modes. A host can hide them; hiding them changes nothing else — the keyboard, the contents
 and the deck itself stay as they are.
 
+**R23 — A deck from the command line.** A deck file can be shown without a host page being
+written: a command takes one deck file, compiles it, and serves it over HTTP — or takes the deck
+on standard input instead of as a file, so one can be piped in. What the browser
+shows is the deck — the same slides, contents, steps, theme, keyboard and present mode as an
+embedded deck — filling the window, with the deck's own controls and nothing of the page's own but
+a theme switch. The address it is served on is reported, and the reader's place is kept in that
+address, so reloading returns to the slide they were on. While the command runs, the deck file and
+the files it includes are watched, and saving any of them updates the browser without losing that
+place. The command needs nothing installed in the folder it is run from — it is run, not added to
+a project — and the server stops with the command.
+
 ## Non-functional requirements
 
 **N1 — Accessibility.** Both modes are fully keyboard navigable. Focus is contained while
@@ -183,6 +195,10 @@ This version is done when:
     both modes, while a host that sets its own colour on the deck still overrides it.
 12. A slide can be laid out against the box the deck has for it — its whole width and height — and
     follows that box when the host resizes the deck, while still never being scrolled.
+13. A deck file served by a command run from a folder that has never installed the package — or a
+    deck piped to that command — shows the deck in the browser, navigable, with its contents and
+    present mode, keeps the reader's place across a reload, and follows the deck file and the files
+    it includes as they are saved.
 
 ## Fixed decisions from the owner
 
@@ -190,5 +206,6 @@ This version is done when:
 - Builder: Vite. Runner: Bun.
 - Authoring format: MDX with React. A deck is a React component, and host pages embed it as a
   component — not as a script, and not as a custom element.
-- Embedded use comes first; all other delivery forms wait.
+- Embedded use comes first, and a deck served from the command line (R23) is the second delivery
+  form. Other delivery forms wait.
 - Present mode is full screen.

@@ -27,6 +27,8 @@ src/runtime/     ships to the browser: Deck.tsx (the component), Slide.tsx, Slid
 src/build/       build-time only, never shipped: the MDX → <Slide> transform, the <Slides> include
 src/mdx.ts       the Vite plugin and remark pipeline a host's config uses
 src/index.ts     the component entry — it must never import the build half
+src/cli.ts       the command line (R23): a deck file served with no host page
+src/cli/         its arguments, and the page it serves — both free of Vite
 decks/           example.mdx: the deck both demo hosts embed
 scripts/         development tools, never shipped: inspect.ts, compile.ts
 demo/            an Astro site that embeds it as an island
@@ -50,11 +52,32 @@ bun run dev:react    # the React demo with hot reload
 bun run demo         # build, then serve the Astro demo at http://127.0.0.1:4173/
 bun run inspect      # a slide on screen: its state, and a PNG if asked. Dev tool only.
 bun run compile      # print what a deck file compiles to. Dev tool only.
+bun run serve        # build the library, then the CLI over decks/example.mdx
+bun run cli          # the same, over any deck: bun run cli decks/mine.mdx
 ```
 
 ## Traps
 
 Each of these has already cost time here.
+
+- **The CLI is run, not imported, and `npx` runs it under Node.** Nothing under `src/cli.ts` or
+  `src/cli/` may use a Bun API, and the bin has to keep working on the oldest Node `engines`
+  allows. `bun run test:e2e -- e2e/cli.spec.ts` starts it with `node` on purpose.
+- **The shebang is the build's, not the source's.** A `#!` line in `src/cli.ts` plus the banner in
+  `vite.lib.config.ts` makes Rollup emit an _empty_ `dist/cli.js` and a `DUPLICATE_SHEBANG`
+  warning: the whole entry disappears without an error. The banner is the only shebang.
+- **The CLI's Vite server must not use the deck's folder as its cache.** `cacheDir` points into
+  the system's temporary directory, or running the command in someone's project would leave a
+  `node_modules/.vite` in it.
+- **The page the command serves is a host page, not a second deck.** It imports the deck file and
+  renders `<Deck>`; nothing about slides, steps or the shadow root belongs in `src/cli/`.
+- **A piped deck is served from a copy in the temporary directory.** Vite, the includes and the
+  watch all want a file in a folder, so standard input is written to
+  `<tmp>/saburto-decks-stdin/<the deck's own hash>/deck.mdx` — the same deck twice reuses the
+  folder and its compilation cache. The copy is why includes and relative pictures in a piped deck
+  cannot resolve: that is the limit of piping, not something to fix by guessing the reader's cwd.
+  `/dev/null` is a character device and is therefore _not_ a deck, so a process spawned with its
+  input ignored still gets "a deck file is required".
 
 - **A deck is a React component, and Astro's MDX integration does not produce React.** Do not add
   `@astrojs/mdx` to a host and expect `<Deck slides={slides} />` to work: it compiles MDX to Astro
@@ -88,6 +111,11 @@ Each of these has already cost time here.
 ## Decisions already taken
 
 Do not relitigate these without the owner.
+
+- **The command line is a delivery form, and it carries its own React.** `saburto-decks <deck.mdx>`
+  serves the deck with nothing installed (R23), so the package declares React and ReactDOM as
+  dependencies as well as peers: the host's copy is still the one an embedded deck meets, and the
+  CLI's own copy is the one its page meets. Do not bundle React into `dist/index.js` instead.
 
 - **A component, not a custom element, and never a script tag.** The host imports `<Deck>` and
   renders it; there is no bundle to load, no tag to register, no snippet. R4 was rewritten for this.

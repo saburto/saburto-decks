@@ -9,8 +9,9 @@ import tailwindcss from '@tailwindcss/vite'
  * building. A deck must not carry a second copy of React, and must not carry a
  * compiler into the browser.
  *
- * Two entries, because the two halves have different audiences: `index` is the
- * component a page renders, `mdx` is the plugin a build config uses.
+ * Three entries, because they have three audiences: `index` is the component a
+ * page renders, `mdx` is the plugin a build config uses, and `cli` is the
+ * command that serves a deck file on its own (R23).
  */
 export default defineConfig({
   plugins: [tailwindcss()],
@@ -21,11 +22,16 @@ export default defineConfig({
     /* A library is minified by whoever consumes it. */
     minify: false,
     lib: {
-      entry: { index: 'src/index.ts', mdx: 'src/mdx.ts' },
+      entry: { index: 'src/index.ts', mdx: 'src/mdx.ts', cli: 'src/cli.ts' },
       formats: ['es']
     },
     rollupOptions: {
-      external: (id) => !id.startsWith('.') && !id.startsWith('/') && !id.startsWith('\0')
+      external: (id) => !id.startsWith('.') && !id.startsWith('/') && !id.startsWith('\0'),
+      output: {
+        /* The command line is run, not imported, so it needs a shebang — and
+         * only it does. */
+        banner: (chunk) => (chunk.name === 'cli' ? '#!/usr/bin/env node' : '')
+      }
     }
   }
 })
